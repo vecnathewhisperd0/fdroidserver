@@ -760,7 +760,7 @@ def build_local(app, thisbuild, vcs, build_dir, output_dir, srclib_dir, extlib_d
         else:
             name = '-'.join([basename, '-'.join(flavours), 'release', 'unsigned'])
         dd = os.path.normpath(dd)
-        if thisbuild['gradlepluginver'] >= LooseVersion('0.11'):
+        if thisbuild['gradlepluginver'] >= LooseVersion('0.10'):
             src = os.path.join(dd, 'build', 'outputs', 'apk', name + '.apk')
         else:
             src = os.path.join(dd, 'build', 'apk', name + '.apk')
