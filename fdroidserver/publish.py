@@ -120,7 +120,7 @@ def main():
         app = allapps[appid]
 
         if app.get('Binaries', None):
-
+            
             # It's an app where we build from source, and verify the apk
             # contents against a developer's binary, and then publish their
             # version if everything checks out.
@@ -142,15 +142,16 @@ def main():
             url = url.replace('%c', str(vercode))
 
             # Grab the binary from where the developer publishes it...
-            logging.info("...retrieving " + url)
-            srcapk = os.path.join(tmp_dir, url.split('/')[-1])
-            p = FDroidPopen(['wget', '-nv', '--continue', url], cwd=tmp_dir)
-            if p.returncode != 0 or not os.path.exists(srcapk):
-                logging.error("...failed to retrieve " + url +
-                              " - publish skipped")
-                continue
+            # logging.info("...retrieving " + url)
+            # srcapk = os.path.join(tmp_dir, url.split('/')[-1])
+            # p = FDroidPopen(['wget', '-nv', '--continue', url], cwd=tmp_dir)
+            # if p.returncode != 0 or not os.path.exists(srcapk):
+            #     logging.error("...failed to retrieve " + url +
+            #                   " - publish skipped")
+            #     continue
 
             # Compare our unsigned one with the downloaded one...
+            
             compare_result = common.compare_apks(srcapk, apkfile, tmp_dir)
             if compare_result:
                 logging.error("...verification failed - publish skipped : "
