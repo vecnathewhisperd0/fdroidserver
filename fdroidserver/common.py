@@ -1903,24 +1903,7 @@ def compare_apks(apk1, apk2, tmp_dir):
     badchars = re.compile('''[/ :;'"]''')
     apk1dir = os.path.join(tmp_dir, badchars.sub('_', apk1[0:-4]))  # trim .apk
     apk2dir = os.path.join(tmp_dir, badchars.sub('_', apk2[0:-4]))  # trim .apk
-    
-    if 'tmp/' in apk1:
-        official_apk = apk1
-        fdroid_apk = apk2
-    elif 'tmp/' in apk2:
-        official_apk = apk2
-        fdroid_apk = apk1
-    with ZipFile(official_apk) as official_apk_as_zip:
-        meta_inf_files = ['META-INF/MANIFEST.MF', 'META-INF/CERT.SF', 'META-INF/CERT.RSA']
-        official_apk_as_zip.extractall(tmp_dir, meta_inf_files)
-    with ZipFile(fdroid_apk, mode='a') as fdroid_apk_as_zip:
-        for meta_inf_file in meta_inf_files:
-            fdroid_apk_as_zip.write(os.path.join(tmp_dir, meta_inf_file), arcname=meta_inf_file)
 
-    if subprocess.call(['jarsigner', '-verify', fdroid_apk]) != 0:
-        return("Failed")
-    else:
-        return("Valid apk")
     for d in [apk1dir, apk2dir]:
         if os.path.exists(d):
             shutil.rmtree(d)

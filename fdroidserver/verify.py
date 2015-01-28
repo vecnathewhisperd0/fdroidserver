@@ -141,7 +141,7 @@ def verify(official_apk, to_verify_apk, tmp_dir):
 
     if subprocess.call(['jarsigner', '-verify', to_verify_apk]) != 0:
         logging.info("...NOT verified - {0}".format(to_verify_apk))
-        
+        common.compare_apks(official_apk, to_verify_apk, tmp_dir)
         return False
     else:
         logging.info("...successfully verified")
