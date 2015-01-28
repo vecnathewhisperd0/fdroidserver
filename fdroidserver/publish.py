@@ -34,6 +34,7 @@ import verify
 config = None
 options = None
 
+output_dir = 'repo'
 
 def main():
 
@@ -54,13 +55,7 @@ def main():
     if not os.path.isdir(log_dir):
         logging.info("Creating log directory")
         os.makedirs(log_dir)
-
-    tmp_dir = 'tmp'
-    if not os.path.isdir(tmp_dir):
-        logging.info("Creating temporary directory")
-        os.makedirs(tmp_dir)
-
-    output_dir = 'repo'
+        
     if not os.path.isdir(output_dir):
         logging.info("Creating output directory")
         os.makedirs(output_dir)
@@ -101,138 +96,93 @@ def main():
                                                     len(allaliases)))
 
     # Process any apks that are waiting to be signed...
-    verified = 0
-    notverified = 0
-    for apkfile in sorted(glob.glob(os.path.join(unsigned_dir, '*.apk'))):
+    verified_apps, not_verified_apps, normal_apps = verify.verify_all(args)
+    publish_verified_apps(verified_apps)
+    publish_normal_apps(normal_apps)
+    
+def publish_verified_apps(verified_apps):
 
-        appid, vercode = common.apknameinfo(apkfile)
-        apkfilename = os.path.basename(apkfile)
-        if vercodes and appid not in vercodes:
-            continue
-        if appid in vercodes and vercodes[appid]:
-            if vercode not in vercodes[appid]:
-                continue
-        logging.info("Processing " + apkfile)
+    tmp_dir = 'tmp'
+    if not os.path.isdir(tmp_dir):
+        logging.info("Creating temporary directory")
+        os.makedirs(tmp_dir)
+        
+    for app in verified_apps:
+        url = app['Binaries']
+        url = url.replace('%v', app['builds'][0]['version'])
+        url = url.replace('%c', app['Current Version Code'])
+        srcapk = os.path.join(tmp_dir, url.split('/')[-1])
+        apkfilename = os.path.join(common.getapkname(app, app['builds'][0]))
 
-        # There ought to be valid metadata for this app, otherwise why are we
-        # trying to publish it?
-        if appid not in allapps:
-            logging.error("Unexpected {0} found in unsigned directory"
-                          .format(apkfilename))
-            sys.exit(1)
-        app = allapps[appid]
-
-        if app.get('Binaries', None):
-            
-            # It's an app where we build from source, and verify the apk
-            # contents against a developer's binary, and then publish their
-            # version if everything checks out.
-
-            # Need the version name for the version code...
-            versionname = None
-            for build in app['builds']:
-                if build['vercode'] == vercode:
-                    versionname = build['version']
-                    break
-            if not versionname:
-                logging.error("...no defined build for version code {0}"
-                              .format(vercode))
-                continue
-
-            # Figure out where the developer's binary is supposed to come from...
-            url = app['Binaries']
-            url = url.replace('%v', versionname)
-            url = url.replace('%c', str(vercode))
-
-            # Grab the binary from where the developer publishes it...
-            logging.info("...retrieving " + url)
-            srcapk = os.path.join(tmp_dir, url.split('/')[-1])
-            p = FDroidPopen(['wget', '-nv', '--continue', url], cwd=tmp_dir)
-            if p.returncode != 0 or not os.path.exists(srcapk):
-                logging.error("...failed to retrieve " + url +
-                              " - publish skipped")
-                continue
-
-            # Compare our unsigned one with the downloaded one...
-            verification_result = verify.verify(srcapk, apkfile, tmp_dir)
-            if verification_result is False:
-                notverified += 1
-                continue
-            else:
-                verified += 1
-
-            # Success! So move the downloaded file to the repo...
-            shutil.move(srcapk, os.path.join(output_dir, apkfilename))
-
-        else:
-
-            # It's a 'normal' app, i.e. we sign and publish it...
-
-            # Figure out the key alias name we'll use. Only the first 8
-            # characters are significant, so we'll use the first 8 from
-            # the MD5 of the app's ID and hope there are no collisions.
-            # If a collision does occur later, we're going to have to
-            # come up with a new alogrithm, AND rename all existing keys
-            # in the keystore!
-            if appid in config['keyaliases']:
-                # For this particular app, the key alias is overridden...
-                keyalias = config['keyaliases'][appid]
-                if keyalias.startswith('@'):
-                    m = md5.new()
-                    m.update(keyalias[1:])
-                    keyalias = m.hexdigest()[:8]
-            else:
+        shutil.move(srcapk, os.path.join(output_dir, apkfilename))
+        logging.info('Published ' + apkfilename)
+        
+def publish_normal_apps(normal_apps):
+    for app in normal_apps:
+        # It's a 'normal' app, i.e. we sign and publish it...
+        
+        # Figure out the key alias name we'll use. Only the first 8
+        # characters are significant, so we'll use the first 8 from
+        # the MD5 of the app's ID and hope there are no collisions.
+        # If a collision does occur later, we're going to have to
+        # come up with a new alogrithm, AND rename all existing keys
+        # in the keystore!
+        if appid in config['keyaliases']:
+            # For this particular app, the key alias is overridden...
+            keyalias = config['keyaliases'][appid]
+            if keyalias.startswith('@'):
                 m = md5.new()
-                m.update(appid)
+                m.update(keyalias[1:])
                 keyalias = m.hexdigest()[:8]
-            logging.info("Key alias: " + keyalias)
+        else:
+            m = md5.new()
+            m.update(appid)
+            keyalias = m.hexdigest()[:8]
+        logging.info("Key alias: " + keyalias)
 
-            # See if we already have a key for this application, and
-            # if not generate one...
-            p = FDroidPopen(['keytool', '-list',
-                             '-alias', keyalias, '-keystore', config['keystore'],
-                             '-storepass:file', config['keystorepassfile']])
-            if p.returncode != 0:
-                logging.info("Key does not exist - generating...")
-                p = FDroidPopen(['keytool', '-genkey',
-                                 '-keystore', config['keystore'],
-                                 '-alias', keyalias,
-                                 '-keyalg', 'RSA', '-keysize', '2048',
-                                 '-validity', '10000',
-                                 '-storepass:file', config['keystorepassfile'],
-                                 '-keypass:file', config['keypassfile'],
-                                 '-dname', config['keydname']])
-                # TODO keypass should be sent via stdin
-                if p.returncode != 0:
-                    raise BuildException("Failed to generate key")
-
-            # Sign the application...
-            p = FDroidPopen(['jarsigner', '-keystore', config['keystore'],
+        # See if we already have a key for this application, and
+        # if not generate one...
+        p = FDroidPopen(['keytool', '-list',
+                         '-alias', keyalias, '-keystore', config['keystore'],
+                         '-storepass:file', config['keystorepassfile']])
+        if p.returncode != 0:
+            logging.info("Key does not exist - generating...")
+            p = FDroidPopen(['keytool', '-genkey',
+                             '-keystore', config['keystore'],
+                             '-alias', keyalias,
+                             '-keyalg', 'RSA', '-keysize', '2048',
+                             '-validity', '10000',
                              '-storepass:file', config['keystorepassfile'],
-                             '-keypass:file', config['keypassfile'], '-sigalg',
-                             'MD5withRSA', '-digestalg', 'SHA1',
-                             apkfile, keyalias])
+                             '-keypass:file', config['keypassfile'],
+                             '-dname', config['keydname']])
             # TODO keypass should be sent via stdin
             if p.returncode != 0:
-                raise BuildException("Failed to sign application")
+                raise BuildException("Failed to generate key")
 
-            # Zipalign it...
-            p = SdkToolsPopen(['zipalign', '-v', '4', apkfile,
-                               os.path.join(output_dir, apkfilename)])
-            if p.returncode != 0:
-                raise BuildException("Failed to align application")
-            os.remove(apkfile)
+        # Sign the application...
+        p = FDroidPopen(['jarsigner', '-keystore', config['keystore'],
+                     '-storepass:file', config['keystorepassfile'],
+                         '-keypass:file', config['keypassfile'], '-sigalg',
+                         'MD5withRSA', '-digestalg', 'SHA1',
+                         apkfile, keyalias])
+        # TODO keypass should be sent via stdin
+        if p.returncode != 0:
+            raise BuildException("Failed to sign application")
+
+        # Zipalign it...
+        p = SdkToolsPopen(['zipalign', '-v', '4', apkfile,
+                           os.path.join(output_dir, apkfilename)])
+        if p.returncode != 0:
+            raise BuildException("Failed to align application")
+        os.remove(apkfile)
 
         # Move the source tarball into the output directory...
         tarfilename = apkfilename[:-4] + '_src.tar.gz'
         tarfile = os.path.join(unsigned_dir, tarfilename)
         if os.path.exists(tarfile):
             shutil.move(tarfile, os.path.join(output_dir, tarfilename))
-
-        logging.info("{0} successfully verified".format(verified))
-        logging.info("{0} NOT verified".format(notverified))
+        
         logging.info('Published ' + apkfilename)
-
 
 if __name__ == "__main__":
     main()
