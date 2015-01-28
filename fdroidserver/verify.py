@@ -25,7 +25,9 @@ import logging
 
 import common
 from common import FDroidPopen, FDroidException
-
+import subprocess
+from zipfile import ZipFile
+from pdb import set_trace
 options = None
 config = None
 
@@ -66,39 +68,31 @@ def main():
 
         if vercodes and appid not in vercodes:
             continue
+
         if vercodes[appid] and vercode not in vercodes[appid]:
             continue
 
-        try:
+        logging.info("Processing " + apkfilename)
+        official_apk = os.path.join(tmp_dir, apkfilename)
+        fdroid_apk = os.path.join(unsigned_dir, apkfilename)
+        verify(official_apk, fdroid_apk, tmp_dir)
+            
+def verify(official_apk, to_verify_apk, tmp_dir):
+    
+    with ZipFile(official_apk) as official_apk_as_zip:
+        meta_inf_files = ['META-INF/MANIFEST.MF', 'META-INF/CERT.SF', 'META-INF/CERT.RSA']
+        official_apk_as_zip.extractall(tmp_dir, meta_inf_files)
+    with ZipFile(to_verify_apk, mode='a') as to_verify_apk_as_zip:
+        for meta_inf_file in meta_inf_files:
+            to_verify_apk_as_zip.write(os.path.join(tmp_dir, meta_inf_file), arcname=meta_inf_file)
 
-            logging.info("Processing " + apkfilename)
-
-            remoteapk = os.path.join(tmp_dir, apkfilename)
-            if os.path.exists(remoteapk):
-                os.remove(remoteapk)
-            url = 'https://f-droid.org/repo/' + apkfilename
-            logging.info("...retrieving " + url)
-            p = FDroidPopen(['wget', '-nv', url], cwd=tmp_dir)
-            if p.returncode != 0:
-                raise FDroidException("Failed to get " + apkfilename)
-
-            compare_result = common.compare_apks(
-                os.path.join(unsigned_dir, apkfilename),
-                remoteapk,
-                tmp_dir)
-            if compare_result:
-                raise FDroidException(compare_result)
-
-            logging.info("...successfully verified")
-            verified += 1
-
-        except FDroidException, e:
-            logging.info("...NOT verified - {0}".format(e))
-            notverified += 1
-
-    logging.info("Finished")
-    logging.info("{0} successfully verified".format(verified))
-    logging.info("{0} NOT verified".format(notverified))
+    if subprocess.call(['jarsigner', '-verify', to_verify_apk]) != 0:
+        logging.info("...NOT verified - {0}".format(to_verify_apk))
+        
+        return False
+    else:
+        logging.info("...successfully verified")
+        return True
 
 if __name__ == "__main__":
     main()

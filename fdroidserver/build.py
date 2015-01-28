@@ -36,7 +36,7 @@ import logging
 import common
 import metadata
 from common import FDroidException, BuildException, VCSException, FDroidPopen, SdkToolsPopen
-
+from pdb import set_trace
 try:
     import paramiko
 except ImportError:
@@ -884,7 +884,7 @@ def trybuild(app, thisbuild, build_dir, output_dir, also_check_dir, srclib_dir, 
 
     :returns: True if the build was done, False if it wasn't necessary.
     """
-
+    set_trace()
     dest_apk = common.getapkname(app, thisbuild)
 
     dest = os.path.join(output_dir, dest_apk)
@@ -1015,7 +1015,7 @@ def main():
     for appid, app in apps.items():
         if (app['Disabled'] and not options.force) or not app['Repo Type'] or not app['builds']:
             del apps[appid]
-
+    set_trace()
     if not apps:
         raise FDroidException("No apps to process.")
 

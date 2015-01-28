@@ -31,7 +31,6 @@ import threading
 import magic
 import logging
 from distutils.version import LooseVersion
-from zipfile import ZipFile
 from pdb import set_trace
 import metadata
 

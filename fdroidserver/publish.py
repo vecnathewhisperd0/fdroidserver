@@ -29,6 +29,7 @@ import logging
 import common
 import metadata
 from common import FDroidPopen, SdkToolsPopen, BuildException
+import verify
 
 config = None
 options = None
@@ -100,6 +101,8 @@ def main():
                                                     len(allaliases)))
 
     # Process any apks that are waiting to be signed...
+    verified = 0
+    notverified = 0
     for apkfile in sorted(glob.glob(os.path.join(unsigned_dir, '*.apk'))):
 
         appid, vercode = common.apknameinfo(apkfile)
@@ -142,21 +145,21 @@ def main():
             url = url.replace('%c', str(vercode))
 
             # Grab the binary from where the developer publishes it...
-            # logging.info("...retrieving " + url)
-            # srcapk = os.path.join(tmp_dir, url.split('/')[-1])
-            # p = FDroidPopen(['wget', '-nv', '--continue', url], cwd=tmp_dir)
-            # if p.returncode != 0 or not os.path.exists(srcapk):
-            #     logging.error("...failed to retrieve " + url +
-            #                   " - publish skipped")
-            #     continue
+            logging.info("...retrieving " + url)
+            srcapk = os.path.join(tmp_dir, url.split('/')[-1])
+            p = FDroidPopen(['wget', '-nv', '--continue', url], cwd=tmp_dir)
+            if p.returncode != 0 or not os.path.exists(srcapk):
+                logging.error("...failed to retrieve " + url +
+                              " - publish skipped")
+                continue
 
             # Compare our unsigned one with the downloaded one...
-            
-            compare_result = common.compare_apks(srcapk, apkfile, tmp_dir)
-            if compare_result:
-                logging.error("...verification failed - publish skipped : "
-                              + compare_result)
+            verification_result = verify.verify(srcapk, apkfile, tmp_dir)
+            if verification_result is False:
+                notverified += 1
                 continue
+            else:
+                verified += 1
 
             # Success! So move the downloaded file to the repo...
             shutil.move(srcapk, os.path.join(output_dir, apkfilename))
@@ -226,6 +229,8 @@ def main():
         if os.path.exists(tarfile):
             shutil.move(tarfile, os.path.join(output_dir, tarfilename))
 
+        logging.info("{0} successfully verified".format(verified))
+        logging.info("{0} NOT verified".format(notverified))
         logging.info('Published ' + apkfilename)
 
 
