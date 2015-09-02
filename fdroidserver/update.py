@@ -1016,6 +1016,11 @@ def archive_old_apks(apps, apks, archapks, repodir, archivedir, defaultkeepversi
                 archapks.append(apk)
                 apks.remove(apk)
 
+# Forces metadata creation while updating
+# Used as a library, from a Python environment
+def create_metadata_and_update(**kwargs):
+    kwargs['force_metadata_creation'] = True
+    main(**kwargs)
 
 def add_apks_to_per_app_repos(repodir, apks):
     apks_per_app = dict()
@@ -1042,16 +1047,17 @@ def add_apks_to_per_app_repos(repodir, apks):
 config = None
 options = None
 
-
-def main():
-
+def main(**kwargs):
     global config, options
 
+    force_metadata_creation = False
+    if 'force_metadata_creation' in kwargs:
+        force_metadata_creation = kwargs['force_metadata_creation']
     # Parse command line...
     parser = OptionParser()
     parser.add_option("--create-key", action="store_true", default=False,
                       help="Create a repo signing key in a keystore")
-    parser.add_option("-c", "--create-metadata", action="store_true", default=False,
+    parser.add_option("-c", "--create-metadata", action="store_true", default=force_metadata_creation,
                       help="Create skeleton metadata files that are missing")
     parser.add_option("--delete-unknown", action="store_true", default=False,
                       help="Delete APKs without metadata from the repo")
