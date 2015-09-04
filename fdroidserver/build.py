@@ -29,7 +29,7 @@ import traceback
 import time
 import json
 from ConfigParser import ConfigParser
-from optparse import OptionParser, OptionError
+from argparse import ArgumentParser, ArgumentError
 from distutils.version import LooseVersion
 import logging
 
@@ -932,43 +932,43 @@ def trybuild(app, thisbuild, build_dir, output_dir, also_check_dir, srclib_dir, 
 def parse_commandline():
     """Parse the command line. Returns options, args."""
 
-    parser = OptionParser(usage="Usage: %prog [options] [APPID[:VERCODE] [APPID[:VERCODE] ...]]")
-    parser.add_option("-v", "--verbose", action="store_true", default=False,
+    parser = ArgumentParser(usage="%(prog)s [options] [APPID[:VERCODE] [APPID[:VERCODE] ...]]")
+    parser.add_argument("-v", "--verbose", action="store_true", default=False,
                       help="Spew out even more information than normal")
-    parser.add_option("-q", "--quiet", action="store_true", default=False,
+    parser.add_argument("-q", "--quiet", action="store_true", default=False,
                       help="Restrict output to warnings and errors")
-    parser.add_option("-l", "--latest", action="store_true", default=False,
+    parser.add_argument("-l", "--latest", action="store_true", default=False,
                       help="Build only the latest version of each package")
-    parser.add_option("-s", "--stop", action="store_true", default=False,
+    parser.add_argument("-s", "--stop", action="store_true", default=False,
                       help="Make the build stop on exceptions")
-    parser.add_option("-t", "--test", action="store_true", default=False,
+    parser.add_argument("-t", "--test", action="store_true", default=False,
                       help="Test mode - put output in the tmp directory only, and always build, even if the output already exists.")
-    parser.add_option("--server", action="store_true", default=False,
+    parser.add_argument("--server", action="store_true", default=False,
                       help="Use build server")
-    parser.add_option("--resetserver", action="store_true", default=False,
+    parser.add_argument("--resetserver", action="store_true", default=False,
                       help="Reset and create a brand new build server, even if the existing one appears to be ok.")
-    parser.add_option("--on-server", dest="onserver", action="store_true", default=False,
+    parser.add_argument("--on-server", dest="onserver", action="store_true", default=False,
                       help="Specify that we're running on the build server")
-    parser.add_option("--skip-scan", dest="skipscan", action="store_true", default=False,
+    parser.add_argument("--skip-scan", dest="skipscan", action="store_true", default=False,
                       help="Skip scanning the source code for binaries and other problems")
-    parser.add_option("--no-tarball", dest="notarball", action="store_true", default=False,
+    parser.add_argument("--no-tarball", dest="notarball", action="store_true", default=False,
                       help="Don't create a source tarball, useful when testing a build")
-    parser.add_option("--no-refresh", dest="refresh", action="store_false", default=True,
+    parser.add_argument("--no-refresh", dest="refresh", action="store_false", default=True,
                       help="Don't refresh the repository, useful when testing a build with no internet connection")
-    parser.add_option("-f", "--force", action="store_true", default=False,
+    parser.add_argument("-f", "--force", action="store_true", default=False,
                       help="Force build of disabled apps, and carries on regardless of scan problems. Only allowed in test mode.")
-    parser.add_option("-a", "--all", action="store_true", default=False,
+    parser.add_argument("-a", "--all", action="store_true", default=False,
                       help="Build all applications available")
-    parser.add_option("-w", "--wiki", default=False, action="store_true",
+    parser.add_argument("-w", "--wiki", default=False, action="store_true",
                       help="Update the wiki")
-    options, args = parser.parse_args()
+    options = parser.parse_args()
 
     # Force --stop with --on-server to get correct exit code
     if options.onserver:
         options.stop = True
 
     if options.force and not options.test:
-        raise OptionError("Force is only allowed in test mode", "force")
+        raise ArgumentError("Force is only allowed in test mode", "force")
 
     return options, args
 
@@ -982,14 +982,14 @@ def main():
 
     options, args = parse_commandline()
     if not args and not options.all:
-        raise OptionError("If you really want to build all the apps, use --all", "all")
+        raise ArgumentError("If you really want to build all the apps, use --all", "all")
 
     config = common.read_config(options)
 
     if config['build_server_always']:
         options.server = True
     if options.resetserver and not options.server:
-        raise OptionError("Using --resetserver without --server makes no sense", "resetserver")
+        raise ArgumentError("Using --resetserver without --server makes no sense", "resetserver")
 
     log_dir = 'logs'
     if not os.path.isdir(log_dir):

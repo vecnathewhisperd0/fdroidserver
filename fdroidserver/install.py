@@ -21,7 +21,7 @@
 import sys
 import os
 import glob
-from optparse import OptionParser, OptionError
+from argparse import ArgumentParser, ArgumentError
 import logging
 
 import common
@@ -49,17 +49,17 @@ def main():
     global options, config
 
     # Parse command line...
-    parser = OptionParser(usage="Usage: %prog [options] [APPID[:VERCODE] [APPID[:VERCODE] ...]]")
-    parser.add_option("-v", "--verbose", action="store_true", default=False,
+    parser = ArgumentParser(usage="%(prog)s [options] [APPID[:VERCODE] [APPID[:VERCODE] ...]]")
+    parser.add_argument("-v", "--verbose", action="store_true", default=False,
                       help="Spew out even more information than normal")
-    parser.add_option("-q", "--quiet", action="store_true", default=False,
+    parser.add_argument("-q", "--quiet", action="store_true", default=False,
                       help="Restrict output to warnings and errors")
-    parser.add_option("-a", "--all", action="store_true", default=False,
+    parser.add_argument("-a", "--all", action="store_true", default=False,
                       help="Install all signed applications available")
-    (options, args) = parser.parse_args()
+    options = parser.parse_args()
 
     if not args and not options.all:
-        raise OptionError("If you really want to install all the signed apps, use --all", "all")
+        raise ArgumentError("If you really want to install all the signed apps, use --all", "all")
 
     config = common.read_config(options)
 
