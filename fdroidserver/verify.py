@@ -37,6 +37,7 @@ def main():
 
     # Parse command line...
     parser = ArgumentParser(usage="%(prog)s [options] [APPID[:VERCODE] [APPID[:VERCODE] ...]]")
+    parser.add_argument("appid", nargs='*', help="app-id with optional versioncode in the form APPID[:VERCODE]")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                       help="Spew out even more information than normal")
     parser.add_argument("-q", "--quiet", action="store_true", default=False,
@@ -58,7 +59,7 @@ def main():
     verified = 0
     notverified = 0
 
-    vercodes = common.read_pkg_args(args, True)
+    vercodes = common.read_pkg_args(options.appid, True)
 
     for apkfile in sorted(glob.glob(os.path.join(unsigned_dir, '*.apk'))):
 

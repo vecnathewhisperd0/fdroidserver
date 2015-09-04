@@ -41,6 +41,7 @@ def main():
     # Parse command line...
     parser = ArgumentParser(usage="%(prog)s [options] "
                           "[APPID[:VERCODE] [APPID[:VERCODE] ...]]")
+    parser.add_argument("appid", nargs='*', help="app-id with optional versioncode in the form APPID[:VERCODE]")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                       help="Spew out even more information than normal")
     parser.add_argument("-q", "--quiet", action="store_true", default=False,
@@ -86,7 +87,7 @@ def main():
     # Nonetheless, to be sure, before publishing we check that there are no
     # collisions, and refuse to do any publishing if that's the case...
     allapps = metadata.read_metadata()
-    vercodes = common.read_pkg_args(args, True)
+    vercodes = common.read_pkg_args(options.appid, True)
     allaliases = []
     for appid in allapps:
         m = md5.new()

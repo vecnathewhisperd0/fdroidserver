@@ -196,6 +196,7 @@ def main():
 
     # Parse command line...
     parser = ArgumentParser()
+    parser.add_argument("command", help="command to execute, either 'init' or 'update'")
     parser.add_argument("-i", "--identity-file", default=None,
                       help="Specify an identity file to provide to SSH for rsyncing")
     parser.add_argument("--local-copy-dir", default=None,
@@ -212,11 +213,7 @@ def main():
 
     config = common.read_config(options)
 
-    if len(args) != 1:
-        logging.critical("Specify a single command")
-        sys.exit(1)
-
-    if args[0] != 'init' and args[0] != 'update':
+    if options.command != 'init' and options.command != 'update':
         logging.critical("The only commands currently supported are 'init' and 'update'")
         sys.exit(1)
 
@@ -288,7 +285,7 @@ def main():
     if config['per_app_repos']:
         repo_sections += common.get_per_app_repos()
 
-    if args[0] == 'init':
+    if options.command == 'init':
         ssh = paramiko.SSHClient()
         ssh.load_system_host_keys()
         for serverwebroot in config.get('serverwebroot', []):
@@ -310,7 +307,7 @@ def main():
                     sftp.mkdir(repo_path, mode=0755)
             sftp.close()
             ssh.close()
-    elif args[0] == 'update':
+    elif options.command == 'update':
         for repo_section in repo_sections:
             if local_copy_dir is not None:
                 if config['sync_from_local_copy_dir'] and os.path.exists(repo_section):

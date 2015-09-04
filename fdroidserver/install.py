@@ -21,7 +21,7 @@
 import sys
 import os
 import glob
-from argparse import ArgumentParser, ArgumentError
+from argparse import ArgumentParser
 import logging
 
 import common
@@ -50,6 +50,7 @@ def main():
 
     # Parse command line...
     parser = ArgumentParser(usage="%(prog)s [options] [APPID[:VERCODE] [APPID[:VERCODE] ...]]")
+    parser.add_argument("appid", nargs='*', help="app-id with optional versioncode in the form APPID[:VERCODE]")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                       help="Spew out even more information than normal")
     parser.add_argument("-q", "--quiet", action="store_true", default=False,
@@ -58,8 +59,8 @@ def main():
                       help="Install all signed applications available")
     options = parser.parse_args()
 
-    if not args and not options.all:
-        raise ArgumentError("If you really want to install all the signed apps, use --all", "all")
+    if not options.appid and not options.all:
+        parser.error("option %s: If you really want to install all the signed apps, use --all" % "all")
 
     config = common.read_config(options)
 
@@ -68,9 +69,9 @@ def main():
         logging.info("No signed output directory - nothing to do")
         sys.exit(0)
 
-    if args:
+    if options.appid:
 
-        vercodes = common.read_pkg_args(args, True)
+        vercodes = common.read_pkg_args(options.appid, True)
         apks = {appid: None for appid in vercodes}
 
         # Get the signed apk with the highest vercode

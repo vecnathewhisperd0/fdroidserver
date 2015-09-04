@@ -29,7 +29,7 @@ import traceback
 import time
 import json
 from ConfigParser import ConfigParser
-from argparse import ArgumentParser, ArgumentError
+from argparse import ArgumentParser
 from distutils.version import LooseVersion
 import logging
 
@@ -930,9 +930,10 @@ def trybuild(app, thisbuild, build_dir, output_dir, also_check_dir, srclib_dir, 
 
 
 def parse_commandline():
-    """Parse the command line. Returns options, args."""
+    """Parse the command line. Returns options, parser."""
 
     parser = ArgumentParser(usage="%(prog)s [options] [APPID[:VERCODE] [APPID[:VERCODE] ...]]")
+    parser.add_argument("appid", nargs='*', help="app-id with optional versioncode in the form APPID[:VERCODE]")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                       help="Spew out even more information than normal")
     parser.add_argument("-q", "--quiet", action="store_true", default=False,
@@ -968,9 +969,9 @@ def parse_commandline():
         options.stop = True
 
     if options.force and not options.test:
-        raise ArgumentError("Force is only allowed in test mode", "force")
+        parser.error("option %s: Force is only allowed in test mode" % "force")
 
-    return options, args
+    return options, parser
 
 options = None
 config = None
@@ -980,16 +981,16 @@ def main():
 
     global options, config
 
-    options, args = parse_commandline()
-    if not args and not options.all:
-        raise ArgumentError("If you really want to build all the apps, use --all", "all")
+    options, parser = parse_commandline()
+    if not options.appid and not options.all:
+        parser.error("option %s: If you really want to build all the apps, use --all" % "all")
 
     config = common.read_config(options)
 
     if config['build_server_always']:
         options.server = True
     if options.resetserver and not options.server:
-        raise ArgumentError("Using --resetserver without --server makes no sense", "resetserver")
+        parser.error("option %s: Using --resetserver without --server makes no sense" % "resetserver")
 
     log_dir = 'logs'
     if not os.path.isdir(log_dir):
@@ -1026,7 +1027,7 @@ def main():
     # Read all app and srclib metadata
     allapps = metadata.read_metadata(xref=not options.onserver)
 
-    apps = common.read_app_args(args, allapps, True)
+    apps = common.read_app_args(options.appid, allapps, True)
     for appid, app in apps.items():
         if (app['Disabled'] and not options.force) or not app['Repo Type'] or not app['builds']:
             del apps[appid]

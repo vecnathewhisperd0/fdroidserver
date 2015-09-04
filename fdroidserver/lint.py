@@ -151,6 +151,7 @@ def main():
 
     # Parse command line...
     parser = ArgumentParser(usage="%(prog)s [options] [APPID [APPID ...]]")
+    parser.add_argument("appid", nargs='*', help="app-id in the form APPID")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                       help="Spew out even more information than normal")
     parser.add_argument("-q", "--quiet", action="store_true", default=False,
@@ -161,7 +162,7 @@ def main():
 
     # Get all apps...
     allapps = metadata.read_metadata(xref=True)
-    apps = common.read_app_args(args, allapps, False)
+    apps = common.read_app_args(options.appid, allapps, False)
 
     filling_ucms = re.compile('^(Tags.*|RepoManifest.*)')
 

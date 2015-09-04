@@ -250,6 +250,7 @@ def main():
 
     # Parse command line...
     parser = ArgumentParser(usage="%(prog)s [options] [APPID[:VERCODE] [APPID[:VERCODE] ...]]")
+    parser.add_argument("appid", nargs='*', help="app-id with optional versioncode in the form APPID[:VERCODE]")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
                       help="Spew out even more information than normal")
     parser.add_argument("-q", "--quiet", action="store_true", default=False,
@@ -260,7 +261,7 @@ def main():
 
     # Read all app and srclib metadata
     allapps = metadata.read_metadata()
-    apps = common.read_app_args(args, allapps, True)
+    apps = common.read_app_args(options.appid, allapps, True)
 
     probcount = 0
 
