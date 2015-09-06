@@ -935,33 +935,33 @@ def parse_commandline():
     parser = ArgumentParser(usage="%(prog)s [options] [APPID[:VERCODE] [APPID[:VERCODE] ...]]")
     parser.add_argument("appid", nargs='*', help="app-id with optional versioncode in the form APPID[:VERCODE]")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
-                      help="Spew out even more information than normal")
+                        help="Spew out even more information than normal")
     parser.add_argument("-q", "--quiet", action="store_true", default=False,
-                      help="Restrict output to warnings and errors")
+                        help="Restrict output to warnings and errors")
     parser.add_argument("-l", "--latest", action="store_true", default=False,
-                      help="Build only the latest version of each package")
+                        help="Build only the latest version of each package")
     parser.add_argument("-s", "--stop", action="store_true", default=False,
-                      help="Make the build stop on exceptions")
+                        help="Make the build stop on exceptions")
     parser.add_argument("-t", "--test", action="store_true", default=False,
-                      help="Test mode - put output in the tmp directory only, and always build, even if the output already exists.")
+                        help="Test mode - put output in the tmp directory only, and always build, even if the output already exists.")
     parser.add_argument("--server", action="store_true", default=False,
-                      help="Use build server")
+                        help="Use build server")
     parser.add_argument("--resetserver", action="store_true", default=False,
-                      help="Reset and create a brand new build server, even if the existing one appears to be ok.")
+                        help="Reset and create a brand new build server, even if the existing one appears to be ok.")
     parser.add_argument("--on-server", dest="onserver", action="store_true", default=False,
-                      help="Specify that we're running on the build server")
+                        help="Specify that we're running on the build server")
     parser.add_argument("--skip-scan", dest="skipscan", action="store_true", default=False,
-                      help="Skip scanning the source code for binaries and other problems")
+                        help="Skip scanning the source code for binaries and other problems")
     parser.add_argument("--no-tarball", dest="notarball", action="store_true", default=False,
-                      help="Don't create a source tarball, useful when testing a build")
+                        help="Don't create a source tarball, useful when testing a build")
     parser.add_argument("--no-refresh", dest="refresh", action="store_false", default=True,
-                      help="Don't refresh the repository, useful when testing a build with no internet connection")
+                        help="Don't refresh the repository, useful when testing a build with no internet connection")
     parser.add_argument("-f", "--force", action="store_true", default=False,
-                      help="Force build of disabled apps, and carries on regardless of scan problems. Only allowed in test mode.")
+                        help="Force build of disabled apps, and carries on regardless of scan problems. Only allowed in test mode.")
     parser.add_argument("-a", "--all", action="store_true", default=False,
-                      help="Build all applications available")
+                        help="Build all applications available")
     parser.add_argument("-w", "--wiki", default=False, action="store_true",
-                      help="Update the wiki")
+                        help="Update the wiki")
     options = parser.parse_args()
 
     # Force --stop with --on-server to get correct exit code

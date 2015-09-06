@@ -518,17 +518,17 @@ def main():
     parser = ArgumentParser(usage="%(prog)s [options] [APPID [APPID ...]]")
     parser.add_argument("appid", nargs='*', help="app-id to check for updates")
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
-                      help="Spew out even more information than normal")
+                        help="Spew out even more information than normal")
     parser.add_argument("-q", "--quiet", action="store_true", default=False,
-                      help="Restrict output to warnings and errors")
+                        help="Restrict output to warnings and errors")
     parser.add_argument("--auto", action="store_true", default=False,
-                      help="Process auto-updates")
+                        help="Process auto-updates")
     parser.add_argument("--autoonly", action="store_true", default=False,
-                      help="Only process apps with auto-updates")
+                        help="Only process apps with auto-updates")
     parser.add_argument("--commit", action="store_true", default=False,
-                      help="Commit changes")
+                        help="Commit changes")
     parser.add_argument("--gplay", action="store_true", default=False,
-                      help="Only print differences with the Play Store")
+                        help="Only print differences with the Play Store")
     options = parser.parse_args()
 
     config = common.read_config(options)

@@ -52,19 +52,19 @@ def main():
     # Parse command line...
     parser = ArgumentParser()
     parser.add_argument("-v", "--verbose", action="store_true", default=False,
-                      help="Spew out even more information than normal")
+                        help="Spew out even more information than normal")
     parser.add_argument("-q", "--quiet", action="store_true", default=False,
-                      help="Restrict output to warnings and errors")
+                        help="Restrict output to warnings and errors")
     parser.add_argument("-d", "--distinguished-name", default=None,
-                      help="X.509 'Distiguished Name' used when generating keys")
+                        help="X.509 'Distiguished Name' used when generating keys")
     parser.add_argument("--keystore", default=None,
-                      help="Path to the keystore for the repo signing key")
+                        help="Path to the keystore for the repo signing key")
     parser.add_argument("--repo-keyalias", default=None,
-                      help="Alias of the repo signing key in the keystore")
+                        help="Alias of the repo signing key in the keystore")
     parser.add_argument("--android-home", default=None,
-                      help="Path to the Android SDK (sometimes set in ANDROID_HOME)")
+                        help="Path to the Android SDK (sometimes set in ANDROID_HOME)")
     parser.add_argument("--no-prompt", action="store_true", default=False,
-                      help="Do not prompt for Android SDK path, just fail")
+                        help="Do not prompt for Android SDK path, just fail")
     options = parser.parse_args()
 
     # find root install prefix
