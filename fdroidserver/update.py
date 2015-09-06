@@ -1070,7 +1070,7 @@ def main():
                         "is /etc/alternatives/editor")
     parser.add_argument("-w", "--wiki", default=False, action="store_true",
                         help="Update the wiki")
-    parser.add_argument("", "--pretty", action="store_true", default=False,
+    parser.add_argument("--pretty", action="store_true", default=False,
                         help="Produce human-readable index.xml")
     parser.add_argument("--clean", action="store_true", default=False,
                         help="Clean update - don't uses caches, reprocess all apks")
