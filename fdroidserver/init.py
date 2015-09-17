@@ -19,6 +19,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+
 import glob
 import os
 import re
@@ -28,7 +30,7 @@ import sys
 from argparse import ArgumentParser
 import logging
 
-import common
+from fdroidserver import common
 
 config = {}
 options = None
