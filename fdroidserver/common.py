@@ -22,6 +22,7 @@
 
 from __future__ import absolute_import
 
+import io
 import os
 import sys
 import re
@@ -164,10 +165,12 @@ def read_config(opts, config_file='config.py'):
 
     options = opts
 
-    config = {}
+    config = dict()
 
     logging.debug("Reading %s" % config_file)
-    execfile(config_file, config)
+    with io.open(config_file, "rb") as f:
+        code = compile(f.read(), config_file, 'exec')
+        exec(code, None, config)
 
     # smartcardoptions must be a list since its command line args for Popen
     if 'smartcardoptions' in config:
