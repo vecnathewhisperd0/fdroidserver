@@ -317,7 +317,7 @@ def resize_icon(iconpath, density):
                 iconpath, oldsize, im.size))
             im.save(iconpath, "PNG")
 
-    except Exception, e:
+    except Exception as e:
         logging.error("Failed resizing {0} - {1}".format(iconpath, e))
 
 
@@ -477,7 +477,7 @@ def scan_apks(apps, apkcache, repodir, knownapks):
                         thisinfo['id'] = re.match(name_pat, line).group(1)
                         thisinfo['versioncode'] = int(re.match(vercode_pat, line).group(1))
                         thisinfo['version'] = re.match(vername_pat, line).group(1)
-                    except Exception, e:
+                    except Exception as e:
                         logging.error("Package matching failed: " + str(e))
                         logging.info("Line was: " + line)
                         sys.exit(1)
@@ -603,7 +603,7 @@ def scan_apks(apps, apkcache, repodir, knownapks):
                                         os.path.join(get_icon_dir(repodir, density), iconfilename))
                             empty_densities.remove(density)
                             break
-                except Exception, e:
+                except Exception as e:
                     logging.warn("Failed reading {0} - {1}".format(iconpath, e))
 
             if thisinfo['icons']:

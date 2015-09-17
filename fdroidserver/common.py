@@ -519,7 +519,7 @@ class vcs:
 
         try:
             self.gotorevisionx(rev)
-        except FDroidException, e:
+        except FDroidException as e:
             exc = e
 
         # If necessary, write the .fdroidvcs file.
@@ -1584,7 +1584,7 @@ def FDroidPopen(commands, cwd=None, output=True):
     try:
         p = subprocess.Popen(commands, cwd=cwd, shell=False, env=env,
                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    except OSError, e:
+    except OSError as e:
         raise BuildException("OSError while trying to execute " +
                              ' '.join(commands) + ': ' + str(e))
 

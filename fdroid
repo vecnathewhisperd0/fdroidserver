@@ -118,7 +118,7 @@ def main():
     try:
         mod.main()
     # These are ours, contain a proper message and are "expected"
-    except fdroidserver.common.FDroidException, e:
+    except fdroidserver.common.FDroidException as e:
         if verbose:
             raise
         else:
@@ -132,7 +132,7 @@ def main():
         sys.exit(1)
     # These should only be unexpected crashes due to bugs in the code
     # str(e) often doesn't contain a reason, so just show the backtrace
-    except Exception, e:
+    except Exception as e:
         logging.critical("Unknown exception found!")
         raise
     sys.exit(0)
