@@ -17,6 +17,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import absolute_import
+
 import json
 import os
 import re
@@ -40,7 +42,7 @@ import xml.etree.cElementTree as ElementTree
 
 from collections import OrderedDict
 
-import common
+import fdroidserver.common
 
 srclibs = None
 
@@ -586,7 +588,7 @@ def fill_build_defaults(build):
             continue
         build[flag] = value
     build['type'] = get_build_type()
-    build['ndk_path'] = common.get_ndk_path(build['ndk'])
+    build['ndk_path'] = fdroidserver.common.get_ndk_path(build['ndk'])
 
 
 def split_list_values(s):
@@ -745,7 +747,7 @@ def _decode_dict(data):
 def parse_metadata(apps, metadatapath):
     root, ext = os.path.splitext(metadatapath)
     metadataformat = ext[1:]
-    accepted = common.config['accepted_formats']
+    accepted = fdroidserver.common.config['accepted_formats']
     if metadataformat not in accepted:
         logging.critical('"' + metadatapath
                          + '" is not in an accepted format, '
