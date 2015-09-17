@@ -84,6 +84,11 @@ if [ -z $python ]; then
     python=python2
 fi
 
+# use python3 to run the tests
+if [[ $1 == "3" ]]; then
+    python=python3
+fi
+
 
 #------------------------------------------------------------------------------#
 echo_header "run commit hooks"
