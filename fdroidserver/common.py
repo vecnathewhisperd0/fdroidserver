@@ -34,6 +34,7 @@ import time
 import operator
 import logging
 import hashlib
+import base64
 import socket
 import xml.etree.ElementTree as XMLElementTree
 
@@ -1861,7 +1862,7 @@ def genpassword():
     h = hashlib.sha256()
     h.update(os.urandom(16))  # salt
     h.update(socket.getfqdn().encode('utf-8'))
-    return h.digest().encode('base64').strip()
+    return base64.b64encode(h.digest()).strip()
 
 
 def genkeystore(localconfig):
