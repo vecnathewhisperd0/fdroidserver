@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from __future__ import absolute_import
+from six import string_types
 
 import json
 import os
@@ -533,7 +534,7 @@ def read_metadata(xref=True):
                 return ("fdroid.app:" + appid, "Dummy name - don't know yet")
             raise MetaDataException("Cannot resolve app id " + appid)
 
-        for appid, app in apps.iteritems():
+        for appid, app in apps.items():
             try:
                 description_html(app['Description'], linkres)
             except MetaDataException as e:
@@ -583,7 +584,7 @@ def fill_build_defaults(build):
             return 'raw'
         return 'ant'
 
-    for flag, value in flag_defaults.iteritems():
+    for flag, value in flag_defaults.items():
         if flag in build:
             continue
         build[flag] = value
@@ -626,8 +627,8 @@ def sorted_builds(builds):
 
 def post_metadata_parse(thisinfo):
 
-    supported_metadata = app_defaults.keys() + ['comments', 'builds', 'id', 'metadatapath']
-    for k, v in thisinfo.iteritems():
+    supported_metadata = list(app_defaults.keys()) + ['comments', 'builds', 'id', 'metadatapath']
+    for k, v in thisinfo.items():
         if k not in supported_metadata:
             raise MetaDataException("Unrecognised metadata: {0}: {1}"
                                     .format(k, v))
@@ -636,11 +637,11 @@ def post_metadata_parse(thisinfo):
 
     # convert to the odd internal format
     for k in ('Description', 'Maintainer Notes'):
-        if isinstance(thisinfo[k], basestring):
+        if isinstance(thisinfo[k], string_types):
             text = thisinfo[k].rstrip().lstrip()
             thisinfo[k] = text.split('\n')
 
-    supported_flags = (flag_defaults.keys()
+    supported_flags = (list(flag_defaults.keys())
                        + ['vercode', 'version', 'versionCode', 'versionName'])
     esc_newlines = re.compile('\\\\( |\\n)')
 
@@ -662,7 +663,7 @@ def post_metadata_parse(thisinfo):
                 keyflagtype = flagtype(k)
                 if keyflagtype == 'list':
                     # these can be bools, strings or lists, but ultimately are lists
-                    if isinstance(v, basestring):
+                    if isinstance(v, string_types):
                         build[k] = [v]
                     elif isinstance(v, bool):
                         if v:
@@ -673,7 +674,7 @@ def post_metadata_parse(thisinfo):
                     build[k] = re.sub(esc_newlines, '', v).lstrip().rstrip()
                 elif keyflagtype == 'bool':
                     # TODO handle this using <xsd:element type="xsd:boolean> in a schema
-                    if isinstance(v, basestring):
+                    if isinstance(v, string_types):
                         if v == 'true':
                             build[k] = True
                         else:
@@ -731,7 +732,7 @@ def _decode_list(data):
 def _decode_dict(data):
     '''convert items in a dict from unicode to basestring'''
     rv = {}
-    for key, value in data.iteritems():
+    for key, value in data.items():
         if isinstance(key, unicode):
             key = key.encode('utf-8')
         if isinstance(value, unicode):
