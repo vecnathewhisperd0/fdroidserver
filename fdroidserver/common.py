@@ -1860,7 +1860,7 @@ def genpassword():
     '''generate a random password for when generating keys'''
     h = hashlib.sha256()
     h.update(os.urandom(16))  # salt
-    h.update(bytes(socket.getfqdn()))
+    h.update(socket.getfqdn().encode('utf-8'))
     return h.digest().encode('base64').strip()
 
 
