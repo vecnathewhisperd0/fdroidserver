@@ -29,11 +29,17 @@ import stat
 import subprocess
 import time
 import operator
-import Queue
 import logging
 import hashlib
 import socket
 import xml.etree.ElementTree as XMLElementTree
+
+try:
+    # Python 2
+    from Queue import Queue
+except ImportError:
+    # Python 3
+    from queue import Queue
 
 from distutils.version import LooseVersion
 from zipfile import ZipFile
@@ -1588,7 +1594,7 @@ def FDroidPopen(commands, cwd=None, output=True):
         raise BuildException("OSError while trying to execute " +
                              ' '.join(commands) + ': ' + str(e))
 
-    stdout_queue = Queue.Queue()
+    stdout_queue = Queue()
     stdout_reader = AsynchronousFileReader(p.stdout, stdout_queue)
 
     # Check the queue for output (until there is no more to get)
