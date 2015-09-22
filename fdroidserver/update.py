@@ -18,7 +18,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#  from __future__ import absolute_import
+from __future__ import unicode_literals
+
 import sys
+import io
 import os
 import shutil
 import glob
@@ -430,7 +434,7 @@ def scan_apks(apps, apkcache, repodir, knownapks):
 
         # Calculate the sha256...
         sha = hashlib.sha256()
-        with open(apkfile, 'rb') as f:
+        with io.open(apkfile, 'rb') as f:
             while True:
                 t = f.read(16384)
                 if len(t) == 0:
@@ -575,7 +579,7 @@ def scan_apks(apps, apkcache, repodir, knownapks):
                 icondest = os.path.join(icon_dir, iconfilename)
 
                 try:
-                    with open(icondest, 'wb') as f:
+                    with io.open(icondest, 'wb') as f:
                         f.write(apk.read(iconsrc))
                     thisinfo['icons'][density] = iconfilename
 
@@ -589,7 +593,7 @@ def scan_apks(apps, apkcache, repodir, knownapks):
                 iconsrc = thisinfo['icons_src']['-1']
                 iconpath = os.path.join(
                     get_icon_dir(repodir, None), iconfilename)
-                with open(iconpath, 'wb') as f:
+                with io.open(iconpath, 'wb') as f:
                     f.write(apk.read(iconsrc))
                 try:
                     im = Image.open(iconpath)
@@ -928,7 +932,7 @@ def make_index(apps, sortedids, apks, repodir, archive, categories):
     else:
         output = doc.toxml()
 
-    with open(os.path.join(repodir, 'index.xml'), 'wb') as f:
+    with io.open(os.path.join(repodir, 'index.xml'), 'wb') as f:
         f.write(output)
 
     if 'repo_keyalias' in config:
@@ -975,7 +979,7 @@ def make_index(apps, sortedids, apks, repodir, archive, categories):
     catdata = ''
     for cat in categories:
         catdata += cat + '\n'
-    with open(os.path.join(repodir, 'categories.txt'), 'w') as f:
+    with io.open(os.path.join(repodir, 'categories.txt'), 'w') as f:
         f.write(catdata)
 
 
@@ -1133,7 +1137,7 @@ def main():
     # cached data if possible.
     apkcachefile = os.path.join('tmp', 'apkcache')
     if not options.clean and os.path.exists(apkcachefile):
-        with open(apkcachefile, 'rb') as cf:
+        with io.open(apkcachefile, 'rb') as cf:
             apkcache = pickle.load(cf)
     else:
         apkcache = {}
@@ -1152,7 +1156,7 @@ def main():
                 if 'name' not in apk:
                     logging.error(apk['id'] + ' does not have a name! Skipping...')
                     continue
-                f = open(os.path.join('metadata', apk['id'] + '.txt'), 'w')
+                f = io.open(os.path.join('metadata', apk['id'] + '.txt'), 'w')
                 f.write("License:Unknown\n")
                 f.write("Web Site:\n")
                 f.write("Source Code:\n")
@@ -1274,11 +1278,11 @@ def main():
                 if app['icon'] is not None:
                     data += app['icon'] + "\t"
                 data += app['License'] + "\n"
-            with open(os.path.join(repodirs[0], 'latestapps.dat'), 'w') as f:
+            with io.open(os.path.join(repodirs[0], 'latestapps.dat'), 'w') as f:
                 f.write(data)
 
     if cachechanged:
-        with open(apkcachefile, 'wb') as cf:
+        with io.open(apkcachefile, 'wb') as cf:
             pickle.dump(apkcache, cf)
 
     # Update the wiki...

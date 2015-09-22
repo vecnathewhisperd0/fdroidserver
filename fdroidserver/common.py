@@ -21,6 +21,7 @@
 # libraries here as they will become a requirement for all commands.
 
 from __future__ import absolute_import
+from __future__ import unicode_literals
 
 import io
 import os
@@ -510,7 +511,7 @@ class vcs:
         deleterepo = False
         if os.path.exists(self.local):
             if os.path.exists(fdpath):
-                with open(fdpath, 'r') as f:
+                with io.open(fdpath, 'r') as f:
                     fsdata = f.read().strip()
                 if fsdata == cdata:
                     writeback = False
@@ -536,7 +537,7 @@ class vcs:
 
         # If necessary, write the .fdroidvcs file.
         if writeback and not self.clone_failed:
-            with open(fdpath, 'w') as f:
+            with io.open(fdpath, 'w') as f:
                 f.write(cdata)
 
         if exc is not None:
@@ -654,9 +655,9 @@ class vcs_git(vcs):
             raise VCSException("No git submodules available")
 
         # fix submodules not accessible without an account and public key auth
-        with open(submfile, 'r') as f:
+        with io.open(submfile, 'r') as f:
             lines = f.readlines()
-        with open(submfile, 'w') as f:
+        with io.open(submfile, 'w') as f:
             for line in lines:
                 if 'git@github.com' in line:
                     line = line.replace('git@github.com:', 'https://github.com/')
@@ -849,7 +850,7 @@ class vcs_hg(vcs):
         p = FDroidPopen(['hg', 'purge', '--all'], cwd=self.local, output=False)
         # Also delete untracked files, we have to enable purge extension for that:
         if "'purge' is provided by the following extension" in p.output:
-            with open(os.path.join(self.local, '.hg', 'hgrc'), "a") as myfile:
+            with io.open(os.path.join(self.local, '.hg', 'hgrc'), "a") as myfile:
                 myfile.write("\n[extensions]\nhgext.purge=\n")
             p = FDroidPopen(['hg', 'purge', '--all'], cwd=self.local, output=False)
             if p.returncode != 0:
@@ -1283,7 +1284,7 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, onserver=
         props = ""
         if os.path.isfile(path):
             logging.info("Updating local.properties file at %s" % path)
-            with open(path, 'r') as f:
+            with io.open(path, 'r') as f:
                 props += f.read()
             props += '\n'
         else:
@@ -1304,7 +1305,7 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, onserver=
         # Add java.encoding if necessary
         if build['encoding']:
             props += "java.encoding=%s\n" % build['encoding']
-        with open(path, 'w') as f:
+        with io.open(path, 'w') as f:
             f.write(props)
 
     flavours = []
@@ -1508,7 +1509,7 @@ class KnownApks:
                 line += ' ' + time.strftime('%Y-%m-%d', added)
             lst.append(line)
 
-        with open(self.path, 'w') as f:
+        with io.open(self.path, 'w') as f:
             for line in sorted(lst, key=natural_key):
                 f.write(line + '\n')
 
@@ -1564,7 +1565,7 @@ def isApkDebuggable(apkfile, config):
 
 class PopenResult:
     returncode = None
-    output = ''
+    output = b""
 
 
 def SdkToolsPopen(commands, cwd=None, output=True):
@@ -1605,21 +1606,25 @@ def FDroidPopen(commands, cwd=None, output=True):
 
     # Check the queue for output (until there is no more to get)
     while not stdout_reader.eof():
-        while not stdout_queue.empty():
-            line = stdout_queue.get()
+        for line in stdout_reader.readlines():
             if output and options.verbose:
                 # Output directly to console
                 sys.stderr.write(line)
                 sys.stderr.flush()
             result.output += line
 
-        time.sleep(0.1)
+    stdout_reader.join()
 
     result.returncode = p.wait()
     return result
 
 
 gradle_comment = re.compile(r'[ ]*//')
+
+
+def FDroidPopenUnicode(commands, cwd=None, output=True):
+    result = FDroidPopen(commands, cwd, output)
+    result.output = result.output.decode('utf-8')
 
 
 def remove_signing_keys(build_dir):
@@ -1635,14 +1640,14 @@ def remove_signing_keys(build_dir):
         if 'build.gradle' in files:
             path = os.path.join(root, 'build.gradle')
 
-            with open(path, "r") as o:
+            with io.open(path, "r") as o:
                 lines = o.readlines()
 
             changed = False
 
             opened = 0
             i = 0
-            with open(path, "w") as o:
+            with io.open(path, "w") as o:
                 while i < len(lines):
                     line = lines[i]
                     i += 1
@@ -1682,12 +1687,12 @@ def remove_signing_keys(build_dir):
             if propfile in files:
                 path = os.path.join(root, propfile)
 
-                with open(path, "r") as o:
+                with io.open(path, "r") as o:
                     lines = o.readlines()
 
                 changed = False
 
-                with open(path, "w") as o:
+                with io.open(path, "w") as o:
                     for line in lines:
                         if any(line.startswith(s) for s in ('key.store', 'key.alias')):
                             changed = True
@@ -1734,10 +1739,10 @@ def place_srclib(root_dir, number, libpath):
 
     lines = []
     if os.path.isfile(proppath):
-        with open(proppath, "r") as o:
+        with io.open(proppath, "r") as o:
             lines = o.readlines()
 
-    with open(proppath, "w") as o:
+    with io.open(proppath, "w") as o:
         placed = False
         for line in lines:
             if line.startswith('android.library.reference.%d=' % number):
@@ -1903,7 +1908,7 @@ def write_to_config(thisconfig, key, value=None):
     if value is None:
         origkey = key + '_orig'
         value = thisconfig[origkey] if origkey in thisconfig else thisconfig[key]
-    with open('config.py', 'r') as f:
+    with io.open('config.py', 'r') as f:
         data = f.read()
     pattern = '\n[\s#]*' + key + '\s*=\s*"[^"]*"'
     repl = '\n' + key + ' = "' + value + '"'
@@ -1914,7 +1919,7 @@ def write_to_config(thisconfig, key, value=None):
     # make sure the file ends with a carraige return
     if not re.match('\n$', data):
         data += '\n'
-    with open('config.py', 'w') as f:
+    with io.open('config.py', 'w') as f:
         f.writelines(data)
 
 
