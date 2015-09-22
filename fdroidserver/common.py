@@ -143,10 +143,10 @@ def fill_config_defaults(thisconfig):
 
 
 def regsub_file(pattern, repl, path):
-    with open(path, 'r') as f:
+    with io.open(path, 'r') as f:
         text = f.read()
     text = re.sub(pattern, repl, text)
-    with open(path, 'w') as f:
+    with io.open(path, 'w') as f:
         f.write(text)
 
 
@@ -310,9 +310,9 @@ def write_password_file(pwtype, password=None):
     filename = '.fdroid.' + pwtype + '.txt'
     fd = os.open(filename, os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0o600)
     if password is None:
-        os.write(fd, config[pwtype])
+        os.write(fd, config[pwtype].encode('utf-8'))
     else:
-        os.write(fd, password)
+        os.write(fd, password.encode('utf-8'))
     os.close(fd)
     config[pwtype + 'file'] = filename
 
@@ -1862,7 +1862,8 @@ def genpassword():
     h = hashlib.sha256()
     h.update(os.urandom(16))  # salt
     h.update(socket.getfqdn().encode('utf-8'))
-    return base64.b64encode(h.digest()).strip()
+    passwd = base64.b64encode(h.digest()).strip()
+    return passwd.decode('utf-8')
 
 
 def genkeystore(localconfig):

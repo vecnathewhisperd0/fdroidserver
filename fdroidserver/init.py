@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
 # update.py - part of the FDroid server tools
@@ -22,6 +22,7 @@
 from __future__ import absolute_import
 
 import glob
+import io
 import os
 import re
 import shutil
@@ -38,12 +39,12 @@ options = None
 
 def disable_in_config(key, value):
     '''write a key/value to the local config.py, then comment it out'''
-    with open('config.py', 'r') as f:
+    with io.open('config.py', 'r') as f:
         data = f.read()
     pattern = '\n[\s#]*' + key + '\s*=\s*"[^"]*"'
     repl = '\n#' + key + ' = "' + value + '"'
     data = re.sub(pattern, repl, data)
-    with open('config.py', 'w') as f:
+    with io.open('config.py', 'w') as f:
         f.writelines(data)
 
 
@@ -73,7 +74,7 @@ def main():
         egg_link = os.path.join(tmp, '..', 'local/lib/python2.7/site-packages/fdroidserver.egg-link')
         if os.path.exists(egg_link):
             # installed from local git repo
-            examplesdir = os.path.join(open(egg_link).readline().rstrip(), 'examples')
+            examplesdir = os.path.join(io.open(egg_link).readline().rstrip(), 'examples')
         else:
             prefix = os.path.dirname(os.path.dirname(__file__))  # use .egg layout
             if not prefix.endswith('.egg'):  # use UNIX layout
@@ -211,11 +212,11 @@ def main():
                     opensc_so = '/usr/lib/opensc-pkcs11.so'
                     logging.warn('No OpenSC PKCS#11 module found, ' +
                                  'install OpenSC then edit "opensc-fdroid.cfg"!')
-            with open(os.path.join(examplesdir, 'opensc-fdroid.cfg'), 'r') as f:
+            with io.open(os.path.join(examplesdir, 'opensc-fdroid.cfg'), 'r') as f:
                 opensc_fdroid = f.read()
             opensc_fdroid = re.sub('^library.*', 'library = ' + opensc_so, opensc_fdroid,
                                    flags=re.MULTILINE)
-            with open('opensc-fdroid.cfg', 'w') as f:
+            with io.open('opensc-fdroid.cfg', 'w') as f:
                 f.write(opensc_fdroid)
     elif not os.path.exists(keystore):
         password = common.genpassword()
