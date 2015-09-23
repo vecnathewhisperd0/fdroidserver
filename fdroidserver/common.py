@@ -1622,9 +1622,10 @@ def FDroidPopen(commands, cwd=None, output=True):
 gradle_comment = re.compile(r'[ ]*//')
 
 
-def FDroidPopenUnicode(commands, cwd=None, output=True):
+def FDroidPopenStr(commands, cwd=None, output=True):
     result = FDroidPopen(commands, cwd, output)
     result.output = result.output.decode('utf-8')
+    return result
 
 
 def remove_signing_keys(build_dir):
@@ -1896,10 +1897,10 @@ def genkeystore(localconfig):
         raise BuildException("Failed to generate key", p.output)
     os.chmod(localconfig['keystore'], 0o0600)
     # now show the lovely key that was just generated
-    p = FDroidPopen(['keytool', '-list', '-v',
-                     '-keystore', localconfig['keystore'],
-                     '-alias', localconfig['repo_keyalias'],
-                     '-storepass:file', config['keystorepassfile']])
+    p = FDroidPopenStr(['keytool', '-list', '-v',
+                        '-keystore', localconfig['keystore'],
+                        '-alias', localconfig['repo_keyalias'],
+                        '-storepass:file', config['keystorepassfile']])
     logging.info(p.output.strip() + '\n\n')
 
 
