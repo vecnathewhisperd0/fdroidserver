@@ -289,7 +289,7 @@ def delete_disabled_builds(apps, apkcache, repodirs):
     :param apkcache: current apk cache information
     :param repodirs: the repo directories to process
     """
-    for appid, app in apps.iteritems():
+    for appid, app in apps.items():
         for build in app['builds']:
             if build['disable']:
                 apkfilename = appid + '_' + str(build['vercode']) + '.apk'
@@ -985,7 +985,7 @@ def make_index(apps, sortedids, apks, repodir, archive, categories):
 
 def archive_old_apks(apps, apks, archapks, repodir, archivedir, defaultkeepversions):
 
-    for appid, app in apps.iteritems():
+    for appid, app in apps.items():
 
         # Get a list of the apks for this app...
         apklist = []
@@ -1127,7 +1127,7 @@ def main():
 
     # Generate a list of categories...
     categories = set()
-    for app in apps.itervalues():
+    for app in apps.values():
         categories.update(app['Categories'])
 
     # Read known apks data (will be updated and written back when we've finished)
@@ -1197,7 +1197,7 @@ def main():
     # level. When doing this, we use the info from the most recent version's apk.
     # We deal with figuring out when the app was added and last updated at the
     # same time.
-    for appid, app in apps.iteritems():
+    for appid, app in apps.items():
         bestver = 0
         added = None
         lastupdated = None
@@ -1235,13 +1235,13 @@ def main():
     # Sort the app list by name, then the web site doesn't have to by default.
     # (we had to wait until we'd scanned the apks to do this, because mostly the
     # name comes from there!)
-    sortedids = sorted(apps.iterkeys(), key=lambda appid: apps[appid]['Name'].upper())
+    sortedids = sorted(apps.keys(), key=lambda appid: apps[appid]['Name'].upper())
 
     # APKs are placed into multiple repos based on the app package, providing
     # per-app subscription feeds for nightly builds and things like it
     if config['per_app_repos']:
         add_apks_to_per_app_repos(repodirs[0], apks)
-        for appid, app in apps.iteritems():
+        for appid, app in apps.items():
             repodir = os.path.join(appid, 'fdroid', 'repo')
             appdict = dict()
             appdict[appid] = app
