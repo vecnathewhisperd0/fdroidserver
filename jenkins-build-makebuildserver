@@ -20,6 +20,8 @@ cleanup_all() {
     sleep 5
     killall -9 VBoxHeadless || true
     echo "$(date -u) - cleanup done."
+    host repo1.maven.org || true
+    host jcenter.bintray.com || true
 }
 trap cleanup_all INT TERM EXIT
 
