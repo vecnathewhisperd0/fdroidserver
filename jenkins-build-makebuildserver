@@ -11,6 +11,8 @@ fi
 
 # make sure that no VirtualBox processes are left running
 cleanup_all() {
+    host repo1.maven.org
+    host jcenter.bintray.com
     echo "$(date -u) - cleanup in progress..."
     ps auxww|grep VBox
     cd $WORKSPACE/buildserver
