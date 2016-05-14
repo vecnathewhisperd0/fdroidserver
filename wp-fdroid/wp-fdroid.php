@@ -820,6 +820,7 @@ class FDroid
 		foreach($xml->children() as $app) {
 
 			if($app->getName() == 'repo') continue;
+		    $appinfo = null;
 			$appinfo['attrs']=$app->attributes();
 			$appinfo['id']=$appinfo['attrs']['id'];
 			foreach($app->children() as $el) {
@@ -828,7 +829,7 @@ class FDroid
 					$appinfo['name']=$el;
 					break;
 				case "icon":
-					$appinfo['icon']=$el;
+					if (!empty($el)) $appinfo['icon']=$el;
 					break;
 				case "summary":
 					$appinfo['summary']=$el;
@@ -883,7 +884,7 @@ class FDOutList
 		$out.='<a href="'.makelink($query_vars, array('fdid'=>$appinfo['id'])).'">';
 		$out.='<div id="appheader">';
 
-		$out.='<div style="float:left;padding-right:10px;"><img src="' . site_url() . '/repo/icons/'.$appinfo['icon'].'" style="width:48px;border:none;"></div>';
+		$out.='<div style="float:left;padding-right:10px;"><img src="' . (!empty($appinfo['icon']) ? site_url() . '/repo/icons/'.$appinfo['icon'] : '#') . '" style="width:48px;border:none;"></div>';
 
 		$out.='<div style="float:right;">';
 		$out.='<p>Details...</p>';
@@ -932,7 +933,7 @@ class FDOutGrid
 		$out.='<div id="appheader" style="text-align:center;width:110px;">';
 
 		$out.='<a href="'.$link.'" style="border-bottom-style:none;">';
-		$out.='<img src="' . site_url() . '/repo/icons/'.$appinfo['icon'].'" style="width:48px;border-width:0;padding-top:5px;padding-bottom:5px;"><br/>';
+		$out.='<img src="' . (!empty($appinfo['icon']) ? site_url() . '/repo/icons/'.$appinfo['icon'] : '#') . '" style="width:48px;border-width:0;padding-top:5px;padding-bottom:5px;"><br/>';
 		$out.=$appinfo['name'].'<br/>';
 		$out.='</a>';
 
