@@ -336,7 +336,13 @@ for f, src, shasum in cachefiles:
         v = sha256_for_file(relpath)
         if v != shasum:
             print("Invalid shasum of '" + v + "' detected for " + f)
-            sys.exit(1)
+            print("Checking for partial download…")
+            if subprocess.call(['wget', '-c', src, '-O', f], cwd=cachedir) != 0:
+                sys.exit(1)
+            nv = sha256_for_file(relpath)
+            if nv != shasum:
+                print("Invalid shasum of '" + v + "' detected for " + f)
+                sys.exit(1)
         else:
             print("...shasum verified for " + f)
 
