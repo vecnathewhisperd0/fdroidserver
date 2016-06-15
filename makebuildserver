@@ -21,16 +21,14 @@ def vagrant(params, cwd=None, printout=False):
                is the stdout (and stderr) from vagrant
     """
     p = subprocess.Popen(['vagrant'] + params, cwd=cwd,
-                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                         universal_newlines=True)
+                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     out = ''
     if printout:
-        while True:
-            line = p.stdout.readline()
-            if len(line) == 0:
-                break
-            print(line.rstrip())
-            out += line
+        while p.poll() is None:
+            stdout, stderr = p.communicate()
+            lines = stdout.decode('utf-8')
+            print(lines)
+            out += lines
         p.wait()
     else:
         out = p.communicate()[0]
@@ -457,7 +455,7 @@ while not ready:
         print("Error while checking status")
         sys.exit(1)
     for line in out.splitlines():
-        if line.startswith("default"):
+        if line.startswith("default".encode('utf8') if isinstance(line, bytes) else 'default'):
             if line.find("poweroff") != -1:
                 ready = True
             else:
