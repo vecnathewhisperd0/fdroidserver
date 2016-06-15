@@ -405,6 +405,52 @@ def getsig(apkpath):
     return hashlib.md5(hexlify(cert_encoded)).hexdigest()
 
 
+def scan_obbs(repodir, apps, apks):
+    """Scans the .obb files in a given repo directory.
+
+    :param repodir: repo directory to scan
+    :param apps: list of current, valid apps
+    :param apks: current information on all APKs
+
+    :returns: a list of 3 element tuples of (packagename, versioncode, obbfile)
+    """
+
+    def obbWarnDelete(f, msg):
+        logging.warning(msg + f)
+        if options.delete_unknown:
+            logging.error("Deleting unknown file: " + f)
+            os.remove(f)
+
+    obbs = []
+    for f in glob.glob(os.path.join(repodir, '*.obb')):
+        obbfile = os.path.basename(f)
+        chunks = obbfile.split('.')
+        if chunks[0] != 'main' and chunks[0] != 'patch':
+            obbWarnDelete(f, 'OBB filename must start with "main." or "patch.": ')
+            continue
+        if not re.match('[0-9-]+', chunks[1]):
+            obbWarnDelete('The OBB version code must come after "' + chunks[0] + '.": ')
+            continue
+        versioncode = int(chunks[1])
+        packagename = ".".join(chunks[2:-1])
+
+        highestVersionCode = -pow(2, 31)  # Java's Integer.MIN_VALUE
+        if packagename not in apps.keys():
+            obbWarnDelete(f, "OBB's packagename does not match a supported APK: ")
+            continue
+        for apk in apks:
+            if packagename == apk['id'] and apk['versioncode'] > highestVersionCode:
+                highestVersionCode = apk['versioncode']
+        if versioncode > highestVersionCode:
+            obbWarnDelete(f, 'OBB file has newer versioncode(' + str(versioncode)
+                          + ') than any APK: ')
+            continue
+
+        obbs.append((packagename, versioncode, obbfile))
+
+    return obbs
+
+
 def scan_apks(apps, apkcache, repodir, knownapks, use_date_from_apk=False):
     """Scan the apks in the given repo directory.
 
@@ -953,6 +999,8 @@ def make_index(apps, sortedids, apks, repodir, archive, categories):
                 addElement('targetSdkVersion', str(apk['targetSdkVersion']), doc, apkel)
             if 'maxSdkVersion' in apk:
                 addElement('maxsdkver', str(apk['maxSdkVersion']), doc, apkel)
+            addElementNonEmpty('obbMainFile', apk.get('obbMainFile'), doc, apkel)
+            addElementNonEmpty('obbPatchFile', apk.get('obbPatchFile'), doc, apkel)
             if 'added' in apk:
                 addElement('added', time.strftime('%Y-%m-%d', apk['added']), doc, apkel)
             addElementNonEmpty('permissions', ','.join(apk['permissions']), doc, apkel)
@@ -1138,7 +1186,7 @@ def main():
     parser.add_argument("-c", "--create-metadata", action="store_true", default=False,
                         help="Create skeleton metadata files that are missing")
     parser.add_argument("--delete-unknown", action="store_true", default=False,
-                        help="Delete APKs without metadata from the repo")
+                        help="Delete APKs or OBBs without metadata from the repo")
     parser.add_argument("-b", "--buildreport", action="store_true", default=False,
                         help="Report on build data status")
     parser.add_argument("-i", "--interactive", default=False, action="store_true",
@@ -1236,10 +1284,22 @@ def main():
     # Scan all apks in the main repo
     apks, cachechanged = scan_apks(apps, apkcache, repodirs[0], knownapks, options.use_date_from_apk)
 
+    obbs = scan_obbs(repodirs[0], apps, apks)
+
     # Generate warnings for apk's with no metadata (or create skeleton
     # metadata files, if requested on the command line)
     newmetadata = False
     for apk in apks:
+        for (packagename, versioncode, obbfile) in sorted(obbs, reverse=True):
+            #print("check " + packagename + ' '+ str(versioncode) + ' ' + obbfile)
+            if versioncode <= apk['versioncode'] and packagename == apk['id']:
+                if obbfile.startswith('main.') and 'obbMainFile' not in apk:
+                    apk['obbMainFile'] = obbfile
+                elif obbfile.startswith('patch.') and 'obbPatchFile' not in apk:
+                    apk['obbPatchFile'] = obbfile
+            if 'obbMainFile' in apk and 'obbPatchFile' in apk:
+                break
+
         if apk['id'] not in apps:
             if options.create_metadata:
                 if 'name' not in apk:
