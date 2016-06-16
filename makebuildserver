@@ -409,12 +409,12 @@ end
 vf = os.path.join(serverdir, 'Vagrantfile')
 writevf = True
 if os.path.exists(vf):
-    vagrant(['halt'], serverdir)
+    vagrant(['halt'], serverdir, printout=options.verbose)
     with open(vf, 'r') as f:
         oldvf = f.read()
     if oldvf != vagrantfile:
         print("Server configuration has changed, rebuild from scratch is required")
-        vagrant(['destroy', '-f'], serverdir)
+        vagrant(['destroy', '-f'], serverdir, printout=options.verbose)
     else:
         print("Re-provisioning existing server")
         writevf = False
@@ -444,13 +444,13 @@ subprocess.call(
     cwd=serverdir)
 
 print("Stopping build server VM")
-vagrant(['halt'], serverdir)
+vagrant(['halt'], serverdir, printout=options.verbose)
 
 print("Waiting for build server VM to be finished")
 ready = False
 while not ready:
     time.sleep(2)
-    returncode, out = vagrant(['status'], serverdir)
+    returncode, out = vagrant(['status'], serverdir, printout=options.verbose)
     if returncode != 0:
         print("Error while checking status")
         sys.exit(1)
