@@ -332,7 +332,7 @@ if 'aptproxy' in config and config['aptproxy']:
 
 # buildserver/ is shared to the VM's /vagrant by default so the old default
 # does not need a custom mount
-if cachedir != 'buildserver/cache':
+if cachedir != os.path.join(serverdir, 'cache'):
     vagrantfile += """
   config.vm.synced_folder '{0}', '/vagrant/cache',
     owner: 'root', group: 'root', create: true
