@@ -4,40 +4,13 @@ import os
 import requests
 import sys
 import subprocess
-import time
+import vagrant
 import hashlib
 import yaml
 from clint.textui import progress
 from optparse import OptionParser
 
-
-def vagrant(params, cwd=None, printout=False):
-    """Run vagrant.
-
-    :param: list of parameters to pass to vagrant
-    :cwd: directory to run in, or None for current directory
-    :printout: True to print output in realtime, False to just
-               return it
-    :returns: (ret, out) where ret is the return code, and out
-               is the stdout (and stderr) from vagrant
-    """
-    p = subprocess.Popen(['vagrant'] + params, cwd=cwd,
-                         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                         universal_newlines=True)
-    out = ''
-    if printout:
-        while True:
-            line = p.stdout.readline()
-            if len(line) == 0:
-                break
-            print(line.rstrip())
-            out += line
-        p.wait()
-    else:
-        out = p.communicate()[0]
-    return (p.returncode, out)
-
-boxfile = 'buildserver.box'
+boxfile = os.path.join(os.getcwd(), 'buildserver.box')
 serverdir = 'buildserver'
 
 parser = OptionParser()
@@ -79,9 +52,6 @@ if not os.path.exists('makebuildserver') or not os.path.exists(serverdir):
 
 if os.path.exists(boxfile):
     os.remove(boxfile)
-
-if options.clean:
-    vagrant(['destroy', '-f'], cwd=serverdir, printout=options.verbose)
 
 # Update cached files.
 cachedir = config['cachedir']
@@ -322,17 +292,24 @@ elif os.path.exists('/proc/cpuinfo'):
     if 'vmx' in contents or 'svm' in contents:
         config['hwvirtex'] = 'on'
 
+logfilename = os.path.join(serverdir, 'up.log')
+log_cm = vagrant.make_file_cm(logfilename)
+v = vagrant.Vagrant(root=serverdir, out_cm=log_cm, err_cm=log_cm)
+
+if options.clean:
+    v.destroy()
+
 # Check against the existing Vagrantfile.yaml, and if they differ, we
 # need to create a new box:
 vf = os.path.join(serverdir, 'Vagrantfile.yaml')
 writevf = True
 if os.path.exists(vf):
-    vagrant(['halt'], serverdir)
+    v.halt()
     with open(vf, 'r', encoding='utf-8') as f:
         oldconfig = yaml.load(f)
     if config != oldconfig:
         print("Server configuration has changed, rebuild from scratch is required")
-        vagrant(['destroy', '-f'], serverdir)
+        v.destroy()
     else:
         print("Re-provisioning existing server")
         writevf = False
@@ -343,12 +320,7 @@ if writevf:
         yaml.dump(config, f)
 
 print("Configuring build server VM")
-returncode, out = vagrant(['up', '--provision'], serverdir, printout=True)
-with open(os.path.join(serverdir, 'up.log'), 'w') as log:
-    log.write(out)
-if returncode != 0:
-    print("Failed to configure server")
-    sys.exit(1)
+v.up(provision=True)
 
 print("Writing buildserver ID")
 p = subprocess.Popen(['git', 'rev-parse', 'HEAD'], stdout=subprocess.PIPE,
@@ -361,28 +333,12 @@ subprocess.call(
     cwd=serverdir)
 
 print("Stopping build server VM")
-vagrant(['halt'], serverdir)
-
-print("Waiting for build server VM to be finished")
-ready = False
-while not ready:
-    time.sleep(2)
-    returncode, out = vagrant(['status'], serverdir)
-    if returncode != 0:
-        print("Error while checking status")
-        sys.exit(1)
-    for line in out.splitlines():
-        if line.startswith("default"):
-            if line.find("poweroff") != -1:
-                ready = True
-            else:
-                print("Status: " + line)
+v.halt()
 
 print("Packaging")
-vagrant(['package', '--output', os.path.join('..', boxfile)], serverdir,
-        printout=options.verbose)
+v.package(output=boxfile)
+
 print("Adding box")
-vagrant(['box', 'add', 'buildserver', boxfile, '-f'],
-        printout=options.verbose)
+v.box_add('buildserver', boxfile, force=True)
 
 os.remove(boxfile)
