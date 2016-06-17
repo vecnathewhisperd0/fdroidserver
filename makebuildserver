@@ -380,6 +380,8 @@ def main():
            str('14.04' in os.uname()[3]).lower())
 
     logfilename = os.path.join(serverdir, 'up.log')
+    if not os.path.exists(logfilename):
+        open(logfilename, 'a').close()  # create blank file
     log_cm = vagrant.make_file_cm(logfilename)
     v = vagrant.Vagrant(root=serverdir, out_cm=log_cm, err_cm=log_cm)
 
