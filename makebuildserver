@@ -10,7 +10,7 @@ from clint.textui import progress
 from optparse import OptionParser
 import fdroidserver.tail
 
-boxfile = 'buildserver.box'
+boxfile = os.path.join(os.getcwd(), 'buildserver.box')
 serverdir = 'buildserver'
 tail = None
 
@@ -430,7 +430,7 @@ def main():
     v.halt()
 
     print("Packaging")
-    v.package(output=os.path.join('..', boxfile))
+    v.package(output=boxfile)
 
     print("Adding box")
     v.box_add('buildserver', boxfile, force=True)
