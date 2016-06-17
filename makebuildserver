@@ -12,6 +12,7 @@ import fdroidserver.tail
 
 boxfile = os.path.join(os.getcwd(), 'buildserver.box')
 serverdir = 'buildserver'
+tail = None
 
 parser = OptionParser()
 parser.add_option("-v", "--verbose", action="store_true", default=False,
@@ -226,214 +227,222 @@ def sha256_for_file(path):
             s.update(data)
         return s.hexdigest()
 
-for srcurl, shasum in cachefiles:
-    filename = os.path.basename(srcurl)
-    local_filename = os.path.join(cachedir, filename)
 
-    if os.path.exists(local_filename):
-        local_length = os.path.getsize(local_filename)
-    else:
-        local_length = -1
+def main():
+    for srcurl, shasum in cachefiles:
+        filename = os.path.basename(srcurl)
+        local_filename = os.path.join(cachedir, filename)
 
-    resume_header = {}
-    download = True
-
-    try:
-        r = requests.head(srcurl, allow_redirects=True, timeout=60)
-        if r.status_code == 200:
-            content_length = int(r.headers.get('content-length'))
+        if os.path.exists(local_filename):
+            local_length = os.path.getsize(local_filename)
         else:
+            local_length = -1
+
+        resume_header = {}
+        download = True
+
+        try:
+            r = requests.head(srcurl, allow_redirects=True, timeout=60)
+            if r.status_code == 200:
+                content_length = int(r.headers.get('content-length'))
+            else:
+                content_length = local_length  # skip the download
+        except requests.exceptions.RequestException as e:
             content_length = local_length  # skip the download
-    except requests.exceptions.RequestException as e:
-        content_length = local_length  # skip the download
-        print(e)
+            print(e)
 
-    if local_length == content_length:
-        download = False
-    elif local_length > content_length:
-        print('deleting corrupt file from cache: ' + local_filename)
-        os.remove(local_filename)
-        print("Downloading " + filename + " to cache")
-    elif local_length > -1 and local_length < content_length:
-        print("Resuming download of " + local_filename)
-        resume_header = {'Range': 'bytes=%d-%d' % (local_length, content_length)}
+        if local_length == content_length:
+            download = False
+        elif local_length > content_length:
+            print('deleting corrupt file from cache: ' + local_filename)
+            os.remove(local_filename)
+            print("Downloading " + filename + " to cache")
+        elif local_length > -1 and local_length < content_length:
+            print("Resuming download of " + local_filename)
+            resume_header = {'Range': 'bytes=%d-%d' % (local_length, content_length)}
+        else:
+            print("Downloading " + filename + " to cache")
+
+        if download:
+            r = requests.get(srcurl, headers=resume_header,
+                             stream=True, verify=False, allow_redirects=True)
+            content_length = int(r.headers.get('content-length'))
+            with open(local_filename, 'ab') as f:
+                for chunk in progress.bar(r.iter_content(chunk_size=65536),
+                                          expected_size=(content_length / 65536) + 1):
+                    if chunk:  # filter out keep-alive new chunks
+                        f.write(chunk)
+
+        v = sha256_for_file(local_filename)
+        if v == shasum:
+            print("\t...shasum verified for " + local_filename)
+        else:
+            print("Invalid shasum of '" + v + "' detected for " + local_filename)
+            sys.exit(1)
+
+    # allow specifying a list/tuple that includes cached local copy
+    if type(config['baseboxurl']) in (list, tuple) or config['baseboxurl'][0] in ('(', '['):
+        baseboxurl = config['baseboxurl']
     else:
-        print("Downloading " + filename + " to cache")
+        baseboxurl = '"{0}"'.format(config['baseboxurl'])
 
-    if download:
-        r = requests.get(srcurl, headers=resume_header,
-                         stream=True, verify=False, allow_redirects=True)
-        content_length = int(r.headers.get('content-length'))
-        with open(local_filename, 'ab') as f:
-            for chunk in progress.bar(r.iter_content(chunk_size=65536),
-                                      expected_size=(content_length / 65536) + 1):
-                if chunk:  # filter out keep-alive new chunks
-                    f.write(chunk)
-
-    v = sha256_for_file(local_filename)
-    if v == shasum:
-        print("\t...shasum verified for " + local_filename)
-    else:
-        print("Invalid shasum of '" + v + "' detected for " + local_filename)
-        sys.exit(1)
-
-# allow specifying a list/tuple that includes cached local copy
-if type(config['baseboxurl']) in (list, tuple) or config['baseboxurl'][0] in ('(', '['):
-    baseboxurl = config['baseboxurl']
-else:
-    baseboxurl = '"{0}"'.format(config['baseboxurl'])
-
-# use VirtualBox software virtualization if hardware is not available,
-# like if this is being run in kvm or some other VM platform, like
-# http://jenkins.debian.net, the values are 'on' or 'off'
-hwvirtex = 'off'
-if sys.platform.startswith('darwin'):
-    # all < 10 year old Macs work, and OSX servers as VM host are very
-    # rare, but this could also be auto-detected if someone codes it
-    hwvirtex = 'on'
-elif os.path.exists('/proc/cpuinfo'):
-    with open('/proc/cpuinfo') as f:
-        contents = f.read()
-    if 'vmx' in contents or 'svm' in contents:
+    # use VirtualBox software virtualization if hardware is not available,
+    # like if this is being run in kvm or some other VM platform, like
+    # http://jenkins.debian.net, the values are 'on' or 'off'
+    hwvirtex = 'off'
+    if sys.platform.startswith('darwin'):
+        # all < 10 year old Macs work, and OSX servers as VM host are very
+        # rare, but this could also be auto-detected if someone codes it
         hwvirtex = 'on'
+    elif os.path.exists('/proc/cpuinfo'):
+        with open('/proc/cpuinfo') as f:
+            contents = f.read()
+        if 'vmx' in contents or 'svm' in contents:
+            hwvirtex = 'on'
 
-# Generate an appropriate Vagrantfile for the buildserver, based on our
-# settings...
-vagrantfile = """
-Vagrant.configure("2") do |config|
+    # Generate an appropriate Vagrantfile for the buildserver, based on our
+    # settings...
+    vagrantfile = """
+    Vagrant.configure("2") do |config|
 
-  if Vagrant.has_plugin?("vagrant-cachier")
-    config.cache.scope = :box
-    config.cache.auto_detect = false
-    config.cache.enable :apt
-    config.cache.enable :chef
-  end
+      if Vagrant.has_plugin?("vagrant-cachier")
+        config.cache.scope = :box
+        config.cache.auto_detect = false
+        config.cache.enable :apt
+        config.cache.enable :chef
+      end
 
-  config.vm.box = "{0}"
-  config.vm.box_url = {1}
+      config.vm.box = "{0}"
+      config.vm.box_url = {1}
 
-  config.vm.provider "virtualbox" do |v|
-    v.customize ["modifyvm", :id, "--memory", "{2}"]
-    v.customize ["modifyvm", :id, "--cpus", "{3}"]
-    v.customize ["modifyvm", :id, "--hwvirtex", "{4}"]
-  end
+      config.vm.provider "virtualbox" do |v|
+        v.customize ["modifyvm", :id, "--memory", "{2}"]
+        v.customize ["modifyvm", :id, "--cpus", "{3}"]
+        v.customize ["modifyvm", :id, "--hwvirtex", "{4}"]
+      end
 
-  config.vm.boot_timeout = {5}
+      config.vm.boot_timeout = {5}
 
-  config.vm.provision :shell, :path => "fixpaths.sh"
-""".format(config['basebox'],
-           baseboxurl,
-           config['memory'],
-           config.get('cpus', 1),
-           hwvirtex,
-           config['boot_timeout'])
-if 'aptproxy' in config and config['aptproxy']:
+      config.vm.provision :shell, :path => "fixpaths.sh"
+    """.format(config['basebox'],
+               baseboxurl,
+               config['memory'],
+               config.get('cpus', 1),
+               hwvirtex,
+               config['boot_timeout'])
+    if 'aptproxy' in config and config['aptproxy']:
+        vagrantfile += """
+      config.vm.provision :shell, :inline => 'sudo echo "Acquire::http {{ Proxy \\"{0}\\"; }};" > /etc/apt/apt.conf.d/02proxy && sudo apt-get update'
+    """.format(config['aptproxy'])
+
+    # buildserver/ is shared to the VM's /vagrant by default so the old default
+    # does not need a custom mount
+    if cachedir != os.path.join(serverdir, 'cache'):
+        vagrantfile += """
+      config.vm.synced_folder '{0}', '/vagrant/cache',
+        owner: 'root', group: 'root', create: true
+    """.format(cachedir)
+
+    # cache .deb packages on the host via a mount trick
+    if config['apt_package_cache']:
+        aptcachedir = cachedir + '/apt/archives'
+        vagrantfile += """
+      config.vm.synced_folder "{0}", "/var/cache/apt/archives",
+        owner: 'root', group: 'root', create: true
+    """.format(aptcachedir)
+
     vagrantfile += """
-  config.vm.provision :shell, :inline => 'sudo echo "Acquire::http {{ Proxy \\"{0}\\"; }};" > /etc/apt/apt.conf.d/02proxy && sudo apt-get update'
-""".format(config['aptproxy'])
 
-# buildserver/ is shared to the VM's /vagrant by default so the old default
-# does not need a custom mount
-if cachedir != os.path.join(serverdir, 'cache'):
-    vagrantfile += """
-  config.vm.synced_folder '{0}', '/vagrant/cache',
-    owner: 'root', group: 'root', create: true
-""".format(cachedir)
+      config.vm.provision "shell", path: "setup-env-vars",
+        args: ["/home/vagrant/android-sdk"]
 
-# cache .deb packages on the host via a mount trick
-if config['apt_package_cache']:
-    aptcachedir = cachedir + '/apt/archives'
-    vagrantfile += """
-  config.vm.synced_folder "{0}", "/var/cache/apt/archives",
-    owner: 'root', group: 'root', create: true
-""".format(aptcachedir)
+      config.vm.provision :chef_solo do |chef|
+        chef.cookbooks_path = "cookbooks"
+        chef.log_level = :debug
+        chef.json = {
+          :settings => {
+            :debian_mirror => "%s",
+            :ubuntu_trusty => "%s",
+            :user => "vagrant"
+          }
+        }
+        chef.add_recipe "fdroidbuild-general"
+        chef.add_recipe "kivy"
+      end
 
-vagrantfile += """
+      config.vm.provision "shell", path: "provision-android-sdk"
+      config.vm.provision "shell", path: "provision-android-ndk",
+        args: ["/home/vagrant/android-ndk"]
+      config.vm.provision "shell", path: "provision-gradle"
+      config.vm.provision "file", source: "gradle",
+        destination: "/opt/gradle/bin/gradle"
 
-  config.vm.provision "shell", path: "setup-env-vars",
-    args: ["/home/vagrant/android-sdk"]
+    end
+    """ % (config['debian_mirror'],
+           str('14.04' in os.uname()[3]).lower())
 
-  config.vm.provision :chef_solo do |chef|
-    chef.cookbooks_path = "cookbooks"
-    chef.log_level = :debug
-    chef.json = {
-      :settings => {
-        :debian_mirror => "%s",
-        :ubuntu_trusty => "%s",
-        :user => "vagrant"
-      }
-    }
-    chef.add_recipe "fdroidbuild-general"
-    chef.add_recipe "kivy"
-  end
+    logfilename = os.path.join(serverdir, 'up.log')
+    if not os.path.exists(logfilename):
+        open(logfilename, 'a').close()  # create blank file
+    log_cm = vagrant.make_file_cm(logfilename)
+    v = vagrant.Vagrant(root=serverdir, out_cm=log_cm, err_cm=log_cm)
 
-  config.vm.provision "shell", path: "provision-android-sdk"
-  config.vm.provision "shell", path: "provision-android-ndk",
-    args: ["/home/vagrant/android-ndk"]
-  config.vm.provision "shell", path: "provision-gradle"
-  config.vm.provision "file", source: "gradle",
-    destination: "/opt/gradle/bin/gradle"
+    if options.verbose:
+        global tail
+        tail = fdroidserver.tail.Tail(logfilename)
+        tail.start()
 
-end
-""" % (config['debian_mirror'],
-       str('14.04' in os.uname()[3]).lower())
-
-logfilename = os.path.join(serverdir, 'up.log')
-if not os.path.exists(logfilename):
-    open(logfilename, 'a').close()  # create blank file
-log_cm = vagrant.make_file_cm(logfilename)
-v = vagrant.Vagrant(root=serverdir, out_cm=log_cm, err_cm=log_cm)
-
-if options.verbose:
-    tail = fdroidserver.tail.Tail(logfilename)
-    tail.start()
-
-if options.clean:
-    v.destroy()
-
-# Check against the existing Vagrantfile, and if they differ, we need to
-# create a new box:
-vf = os.path.join(serverdir, 'Vagrantfile')
-writevf = True
-if os.path.exists(vf):
-    v.halt()
-    with open(vf, 'r') as f:
-        oldvf = f.read()
-    if oldvf != vagrantfile:
-        print("Server configuration has changed, rebuild from scratch is required")
+    if options.clean:
         v.destroy()
+
+    # Check against the existing Vagrantfile, and if they differ, we need to
+    # create a new box:
+    vf = os.path.join(serverdir, 'Vagrantfile')
+    writevf = True
+    if os.path.exists(vf):
+        v.halt()
+        with open(vf, 'r') as f:
+            oldvf = f.read()
+        if oldvf != vagrantfile:
+            print("Server configuration has changed, rebuild from scratch is required")
+            v.destroy()
+        else:
+            print("Re-provisioning existing server")
+            writevf = False
     else:
-        print("Re-provisioning existing server")
-        writevf = False
-else:
-    print("No existing server - building from scratch")
-if writevf:
-    with open(vf, 'w') as f:
-        f.write(vagrantfile)
+        print("No existing server - building from scratch")
+    if writevf:
+        with open(vf, 'w') as f:
+            f.write(vagrantfile)
 
-print("Configuring build server VM")
-v.up(provision=True)
+    print("Configuring build server VM")
+    v.up(provision=True)
 
-print("Writing buildserver ID")
-p = subprocess.Popen(['git', 'rev-parse', 'HEAD'], stdout=subprocess.PIPE,
-                     universal_newlines=True)
-buildserverid = p.communicate()[0].strip()
-print("...ID is " + buildserverid)
-subprocess.call(
-    ['vagrant', 'ssh', '-c', 'sh -c "echo {0} >/home/vagrant/buildserverid"'
-        .format(buildserverid)],
-    cwd=serverdir)
+    print("Writing buildserver ID")
+    p = subprocess.Popen(['git', 'rev-parse', 'HEAD'], stdout=subprocess.PIPE,
+                         universal_newlines=True)
+    buildserverid = p.communicate()[0].strip()
+    print("...ID is " + buildserverid)
+    subprocess.call(
+        ['vagrant', 'ssh', '-c', 'sh -c "echo {0} >/home/vagrant/buildserverid"'
+            .format(buildserverid)],
+        cwd=serverdir)
 
-print("Stopping build server VM")
-v.halt()
+    print("Stopping build server VM")
+    v.halt()
 
-print("Packaging")
-v.package(output=boxfile)
+    print("Packaging")
+    v.package(output=boxfile)
 
-print("Adding box")
-v.box_add('buildserver', boxfile, force=True)
+    print("Adding box")
+    v.box_add('buildserver', boxfile, force=True)
 
-os.remove(boxfile)
+    os.remove(boxfile)
 
-if tail is not None:
-    tail.stop()
+
+if __name__ == '__main__':
+    try:
+        main()
+    finally:
+        if tail is not None:
+            tail.stop()
