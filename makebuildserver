@@ -338,7 +338,7 @@ def main():
     if cachedir != os.path.join(serverdir, 'cache'):
         vagrantfile += """
       config.vm.synced_folder '{0}', '/vagrant/cache',
-        owner: 'root', group: 'root', mount_options: ['ro'], create: true
+        owner: 'root', group: 'root', create: true
     """.format(cachedir)
 
     # cache .deb packages on the host via a mount trick
