@@ -23,7 +23,7 @@ fi
 
 cd /vagrant/cache
 
-# make hard links for `android update sdk` to use and delete
+# make links for `android update sdk` to use and delete
 for f in android_*.zip android-[0-9]*.zip platform-[0-9]*.zip build-tools_r*-linux.zip; do
     rm -f ${ANDROID_HOME}/temp/$f
     ln -s /vagrant/cache/$f ${ANDROID_HOME}/temp/
