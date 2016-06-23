@@ -50,7 +50,26 @@ echo "boot_timeout = 1200" >> $WORKSPACE/makebuildserver.config.py
 echo "apt_package_cache = True" >> $WORKSPACE/makebuildserver.config.py
 ./makebuildserver --verbose
 
-# this can be handled in the jenkins job, or here:
+# copy existing gradle and m2 caches on the host to the guest
+cd $WORKSPACE/buildserver
+vagrant up
+cd ~
+for d in .m2 .gradle/caches .gradle/wrapper; do
+    if [ -d $d ]; then
+        vagrant ssh -c "mkdir -p ~/$d"
+        rsync -axv --progress --delete \
+            -e "ssh -i ${VAGRANT_HOME}/insecure_private_key -p2222 -oIdentitiesOnly=yes" \
+            $d/ "vagrant@127.0.0.1:$d/"
+    fi
+done
+
+# this file changes every time but should not be cached
+vagrant ssh -c "rm -f ~/.gradle/caches/modules-2/modules-2.lock"
+vagrant ssh -c "rm -fr ~/.gradle/caches/*/plugin-resolution/"
+
+
+# now get the metadata to build
+cd $WORKSPACE
 if [ -e fdroiddata ]; then
     cd fdroiddata
     git checkout master
