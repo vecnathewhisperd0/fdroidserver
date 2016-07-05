@@ -71,4 +71,4 @@ echo "build_server_always = True" > config.py
 # Uses verification
 #../fdroid build --stop info.guardianproject.checkey:101
 # Gradle with retrolambda (JDK7 and JDK8)
-#../fdroid build --stop com.moez.QKSMS:124
+../fdroid build --stop com.moez.QKSMS:124
