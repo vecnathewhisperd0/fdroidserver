@@ -36,6 +36,7 @@ packages="
  gettext
  git-core
  git-svn
+ ghostscript
  gperf
  graphviz
  imagemagick
