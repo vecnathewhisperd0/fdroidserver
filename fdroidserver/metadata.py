@@ -930,6 +930,19 @@ def post_metadata_parse(app):
         for build in app['builds']:
             if not isinstance(build, Build):
                 build = Build(build)
+
+            # 'app' is the default subdir in the Android gradle templates
+            if not build.gradle == []:
+                settings = os.path.join(fdroidserver.common.get_build_dir(app),
+                                        'settings.gradle')
+                if os.path.exists(settings):
+                    with open(settings) as fp:
+                        for line in fp:
+                            m = re.match(r"\s*include.*':app'.*", line)
+                            if m:
+                                build.subdir = 'app'
+                                break
+
             for k, v in build.items():
                 if not (v is None):
                     if flagtype(k) == TYPE_LIST:
