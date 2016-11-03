@@ -844,6 +844,9 @@ def trybuild(app, build, build_dir, output_dir, log_dir, also_check_dir,
     # if build.gradle is present, default to gradle=yes
     if not build.gradle and os.path.isfile(os.path.join(build_dir, 'build.gradle')):
         build.gradle = ['yes']
+    # if build.commit is not present, default to versionName as git tag
+    if not build.commit and build.version:
+        build.commit = build.version
 
     if server:
         # When using server mode, still keep a local cache of the repo, by
