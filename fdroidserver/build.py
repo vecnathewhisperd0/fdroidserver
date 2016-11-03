@@ -841,6 +841,10 @@ def trybuild(app, build, build_dir, output_dir, log_dir, also_check_dir,
     logging.info("Building version %s (%s) of %s" % (
         build.versionName, build.versionCode, app.id))
 
+    # if build.gradle is present, default to gradle=yes
+    if not build.gradle and os.path.isfile(os.path.join(build_dir, 'build.gradle')):
+        build.gradle = ['yes']
+
     if server:
         # When using server mode, still keep a local cache of the repo, by
         # grabbing the source now.
