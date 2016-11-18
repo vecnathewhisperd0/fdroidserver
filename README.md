@@ -67,6 +67,7 @@ via other mechanisms like Brew/dnf/pacman/emerge/Fink/MacPorts.
 For Debian based distributions:
 
 	apt-get install python3-dev python3-pip python3-venv libjpeg-dev zlib1g-dev
+	apt-get install libffi-dev libssl-dev
 
 Then here's how to install:
 
