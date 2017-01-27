@@ -87,6 +87,7 @@ packages="
  realpath
  scons
  sqlite3
+ sox
  subversion
  swig
  texinfo
