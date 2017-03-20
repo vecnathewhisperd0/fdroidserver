@@ -97,12 +97,7 @@ def update_awsbucket(repo_section):
                         upload = True
 
             if upload:
-                logging.debug(' uploading "' + file_to_upload + '"...')
-                extra = {'acl': 'public-read'}
-                if file_to_upload.endswith('.sig'):
-                    extra['content_type'] = 'application/pgp-signature'
-                elif file_to_upload.endswith('.asc'):
-                    extra['content_type'] = 'application/pgp-signature'
+                extra = {'acl': 'public-read', 'content_type': 'application/octet-stream'}
                 logging.info(' uploading ' + os.path.relpath(file_to_upload)
                              + ' to s3://' + awsbucket + '/' + object_name)
                 with open(file_to_upload, 'rb') as iterator:
