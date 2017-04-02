@@ -73,9 +73,12 @@ y
 
 EOH
 
+# accept licenses: hashes are calculated from https://dl.google.com/android/repository/addon.xml with
+# `xmlstarlet sel -t -v '//sdk:license[@id="android-sdk-preview-license"]' addon.xml`
+# `xmlstarlet sel -t -v '//sdk:license[@id="android-sdk-license"]' addon.xml`
 mkdir -p $ANDROID_HOME/licenses/
-echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55" > $ANDROID_HOME/licenses/android-sdk-license
-echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > $ANDROID_HOME/licenses/android-sdk-preview-license
+echo -e "\ne6b7c2ab7fa2298c15165e9583d0acf0b04a2232" > $ANDROID_HOME/licenses/android-sdk-license
+echo -e "\n79120722343a6f314e0719f863036c702b0e6b2a" > $ANDROID_HOME/licenses/android-sdk-preview-license
 echo y | $ANDROID_HOME/tools/bin/sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.1"
 echo y | $ANDROID_HOME/tools/bin/sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout-solver;1.0.1"
 echo y | $ANDROID_HOME/tools/bin/sdkmanager "extras;m2repository;com;android;support;constraint;constraint-layout;1.0.2"
