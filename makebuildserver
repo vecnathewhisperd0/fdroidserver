@@ -6,6 +6,7 @@ import requests
 import stat
 import sys
 import subprocess
+import tempfile
 import time
 import hashlib
 import yaml
@@ -479,8 +480,17 @@ while not ready:
                 print("Status: " + line)
 
 print("Packaging")
-vagrant(['package', '--output', os.path.join('..', boxfile)], serverdir,
-        printout=options.verbose)
+if config['vm_provider'] == 'libvirt':
+    subprocess.call(['sudo', 'chmod', 'a+r', '/var/lib/libvirt/images/buildserver_default.img'])
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_vf = os.path.join(tmpdir, 'Vagrantfile')
+        with open(os.path.join(serverdir, 'Vagrantfile.libvirt-packaged')) as f:
+            with open(tmp_vf, mode='w') as of:
+                of.write(f.read().format_map(config))
+        vagrant(['package', '--include', tmp_vf, '--output', os.path.join('..', boxfile)], serverdir, printout=options.verbose)
+else:
+    vagrant(['package', '--output', os.path.join('..', boxfile)], serverdir,
+            printout=options.verbose)
 print("Adding box")
 vagrant(['box', 'add', 'buildserver', boxfile, '-f'],
         printout=options.verbose)
