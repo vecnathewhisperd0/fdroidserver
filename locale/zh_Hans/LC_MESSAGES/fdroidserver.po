@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-06-23 13:49+0000\n"
+"PO-Revision-Date: 2017-06-23 14:12+0000\n"
 "Last-Translator: sima <lin2s@riseup.net>\n"
 "Language-Team: Chinese (Simplified) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hans/>\n"
@@ -73,7 +73,7 @@ msgstr "扫描包源码"
 
 #: ../fdroid:47
 msgid "Dynamically scan APKs post build"
-msgstr "动态扫描 APK 的 post build"
+msgstr "动态扫描已编译 APK"
 
 #: ../fdroid:48
 msgid "Update the stats of the repo"
