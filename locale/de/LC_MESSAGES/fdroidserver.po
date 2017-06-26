@@ -6,104 +6,108 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: \n"
+"Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2017-06-26 13:28+0000\n"
+"Last-Translator: Roman Leo <roman.leo@gmx.de>\n"
+"Language-Team: German "
+"<https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2.15-dev\n"
 
 #: ../fdroid:34
 msgid "Build a package from source"
-msgstr ""
+msgstr "Erstellung eines Paketes von dieser Quelle"
 
 #: ../fdroid:35
 msgid "Quickly start a new repository"
-msgstr ""
+msgstr "Schnellstart eines neuen Repositorys"
 
 #: ../fdroid:36
 msgid "Sign and place packages in the repo"
-msgstr ""
+msgstr "Signierung und Platzierung eines Paketes in dem Repository"
 
 #: ../fdroid:37
 msgid "Add gpg signatures for packages in repo"
-msgstr ""
+msgstr "Hinzufügung von gpg-Signaturen für Pakete im Repository"
 
 #: ../fdroid:38
 msgid "Update repo information for new packages"
-msgstr ""
+msgstr "Aktualisierung des Repositorys für Informationen über neue Pakete"
 
 #: ../fdroid:39
 msgid "Verify the integrity of downloaded packages"
-msgstr ""
+msgstr "Überprüfung der Integrität der heruntergeladenen Paketen"
 
 #: ../fdroid:40
 msgid "Check for updates to applications"
-msgstr ""
+msgstr "Prüfung auf Aktualisierungen für Anwendungen"
 
 #: ../fdroid:41
 msgid "Add a new application from its source code"
-msgstr ""
+msgstr "Hinzufügen einer neuen Anwendung von deren Quellcode"
 
 #: ../fdroid:42
 msgid "Install built packages on devices"
-msgstr ""
+msgstr "Installation hergestellter Paketen auf Laufwerken"
 
 #: ../fdroid:43
 msgid "Read all the metadata files and exit"
-msgstr ""
+msgstr "Betrachtung von allen Metadaten-Dateien und Ende"
 
 #: ../fdroid:44
 msgid "Rewrite all the metadata files"
-msgstr ""
+msgstr "Neubeschreibung von allen Metadaten-Dateien"
 
 #: ../fdroid:45
 msgid "Warn about possible metadata errors"
-msgstr ""
+msgstr "Warnung über mögliche Metadaten-Fehler"
 
 #: ../fdroid:46
 msgid "Scan the source code of a package"
-msgstr ""
+msgstr "Überprüfung des Quellcodes von einem Paket"
 
 #: ../fdroid:47
 msgid "Dynamically scan APKs post build"
-msgstr ""
+msgstr "Dynamische Überprüfung von späteren APK-Fassungen"
 
 #: ../fdroid:48
 msgid "Update the stats of the repo"
-msgstr ""
+msgstr "Aktualisierung des Status von dem Repository"
 
 #: ../fdroid:49
 msgid "Interact with the repo HTTP server"
-msgstr ""
+msgstr "Interaktion mit dem HTTP-Server des Repositorys"
 
 #: ../fdroid:50
+#, fuzzy
 msgid "Sign indexes created using update --nosign"
-msgstr ""
+msgstr "Signierung von Indizes, erstellt durch update --nosign"
 
 #: ../fdroid:51
 msgid "Update the binary transparency log for a URL"
-msgstr ""
+msgstr "Aktualisierung des binären Nachvollziehbarkeits-Log für eine Adresse"
 
 #: ../fdroid:56
 msgid "usage: fdroid [-h|--help|--version] <command> [<args>]"
-msgstr ""
+msgstr "Benutzung: fdroid [-h|--help|--version] <command> [<args>]"
 
 #: ../fdroid:58
 msgid "Valid commands are:"
-msgstr ""
+msgstr "Gültige Befehle sind:"
 
 #: ../fdroid:104
 #, c-format
 msgid "Command '%s' not recognised.\n"
-msgstr ""
+msgstr "Befehl '%s' nicht erkannt.\n"
 
 #: ../fdroid:150
 msgid "Unknown exception found!"
-msgstr ""
+msgstr "Unbekannte Ausnahme gefunden!"
 
 #: ../fdroidserver/btlog.py:154
 msgid "Path to the git repo to use as the log"
@@ -295,7 +299,7 @@ msgstr ""
 
 #: ../fdroidserver/metadata.py:1337
 msgid "force errors to be warnings, or ignore"
-msgstr ""
+msgstr "Erzwinge Fehler als Warnungen, oder Nichtbeachtung"
 
 #: ../fdroidserver/rewritemeta.py:54
 msgid "List files that would be reformatted"
