@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-06-26 13:28+0000\n"
-"Last-Translator: Roman Leo <roman.leo@gmx.de>\n"
+"PO-Revision-Date: 2017-06-26 16:36+0000\n"
+"Last-Translator: Claus Rüdinger <Mail-an-CR@web.de>\n"
 "Language-Team: German "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\n"
 "Language: de\n"
@@ -287,7 +287,7 @@ msgstr ""
 
 #: ../fdroidserver/install.py:54
 msgid "Install all signed applications available"
-msgstr ""
+msgstr "Alle verfügbaren, signierten Anwendungen installieren"
 
 #: ../fdroidserver/lint.py:393
 msgid "Also warn about formatting issues, like rewritemeta -l"
@@ -303,7 +303,7 @@ msgstr "Erzwinge Fehler als Warnungen, oder Nichtbeachtung"
 
 #: ../fdroidserver/rewritemeta.py:54
 msgid "List files that would be reformatted"
-msgstr ""
+msgstr "Dateien listen, die reformatiert würden"
 
 #: ../fdroidserver/rewritemeta.py:56
 msgid "Rewrite to a specific format: "
@@ -387,3 +387,5 @@ msgstr ""
 #: ../fdroidserver/update.py:1529
 msgid "Rename APK files that do not match package.name_123.apk"
 msgstr ""
+"APK-Dateien umbenennen, die nicht dem Muster „package.name_123.apk“ "
+"entsprechen"
