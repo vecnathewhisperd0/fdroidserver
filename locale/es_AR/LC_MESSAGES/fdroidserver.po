@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-06-19 02:53+0000\n"
-"Last-Translator: Macofe <macofe.languagetool@gmail.com>\n"
+"PO-Revision-Date: 2017-06-27 12:47+0000\n"
+"Last-Translator: Franco <fulanodetal.github1@openaliasbox.org>\n"
 "Language-Team: Spanish (Argentina) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/es_AR/>\n"
 "Language: es_AR\n"
@@ -106,19 +106,22 @@ msgstr "No se reconoce el comando \"%s\".\n"
 
 #: ../fdroid:150
 msgid "Unknown exception found!"
-msgstr "Se encontró una excepción desconocida."
+msgstr "¡Se encontró una excepción desconocida!"
 
 #: ../fdroidserver/btlog.py:154
 msgid "Path to the git repo to use as the log"
-msgstr ""
+msgstr "Ruta de acceso al repositorio git para usar como registro"
 
 #: ../fdroidserver/btlog.py:156
 msgid "The base URL for the repo to log (default: https://f-droid.org)"
 msgstr ""
+"La URL base del repositorio para el registro (predefinido: "
+"https://f-droid.org)"
 
 #: ../fdroidserver/btlog.py:158
+#, fuzzy
 msgid "Push the log to this git remote repository"
-msgstr ""
+msgstr "Pulse el registro a este repositorio remoto git"
 
 #: ../fdroidserver/build.py:875 ../fdroidserver/install.py:52
 #: ../fdroidserver/publish.py:45 ../fdroidserver/scanner.py:255
@@ -298,7 +301,7 @@ msgstr ""
 
 #: ../fdroidserver/metadata.py:1337
 msgid "force errors to be warnings, or ignore"
-msgstr ""
+msgstr "forzar errores al ser advertencias, o ignorar"
 
 #: ../fdroidserver/rewritemeta.py:54
 msgid "List files that would be reformatted"
@@ -341,12 +344,14 @@ msgid "Create a repo signing key in a keystore"
 msgstr ""
 
 #: ../fdroidserver/update.py:1506
+#, fuzzy
 msgid "Create skeleton metadata files that are missing"
-msgstr ""
+msgstr "Crear esqueleto de metadatos de los archivos faltantes"
 
 #: ../fdroidserver/update.py:1508
+#, fuzzy
 msgid "Delete APKs and/or OBBs without metadata from the repo"
-msgstr ""
+msgstr "Borrar archivos APK y/o OBBs sin metadatos en el repositorio"
 
 #: ../fdroidserver/update.py:1510
 msgid "Report on build data status"
@@ -354,7 +359,7 @@ msgstr ""
 
 #: ../fdroidserver/update.py:1512
 msgid "Interactively ask about things that need updating."
-msgstr ""
+msgstr "Preguntar de forma interactiva sobre las cosas necesarias a actualizar."
 
 #: ../fdroidserver/update.py:1514
 msgid "Resize all the icons exceeding the max pixel size and exit"
@@ -367,11 +372,11 @@ msgstr ""
 
 #: ../fdroidserver/update.py:1521
 msgid "Produce human-readable index.xml"
-msgstr ""
+msgstr "Producir index.xml legible"
 
 #: ../fdroidserver/update.py:1523
 msgid "Clean update - don't uses caches, reprocess all apks"
-msgstr ""
+msgstr "Limpiar actualización - no utiliza cachés, reprocesa todos los APK's"
 
 #: ../fdroidserver/update.py:1525
 msgid ""
@@ -385,4 +390,4 @@ msgstr ""
 
 #: ../fdroidserver/update.py:1529
 msgid "Rename APK files that do not match package.name_123.apk"
-msgstr ""
+msgstr "Renombrar archivos APK que no corresponden a package.name_123.apk"
