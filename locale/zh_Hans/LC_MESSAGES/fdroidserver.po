@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-06-23 14:12+0000\n"
-"Last-Translator: sima <lin2s@riseup.net>\n"
+"PO-Revision-Date: 2017-06-29 03:39+0000\n"
+"Last-Translator: Chi-Hsun Tsai <chihsun.tsai@gmail.com>\n"
 "Language-Team: Chinese (Simplified) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hans/>\n"
 "Language: zh_Hans\n"
@@ -73,7 +73,7 @@ msgstr "扫描包源码"
 
 #: ../fdroid:47
 msgid "Dynamically scan APKs post build"
-msgstr "动态扫描已编译 APK"
+msgstr "动态扫描已编译的 APKs"
 
 #: ../fdroid:48
 msgid "Update the stats of the repo"
@@ -106,15 +106,15 @@ msgstr "无法识别命令 '%s'。\n"
 
 #: ../fdroid:150
 msgid "Unknown exception found!"
-msgstr "发生位置异常！"
+msgstr "发生未知异常！"
 
 #: ../fdroidserver/btlog.py:154
 msgid "Path to the git repo to use as the log"
-msgstr "日志使用的 git 资源库路径"
+msgstr "使用的 git 资源库路径在日志上"
 
 #: ../fdroidserver/btlog.py:156
 msgid "The base URL for the repo to log (default: https://f-droid.org)"
-msgstr "资源库日志的基 URL（默认为 https://f-droid.org）"
+msgstr "资源库基 URL的日志（默认为 https://f-droid.org）"
 
 #: ../fdroidserver/btlog.py:158
 msgid "Push the log to this git remote repository"
@@ -208,7 +208,7 @@ msgstr "仅输出与 Play Store 的差异"
 
 #: ../fdroidserver/common.py:124
 msgid "Spew out even more information than normal"
-msgstr "输出比正常显示更多的信息"
+msgstr "比一般情况输出更多的信息"
 
 #: ../fdroidserver/common.py:126
 msgid "Restrict output to warnings and errors"
@@ -244,7 +244,7 @@ msgstr "覆盖资源库 APK 路径（默认为 ./repo）"
 
 #: ../fdroidserver/import.py:193
 msgid "Project URL to import from."
-msgstr "复制 URL 至导入地址项 (import from)。"
+msgstr "项目 URL 导入位置。"
 
 #: ../fdroidserver/import.py:195
 msgid "Path to main android project subdirectory, if not in root."
@@ -262,7 +262,7 @@ msgstr "项目总体许可证。"
 msgid ""
 "Allows a different revision (or git branch) to be specified for the initial "
 "import"
-msgstr "运行初始导入时指定不同修订（或 git 分支）"
+msgstr "可让运行初始导入时指定不同修订（或 git 分支）"
 
 #: ../fdroidserver/init.py:56
 msgid "X.509 'Distiguished Name' used when generating keys"
@@ -298,7 +298,7 @@ msgstr "app-id，格式：APPID"
 
 #: ../fdroidserver/metadata.py:1337
 msgid "force errors to be warnings, or ignore"
-msgstr "限制或忽略提示错误"
+msgstr "强制错误提示警告或忽略"
 
 #: ../fdroidserver/rewritemeta.py:54
 msgid "List files that would be reformatted"
