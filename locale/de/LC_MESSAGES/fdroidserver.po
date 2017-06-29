@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-06-29 15:17+0000\n"
+"PO-Revision-Date: 2017-06-29 15:19+0000\n"
 "Last-Translator: Claus Rüdinger <Mail-an-CR@web.de>\n"
 "Language-Team: German "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\n"
@@ -249,7 +249,7 @@ msgstr "Alle Container bereinigen und danach beenden"
 
 #: ../fdroidserver/dscanner.py:425
 msgid "Prepare drozer to run a scan"
-msgstr "Bereite drozer auf einen Scan vor"
+msgstr "Drozer auf einen Scan vorbereiten"
 
 #: ../fdroidserver/dscanner.py:428
 msgid "Override path for repo APKs (default: ./repo)"
@@ -352,7 +352,7 @@ msgstr "Herunterladung von Logs welche wir nicht haben"
 
 #: ../fdroidserver/stats.py:66
 msgid "Recalculate aggregate stats - use when changes "
-msgstr "Neuberechnung des Gesamtstatus - angewendet nach Änderungen "
+msgstr "Sammelstatistik neu berechnen - nach Änderungen anwenden "
 
 #: ../fdroidserver/stats.py:69
 msgid "Don't do anything logs-related"
