@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-06-29 03:39+0000\n"
+"PO-Revision-Date: 2017-06-29 04:01+0000\n"
 "Last-Translator: Chi-Hsun Tsai <chihsun.tsai@gmail.com>\n"
 "Language-Team: Chinese (Simplified) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hans/>\n"
@@ -109,10 +109,12 @@ msgid "Unknown exception found!"
 msgstr "发生未知异常！"
 
 #: ../fdroidserver/btlog.py:154
+#, fuzzy
 msgid "Path to the git repo to use as the log"
 msgstr "使用的 git 资源库路径在日志上"
 
 #: ../fdroidserver/btlog.py:156
+#, fuzzy
 msgid "The base URL for the repo to log (default: https://f-droid.org)"
 msgstr "资源库基 URL的日志（默认为 https://f-droid.org）"
 
@@ -297,6 +299,7 @@ msgid "app-id in the form APPID"
 msgstr "app-id，格式：APPID"
 
 #: ../fdroidserver/metadata.py:1337
+#, fuzzy
 msgid "force errors to be warnings, or ignore"
 msgstr "强制错误提示警告或忽略"
 
