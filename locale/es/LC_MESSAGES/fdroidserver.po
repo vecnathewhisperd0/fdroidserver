@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-07-03 15:18+0000\n"
+"PO-Revision-Date: 2017-07-03 15:20+0000\n"
 "Last-Translator: José Rodrigo Baires Quezada <rbaires@irex.org>\n"
 "Language-Team: Spanish "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/es/>\n"
@@ -329,8 +329,7 @@ msgstr "Comando para ejecutar, ya sea 'init' o 'update'"
 
 #: ../fdroidserver/server.py:549
 msgid "Specify an identity file to provide to SSH for rsyncing"
-msgstr ""
-"Especificar un archivo de identidad para proporcionar un SSH para Rsyncing"
+msgstr "Especifique un fichero de identidad que ofrezca SSH para rsync"
 
 #: ../fdroidserver/server.py:551
 msgid "Specify a local folder to sync the repo to"
@@ -358,7 +357,7 @@ msgstr "Cree una clave de firmado de repositorios en un llavero de claves"
 
 #: ../fdroidserver/update.py:1506
 msgid "Create skeleton metadata files that are missing"
-msgstr "Crear esqueleto de metadatos de archivos perdidos"
+msgstr "Crear esqueleto de metadatos de archivos que faltan"
 
 #: ../fdroidserver/update.py:1508
 msgid "Delete APKs and/or OBBs without metadata from the repo"
