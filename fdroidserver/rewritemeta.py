@@ -77,8 +77,6 @@ def main():
         if not options.to and ext not in supported:
             logging.info("Ignoring %s file at '%s'" % (ext, path))
             continue
-        else:
-            logging.info("rewriting '%s' to %s" % (appid, options.to))
 
         to_ext = ext
         if options.to is not None:
