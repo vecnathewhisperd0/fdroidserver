@@ -1719,11 +1719,13 @@ def main():
         if apk['packageName'] not in apps:
             if options.create_metadata:
                 if 'name' not in apk:
-                    logging.error(apk['packageName'] + ' does not have a name! Skipping...')
-                    continue
+                    logging.error(apk['packageName'] + ' does not have a name!')
+                    AppName = apk['packageName']
+                else:
+                    AppName = apk['name']
                 with open(os.path.join('metadata', apk['packageName'] + '.yml'), 'w') as f:
                     app = metadata.App()
-                    app.Name = apk['name']
+                    app.Name = AppName
                     app.Summary = apk['name']
                     app.CurrentVersionCode = 2147483647  # Java's Integer.MAX_VALUE
                     app.Categories = [os.path.basename(os.path.dirname(os.getcwd()))]
