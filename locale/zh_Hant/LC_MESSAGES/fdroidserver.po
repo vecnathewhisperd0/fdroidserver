@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-06-20 05:45+0000\n"
+"PO-Revision-Date: 2017-07-06 04:53+0000\n"
 "Last-Translator: ezjerry liao <ezjerry@gmail.com>\n"
 "Language-Team: Chinese (Traditional) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hant/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 2.15-dev\n"
+"X-Generator: Weblate 2.16-dev\n"
 
 #: ../fdroid:34
 msgid "Build a package from source"
@@ -45,11 +45,11 @@ msgstr "驗證下載套裝軟體的完整性"
 
 #: ../fdroid:40
 msgid "Check for updates to applications"
-msgstr ""
+msgstr "檢查應用程式更新"
 
 #: ../fdroid:41
 msgid "Add a new application from its source code"
-msgstr ""
+msgstr "從原始程式碼增加一個新的應用程式"
 
 #: ../fdroid:42
 msgid "Install built packages on devices"
@@ -57,15 +57,15 @@ msgstr ""
 
 #: ../fdroid:43
 msgid "Read all the metadata files and exit"
-msgstr ""
+msgstr "讀取所有的中介資料檔案並退出"
 
 #: ../fdroid:44
 msgid "Rewrite all the metadata files"
-msgstr ""
+msgstr "重寫所有的中介資料檔案"
 
 #: ../fdroid:45
 msgid "Warn about possible metadata errors"
-msgstr ""
+msgstr "關於中介資料可能錯誤的警告"
 
 #: ../fdroid:46
 msgid "Scan the source code of a package"
