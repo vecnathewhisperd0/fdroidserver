@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-06-29 15:19+0000\n"
+"PO-Revision-Date: 2017-07-16 20:06+0000\n"
 "Last-Translator: Claus Rüdinger <Mail-an-CR@web.de>\n"
 "Language-Team: German "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2.15-dev\n"
+"X-Generator: Weblate 2.16-dev\n"
 
 #: ../fdroid:34
 msgid "Build a package from source"
@@ -287,11 +287,11 @@ msgstr "X.509 'Angesehener Name' wenn Schlüssel generiert werden"
 
 #: ../fdroidserver/init.py:58
 msgid "Path to the keystore for the repo signing key"
-msgstr "Pfad zum Schlüsselspeicher für den Repository-Signierungsschlüssel"
+msgstr "Pfad zum Schlüsselspeicher für den Repository-Signierschlüssel"
 
 #: ../fdroidserver/init.py:60
 msgid "Alias of the repo signing key in the keystore"
-msgstr "Pseudonym des Repository-Signierungsschlüssels im Schlüsselspeicher"
+msgstr "Pseudonym des Repository-Signierchlüssels im Schlüsselspeicher"
 
 #: ../fdroidserver/init.py:62
 msgid "Path to the Android SDK (sometimes set in ANDROID_HOME)"
@@ -360,7 +360,7 @@ msgstr "Mache auf Logs bezogen nichts"
 
 #: ../fdroidserver/update.py:1504
 msgid "Create a repo signing key in a keystore"
-msgstr "Repository-Signierungsschlüssel in einem Schlüsselspeicher erstellen"
+msgstr "Repository-Signierschlüssel in einem Schlüsselspeicher erstellen"
 
 #: ../fdroidserver/update.py:1506
 msgid "Create skeleton metadata files that are missing"
