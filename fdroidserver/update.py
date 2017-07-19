@@ -1763,34 +1763,48 @@ def main():
     for apk in apks:
         if apk['packageName'] not in apps:
             if options.create_metadata:
-                import yaml
-                with open(os.path.join('metadata', apk['packageName'] + '.yml'), 'w') as f:
-                    # this should use metadata.App() and
-                    # metadata.write_yaml(), but since ruamel.yaml
-                    # 0.13 is not widely distributed yet, and it's
-                    # special tricks are not really needed here, this
-                    # uses the plain YAML lib
-                    if os.path.exists('template.yml'):
-                        with open('template.yml') as fp:
-                            app = yaml.load(fp)
-                    else:
-                        app = dict()
-                        app['Categories'] = [os.path.basename(os.getcwd())]
-                        # include some blanks as part of the template
-                        app['AuthorName'] = ''
-                        app['Summary'] = ''
-                        app['WebSite'] = ''
-                        app['IssueTracker'] = ''
-                        app['SourceCode'] = ''
-                        app['CurrentVersionCode'] = 2147483647  # Java's Integer.MAX_VALUE
+                if os.path.exists('template.txt'):
+                    with open('template.txt','r') as f:
+                        metatxt = f.read()
                     if 'name' in apk and apk['name'] != '':
-                        app['Name'] = apk['name']
+                        metatxt = re.sub(r'\{\{app_name\}\}', apk['name'], metatxt, flags=re.IGNORECASE)
                     else:
                         logging.warning(apk['packageName'] + ' does not have a name! Using package name instead.')
-                        app['Name'] = apk['packageName']
-                    yaml.dump(app, f, default_flow_style=False)
+                        metatxt = re.sub(r'\{\{app_name\}\}', apk['packageName'], metatxt, re.I)
+                    metatxt = re.sub(r'\{\{date_today\}\}', datetime.now().strftime("%Y-%m-%d"), metatxt, flags=re.IGNORECASE)
+                    with open(os.path.join('metadata', apk['packageName'] + '.txt'), 'w') as f:
+                        f.write(metatxt)
                     logging.info("Generated skeleton metadata for " + apk['packageName'])
                     newmetadata = True
+                else:
+                    import yaml
+                    with open(os.path.join('metadata', apk['packageName'] + '.yml'), 'w') as f:
+                        # this should use metadata.App() and
+                        # metadata.write_yaml(), but since ruamel.yaml
+                        # 0.13 is not widely distributed yet, and it's
+                        # special tricks are not really needed here, this
+                        # uses the plain YAML lib
+                        if os.path.exists('template.yml'):
+                            with open('template.yml') as fp:
+                                app = yaml.load(fp)
+                        else:
+                            app = dict()
+                            app['Categories'] = [os.path.basename(os.getcwd())]
+                            # include some blanks as part of the template
+                            app['AuthorName'] = ''
+                            app['Summary'] = ''
+                            app['WebSite'] = ''
+                            app['IssueTracker'] = ''
+                            app['SourceCode'] = ''
+                            app['CurrentVersionCode'] = 2147483647  # Java's Integer.MAX_VALUE
+                        if 'name' in apk and apk['name'] != '':
+                            app['Name'] = apk['name']
+                        else:
+                            logging.warning(apk['packageName'] + ' does not have a name! Using package name instead.')
+                            app['Name'] = apk['packageName']
+                        yaml.dump(app, f, default_flow_style=False)
+                        logging.info("Generated skeleton metadata for " + apk['packageName'])
+                        newmetadata = True
             else:
                 msg = apk['apkName'] + " (" + apk['packageName'] + ") has no metadata!"
                 if options.delete_unknown:

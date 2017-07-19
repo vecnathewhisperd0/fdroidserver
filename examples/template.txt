@@ -1,0 +1,20 @@
+License:Unknown
+Web Site:
+Author Name:
+Donate:
+Bitcoin:
+Source Code:
+Issue Tracker:
+Changelog:
+Name:{{app_name}}
+Summary:{{app_name}}
+Description:
+{{app_name}}
+.
+Categories:Internet
+Archive Policy:2 versions
+Requires Root:No
+
+Maintainer Notes:
+Initial Metadata created at {{date_today}}.
+.
