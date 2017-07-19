@@ -1764,7 +1764,7 @@ def main():
         if apk['packageName'] not in apps:
             if options.create_metadata:
                 if os.path.exists('template.txt'):
-                    with open('template.txt','r') as f:
+                    with open('template.txt', 'r') as f:
                         metatxt = f.read()
                     if 'name' in apk and apk['name'] != '':
                         metatxt = re.sub(r'\{\{app_name\}\}', apk['name'], metatxt, flags=re.IGNORECASE)
