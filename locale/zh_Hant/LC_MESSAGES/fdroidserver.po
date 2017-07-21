@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-07-18 20:43+0000\n"
-"Last-Translator: riotism <thejacklau@gmail.com>\n"
+"PO-Revision-Date: 2017-07-21 12:37+0000\n"
+"Last-Translator: ezjerry liao <ezjerry@gmail.com>\n"
 "Language-Team: Chinese (Traditional) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hant/>\n"
 "Language: zh_Hant\n"
@@ -29,15 +29,15 @@ msgstr "快速啟動新的儲存庫"
 
 #: ../fdroid:36
 msgid "Sign and place packages in the repo"
-msgstr ""
+msgstr "簽署並放置套件包在軟體倉庫中"
 
 #: ../fdroid:37
 msgid "Add gpg signatures for packages in repo"
-msgstr ""
+msgstr "在軟體倉庫中加入套件包的 gpg 簽署"
 
 #: ../fdroid:38
 msgid "Update repo information for new packages"
-msgstr ""
+msgstr "為新的套件包更新軟體倉庫資訊"
 
 #: ../fdroid:39
 msgid "Verify the integrity of downloaded packages"
@@ -53,7 +53,7 @@ msgstr "從原始程式碼增加一個新的應用程式"
 
 #: ../fdroid:42
 msgid "Install built packages on devices"
-msgstr ""
+msgstr "在裝置上安裝構建套件包"
 
 #: ../fdroid:43
 msgid "Read all the metadata files and exit"
@@ -69,7 +69,7 @@ msgstr "關於中介資料可能錯誤的警告"
 
 #: ../fdroid:46
 msgid "Scan the source code of a package"
-msgstr ""
+msgstr "掃描套件包的原始碼"
 
 #: ../fdroid:47
 msgid "Dynamically scan APKs post build"
