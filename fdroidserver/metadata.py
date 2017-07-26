@@ -989,7 +989,10 @@ def parse_json_metadata(mf, app):
 
 def parse_yaml_metadata(mf, app):
     yamldata = yaml.load(mf, Loader=YamlLoader)
-    app.update(yamldata)
+    try:
+        app.update(yamldata)
+    except TypeError as e:
+        warn_or_exception('parse_yaml_metadata: ' + str(e) + ' (metadata file "' + mf.name + '" empty?)')
     return app
 
 
