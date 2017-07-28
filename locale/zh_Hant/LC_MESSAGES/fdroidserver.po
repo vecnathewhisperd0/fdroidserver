@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-07-26 07:51+0000\n"
+"PO-Revision-Date: 2017-07-28 05:10+0000\n"
 "Last-Translator: ezjerry liao <ezjerry@gmail.com>\n"
 "Language-Team: Chinese (Traditional) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hant/>\n"
@@ -81,15 +81,15 @@ msgstr "更新軟體倉庫的統計"
 
 #: ../fdroid:49
 msgid "Interact with the repo HTTP server"
-msgstr ""
+msgstr "與軟體倉庫 HTTP 伺服器互動"
 
 #: ../fdroid:50
 msgid "Sign indexes created using update --nosign"
-msgstr ""
+msgstr "簽署使用更新建立的索引 --nosign"
 
 #: ../fdroid:51
 msgid "Update the binary transparency log for a URL"
-msgstr ""
+msgstr "為網址更新二進制的透明日誌"
 
 #: ../fdroid:56
 msgid "usage: fdroid [-h|--help|--version] <command> [<args>]"
@@ -298,7 +298,7 @@ msgstr ""
 
 #: ../fdroidserver/metadata.py:1337
 msgid "force errors to be warnings, or ignore"
-msgstr ""
+msgstr "強制錯誤警告或忽略"
 
 #: ../fdroidserver/rewritemeta.py:54
 msgid "List files that would be reformatted"
