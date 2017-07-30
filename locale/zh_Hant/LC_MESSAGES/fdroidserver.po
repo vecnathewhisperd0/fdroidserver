@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-07-28 05:10+0000\n"
+"PO-Revision-Date: 2017-07-30 13:27+0000\n"
 "Last-Translator: ezjerry liao <ezjerry@gmail.com>\n"
 "Language-Team: Chinese (Traditional) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hant/>\n"
@@ -73,7 +73,7 @@ msgstr "掃描套件包的原始碼"
 
 #: ../fdroid:47
 msgid "Dynamically scan APKs post build"
-msgstr ""
+msgstr "動態掃描建置後的 APK"
 
 #: ../fdroid:48
 msgid "Update the stats of the repo"
@@ -110,7 +110,7 @@ msgstr "發現未知的異常！"
 
 #: ../fdroidserver/btlog.py:154
 msgid "Path to the git repo to use as the log"
-msgstr ""
+msgstr "到 git 軟體倉庫的路徑用在日誌"
 
 #: ../fdroidserver/btlog.py:156
 msgid "The base URL for the repo to log (default: https://f-droid.org)"
@@ -118,7 +118,7 @@ msgstr ""
 
 #: ../fdroidserver/btlog.py:158
 msgid "Push the log to this git remote repository"
-msgstr ""
+msgstr "將日誌推送到 git 遠端軟體倉庫"
 
 #: ../fdroidserver/build.py:875 ../fdroidserver/install.py:52
 #: ../fdroidserver/publish.py:45 ../fdroidserver/scanner.py:255
@@ -128,27 +128,27 @@ msgstr ""
 
 #: ../fdroidserver/build.py:877
 msgid "Build only the latest version of each package"
-msgstr ""
+msgstr "只構建每個套件包的最後版本"
 
 #: ../fdroidserver/build.py:879
 msgid "Make the build stop on exceptions"
-msgstr ""
+msgstr "異常時停止做構建"
 
 #: ../fdroidserver/build.py:881
 msgid ""
 "Test mode - put output in the tmp directory only, and always build, even if "
 "the output already exists."
-msgstr ""
+msgstr "測試模式 - 將輸出只放在 tmp 目錄中，即使輸出已經存在，仍然構建。"
 
 #: ../fdroidserver/build.py:883
 msgid "Use build server"
-msgstr ""
+msgstr "使用構建伺服器"
 
 #: ../fdroidserver/build.py:885
 msgid ""
 "Reset and create a brand new build server, even if the existing one appears "
 "to be ok."
-msgstr ""
+msgstr "即使現有的伺服器明顯是好的，仍重置並建立一個新的構建伺服器。"
 
 #: ../fdroidserver/build.py:887
 msgid "Specify that we're running on the build server"
@@ -342,11 +342,11 @@ msgstr ""
 
 #: ../fdroidserver/update.py:1506
 msgid "Create skeleton metadata files that are missing"
-msgstr ""
+msgstr "建立缺少的骨幹中介資料檔案"
 
 #: ../fdroidserver/update.py:1508
 msgid "Delete APKs and/or OBBs without metadata from the repo"
-msgstr ""
+msgstr "從軟體倉庫刪除缺少中介資料的 APK 和/或 OBB"
 
 #: ../fdroidserver/update.py:1510
 msgid "Report on build data status"
@@ -354,7 +354,7 @@ msgstr ""
 
 #: ../fdroidserver/update.py:1512
 msgid "Interactively ask about things that need updating."
-msgstr ""
+msgstr "以對話方式詢問需要更新的內容。"
 
 #: ../fdroidserver/update.py:1514
 msgid "Resize all the icons exceeding the max pixel size and exit"
@@ -367,11 +367,11 @@ msgstr ""
 
 #: ../fdroidserver/update.py:1521
 msgid "Produce human-readable index.xml"
-msgstr ""
+msgstr "產生可讀懂的 index.xml 格式"
 
 #: ../fdroidserver/update.py:1523
 msgid "Clean update - don't uses caches, reprocess all apks"
-msgstr ""
+msgstr "清除更新 - 不使用快取，重新處理全部的 apk"
 
 #: ../fdroidserver/update.py:1525
 msgid ""
@@ -385,4 +385,4 @@ msgstr ""
 
 #: ../fdroidserver/update.py:1529
 msgid "Rename APK files that do not match package.name_123.apk"
-msgstr ""
+msgstr "為不符合 package.name_123.apk 格式的 APK 檔案更名"
