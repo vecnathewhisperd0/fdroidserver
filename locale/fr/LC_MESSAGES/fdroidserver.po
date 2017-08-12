@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-08-12 10:25+0000\n"
-"Last-Translator: Florian <floflr@zaclys.net>\n"
+"PO-Revision-Date: 2017-08-12 10:57+0000\n"
+"Last-Translator: nailyk <nailyk_weblate@nailyk.fr>\n"
 "Language-Team: French "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\n"
 "Language: fr\n"
@@ -25,7 +25,7 @@ msgstr ""
 
 #: ../fdroid:35
 msgid "Quickly start a new repository"
-msgstr ""
+msgstr "Démarrage rapide d'un nouveau dépot"
 
 #: ../fdroid:36
 msgid "Sign and place packages in the repo"
@@ -45,11 +45,11 @@ msgstr ""
 
 #: ../fdroid:40
 msgid "Check for updates to applications"
-msgstr ""
+msgstr "Vérifier les mises à jour pour les applications"
 
 #: ../fdroid:41
 msgid "Add a new application from its source code"
-msgstr ""
+msgstr "Ajouter une nouvelle application depuis son code source"
 
 #: ../fdroid:42
 msgid "Install built packages on devices"
@@ -57,15 +57,15 @@ msgstr ""
 
 #: ../fdroid:43
 msgid "Read all the metadata files and exit"
-msgstr ""
+msgstr "Lire toutes les métadonnées et quitter"
 
 #: ../fdroid:44
 msgid "Rewrite all the metadata files"
-msgstr ""
+msgstr "Réécrire toutes les métadonnées"
 
 #: ../fdroid:45
 msgid "Warn about possible metadata errors"
-msgstr ""
+msgstr "Avertir de possible erreurs dans les métadonnées"
 
 #: ../fdroid:46
 msgid "Scan the source code of a package"
@@ -77,15 +77,15 @@ msgstr ""
 
 #: ../fdroid:48
 msgid "Update the stats of the repo"
-msgstr ""
+msgstr "Mettre à jour les statistiques du dépôt"
 
 #: ../fdroid:49
 msgid "Interact with the repo HTTP server"
-msgstr ""
+msgstr "Interagir avec le serveur HTTP du dépôt"
 
 #: ../fdroid:50
 msgid "Sign indexes created using update --nosign"
-msgstr ""
+msgstr "Signer les indexes créés avec update --nosign"
 
 #: ../fdroid:51
 msgid "Update the binary transparency log for a URL"
@@ -100,25 +100,28 @@ msgid "Valid commands are:"
 msgstr "Les commandes valides sont les suivantes :"
 
 #: ../fdroid:104
-#, c-format
+#, c-format, fuzzy
 msgid "Command '%s' not recognised.\n"
-msgstr ""
+msgstr "Commande '%s 1' non reconnue.\n"
 
 #: ../fdroid:150
+#, fuzzy
 msgid "Unknown exception found!"
-msgstr ""
+msgstr "Erreur inconnue!"
 
 #: ../fdroidserver/btlog.py:154
 msgid "Path to the git repo to use as the log"
-msgstr ""
+msgstr "Chemin vers un dépôt git à utiliser comme journal"
 
 #: ../fdroidserver/btlog.py:156
+#, fuzzy
 msgid "The base URL for the repo to log (default: https://f-droid.org)"
-msgstr ""
+msgstr "URL de base pour le dépôt du journal (par défaut: https://f-droid.org)"
 
 #: ../fdroidserver/btlog.py:158
+#, fuzzy
 msgid "Push the log to this git remote repository"
-msgstr ""
+msgstr "Envoyer les logs dans ce dépôt distant"
 
 #: ../fdroidserver/build.py:875 ../fdroidserver/install.py:52
 #: ../fdroidserver/publish.py:45 ../fdroidserver/scanner.py:255
@@ -297,8 +300,9 @@ msgid "app-id in the form APPID"
 msgstr ""
 
 #: ../fdroidserver/metadata.py:1337
+#, fuzzy
 msgid "force errors to be warnings, or ignore"
-msgstr ""
+msgstr "forcer les erreurs en avertissement, ou les ignorer"
 
 #: ../fdroidserver/rewritemeta.py:54
 msgid "List files that would be reformatted"
@@ -348,15 +352,17 @@ msgstr ""
 
 #: ../fdroidserver/update.py:1508
 msgid "Delete APKs and/or OBBs without metadata from the repo"
-msgstr ""
+msgstr "Supprimer les APK et/ou OBB sans métadonnées dans le dépôt"
 
 #: ../fdroidserver/update.py:1510
 msgid "Report on build data status"
 msgstr ""
 
 #: ../fdroidserver/update.py:1512
+#, fuzzy
 msgid "Interactively ask about things that need updating."
 msgstr ""
+"Demander interactivement à propos des choses qui requièrent une mise à jour"
 
 #: ../fdroidserver/update.py:1514
 msgid "Resize all the icons exceeding the max pixel size and exit"
