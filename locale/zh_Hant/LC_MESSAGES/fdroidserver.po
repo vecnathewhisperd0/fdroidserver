@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-08-09 23:19+0000\n"
+"PO-Revision-Date: 2017-08-13 02:50+0000\n"
 "Last-Translator: ezjerry liao <ezjerry@gmail.com>\n"
 "Language-Team: Chinese (Traditional) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hant/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 2.16-dev\n"
+"X-Generator: Weblate 2.16\n"
 
 #: ../fdroid:34
 msgid "Build a package from source"
@@ -180,39 +180,39 @@ msgstr ""
 
 #: ../fdroidserver/build.py:899
 msgid "Build all applications available"
-msgstr ""
+msgstr "構建所有可用的應用程式"
 
 #: ../fdroidserver/build.py:901 ../fdroidserver/update.py:1519
 msgid "Update the wiki"
-msgstr ""
+msgstr "更新維基百科"
 
 #: ../fdroidserver/checkupdates.py:513
 msgid "app-id to check for updates"
-msgstr ""
+msgstr "以 app-id 檢查更新"
 
 #: ../fdroidserver/checkupdates.py:515
 msgid "Process auto-updates"
-msgstr ""
+msgstr "處理自動更新"
 
 #: ../fdroidserver/checkupdates.py:517
 msgid "Only process apps with auto-updates"
-msgstr ""
+msgstr "只處理具有自動更新的應用程式"
 
 #: ../fdroidserver/checkupdates.py:519
 msgid "Commit changes"
-msgstr ""
+msgstr "提交變更"
 
 #: ../fdroidserver/checkupdates.py:521
 msgid "Only print differences with the Play Store"
-msgstr ""
+msgstr "僅印出與 Play Store 的不同處"
 
 #: ../fdroidserver/common.py:124
 msgid "Spew out even more information than normal"
-msgstr ""
+msgstr "傾湧出比正常情況下更多的資訊"
 
 #: ../fdroidserver/common.py:126
 msgid "Restrict output to warnings and errors"
-msgstr ""
+msgstr "將輸出限定為警告和錯誤"
 
 #: ../fdroidserver/dscanner.py:410
 msgid "app-id with optional versioncode in the form APPID[:VERCODE]"
@@ -220,11 +220,11 @@ msgstr ""
 
 #: ../fdroidserver/dscanner.py:413
 msgid "Scan only the latest version of each package"
-msgstr ""
+msgstr "只掃描每個套件包的最新版本"
 
 #: ../fdroidserver/dscanner.py:416
 msgid "Clean after all scans have finished"
-msgstr ""
+msgstr "所有掃描完成後清除"
 
 #: ../fdroidserver/dscanner.py:419
 msgid "Clean before the scans start and rebuild the container"
