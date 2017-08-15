@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-08-13 02:50+0000\n"
+"PO-Revision-Date: 2017-08-15 15:48+0000\n"
 "Last-Translator: ezjerry liao <ezjerry@gmail.com>\n"
 "Language-Team: Chinese (Traditional) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hant/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 2.16\n"
+"X-Generator: Weblate 2.17-dev\n"
 
 #: ../fdroid:34
 msgid "Build a package from source"
@@ -236,7 +236,7 @@ msgstr ""
 
 #: ../fdroidserver/dscanner.py:425
 msgid "Prepare drozer to run a scan"
-msgstr ""
+msgstr "準備 drozer 以執行掃描"
 
 #: ../fdroidserver/dscanner.py:428
 msgid "Override path for repo APKs (default: ./repo)"
@@ -358,12 +358,12 @@ msgstr "以對話方式詢問需要更新的內容。"
 
 #: ../fdroidserver/update.py:1514
 msgid "Resize all the icons exceeding the max pixel size and exit"
-msgstr ""
+msgstr "重設超過最大像素的所有圖示之尺寸並且退出"
 
 #: ../fdroidserver/update.py:1516
 #, c-format
 msgid "Specify editor to use in interactive mode. Default %s"
-msgstr ""
+msgstr "指定編輯器在互動模式使用。預設 %s"
 
 #: ../fdroidserver/update.py:1521
 msgid "Produce human-readable index.xml"
@@ -381,7 +381,7 @@ msgstr ""
 
 #: ../fdroidserver/update.py:1527
 msgid "Use date from apk instead of current time for newly added apks"
-msgstr ""
+msgstr "新增的 apk 使用日期，來自 apk 而不是目前時間"
 
 #: ../fdroidserver/update.py:1529
 msgid "Rename APK files that do not match package.name_123.apk"
