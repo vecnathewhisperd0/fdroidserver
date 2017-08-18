@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-08-15 15:48+0000\n"
+"PO-Revision-Date: 2017-08-19 01:44+0000\n"
 "Last-Translator: ezjerry liao <ezjerry@gmail.com>\n"
 "Language-Team: Chinese (Traditional) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hant/>\n"
@@ -170,13 +170,13 @@ msgstr "不要建立 tarball，在測試一個構建時很有用處"
 msgid ""
 "Don't refresh the repository, useful when testing a build with no internet "
 "connection"
-msgstr ""
+msgstr "不要更新軟體倉庫，在沒有網路連線時測試構建很有用"
 
 #: ../fdroidserver/build.py:897
 msgid ""
 "Force build of disabled apps, and carries on regardless of scan problems. "
 "Only allowed in test mode."
-msgstr ""
+msgstr "強制停用應用程式的構建，並且忽視掃描問題而繼續。只允許在測試模式下。"
 
 #: ../fdroidserver/build.py:899
 msgid "Build all applications available"
@@ -228,11 +228,11 @@ msgstr "所有掃描完成後清除"
 
 #: ../fdroidserver/dscanner.py:419
 msgid "Clean before the scans start and rebuild the container"
-msgstr ""
+msgstr "在掃描開始與重新構建容器之前清除"
 
 #: ../fdroidserver/dscanner.py:422
 msgid "Clean up all containers and then exit"
-msgstr ""
+msgstr "清除所有容器，然後退出"
 
 #: ../fdroidserver/dscanner.py:425
 msgid "Prepare drozer to run a scan"
@@ -240,11 +240,11 @@ msgstr "準備 drozer 以執行掃描"
 
 #: ../fdroidserver/dscanner.py:428
 msgid "Override path for repo APKs (default: ./repo)"
-msgstr ""
+msgstr "覆蓋軟體倉庫 APK 的路徑 (預設：./repo)"
 
 #: ../fdroidserver/import.py:193
 msgid "Project URL to import from."
-msgstr ""
+msgstr "要導入的專案網址。"
 
 #: ../fdroidserver/import.py:195
 msgid "Path to main android project subdirectory, if not in root."
@@ -252,11 +252,11 @@ msgstr ""
 
 #: ../fdroidserver/import.py:197
 msgid "Comma separated list of categories."
-msgstr ""
+msgstr "以逗號分隔類別清單。"
 
 #: ../fdroidserver/import.py:199
 msgid "Overall license of the project."
-msgstr ""
+msgstr "該專案的整體授權。"
 
 #: ../fdroidserver/import.py:201
 msgid ""
@@ -274,27 +274,27 @@ msgstr ""
 
 #: ../fdroidserver/init.py:60
 msgid "Alias of the repo signing key in the keystore"
-msgstr ""
+msgstr "在金鑰庫裡軟體倉庫簽署金鑰的別名"
 
 #: ../fdroidserver/init.py:62
 msgid "Path to the Android SDK (sometimes set in ANDROID_HOME)"
-msgstr ""
+msgstr "Android SDK 的路徑（有時在 ANDROID_HOME 中設定）"
 
 #: ../fdroidserver/init.py:64
 msgid "Do not prompt for Android SDK path, just fail"
-msgstr ""
+msgstr "不要為 Android SDK 的路徑提示，只提示失敗的"
 
 #: ../fdroidserver/install.py:54
 msgid "Install all signed applications available"
-msgstr ""
+msgstr "安裝所有已簽署可用的應用程式"
 
 #: ../fdroidserver/lint.py:393
 msgid "Also warn about formatting issues, like rewritemeta -l"
-msgstr ""
+msgstr "還要提醒格式化問題，如 rewritemeta -l"
 
 #: ../fdroidserver/lint.py:394 ../fdroidserver/rewritemeta.py:57
 msgid "app-id in the form APPID"
-msgstr ""
+msgstr "app-id，格式為 APPID"
 
 #: ../fdroidserver/metadata.py:1337
 msgid "force errors to be warnings, or ignore"
@@ -302,15 +302,15 @@ msgstr "強制錯誤警告或忽略"
 
 #: ../fdroidserver/rewritemeta.py:54
 msgid "List files that would be reformatted"
-msgstr ""
+msgstr "列出將重新格式化的檔案"
 
 #: ../fdroidserver/rewritemeta.py:56
 msgid "Rewrite to a specific format: "
-msgstr ""
+msgstr "重寫為特定的格式： "
 
 #: ../fdroidserver/server.py:547
 msgid "command to execute, either 'init' or 'update'"
-msgstr ""
+msgstr "命令執行，'init' 或 'update' 中的任何一個"
 
 #: ../fdroidserver/server.py:549
 msgid "Specify an identity file to provide to SSH for rsyncing"
@@ -318,27 +318,27 @@ msgstr ""
 
 #: ../fdroidserver/server.py:551
 msgid "Specify a local folder to sync the repo to"
-msgstr ""
+msgstr "指定要將軟體倉庫同步到本地的資料夾"
 
 #: ../fdroidserver/server.py:553
 msgid "Don't use rsync checksums"
-msgstr ""
+msgstr "不使用 rsync 檢驗和"
 
 #: ../fdroidserver/stats.py:64
 msgid "Download logs we don't have"
-msgstr ""
+msgstr "下載我們沒有的日誌"
 
 #: ../fdroidserver/stats.py:66
 msgid "Recalculate aggregate stats - use when changes "
-msgstr ""
+msgstr "重新計算集合統計 - 更改時使用 "
 
 #: ../fdroidserver/stats.py:69
 msgid "Don't do anything logs-related"
-msgstr ""
+msgstr "不要做任何與日誌有關的事情"
 
 #: ../fdroidserver/update.py:1504
 msgid "Create a repo signing key in a keystore"
-msgstr ""
+msgstr "在金鑰庫中建立一個軟體倉庫的簽署金鑰"
 
 #: ../fdroidserver/update.py:1506
 msgid "Create skeleton metadata files that are missing"
@@ -350,7 +350,7 @@ msgstr "從軟體倉庫刪除缺少中介資料的 APK 和/或 OBB"
 
 #: ../fdroidserver/update.py:1510
 msgid "Report on build data status"
-msgstr ""
+msgstr "報告構建資料的狀態"
 
 #: ../fdroidserver/update.py:1512
 msgid "Interactively ask about things that need updating."
@@ -377,7 +377,7 @@ msgstr "清除更新 - 不使用快取，重新處理全部的 apk"
 msgid ""
 "When configured for signed indexes, create only unsigned indexes at this "
 "stage"
-msgstr ""
+msgstr "當已組態為簽名的索引時，只能在此階段建立無簽名的索引"
 
 #: ../fdroidserver/update.py:1527
 msgid "Use date from apk instead of current time for newly added apks"
