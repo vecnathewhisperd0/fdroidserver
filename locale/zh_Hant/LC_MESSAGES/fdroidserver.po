@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-08-19 01:44+0000\n"
+"PO-Revision-Date: 2017-08-21 10:44+0000\n"
 "Last-Translator: ezjerry liao <ezjerry@gmail.com>\n"
 "Language-Team: Chinese (Traditional) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hant/>\n"
@@ -114,7 +114,7 @@ msgstr "到 git 軟體倉庫的路徑用在日誌"
 
 #: ../fdroidserver/btlog.py:156
 msgid "The base URL for the repo to log (default: https://f-droid.org)"
-msgstr ""
+msgstr "軟體倉庫日誌的總部網址（預設：https://f-droid.org）"
 
 #: ../fdroidserver/btlog.py:158
 msgid "Push the log to this git remote repository"
@@ -248,7 +248,7 @@ msgstr "要導入的專案網址。"
 
 #: ../fdroidserver/import.py:195
 msgid "Path to main android project subdirectory, if not in root."
-msgstr ""
+msgstr "如果不在根目錄下，路徑為 android 主要專案的子目錄。"
 
 #: ../fdroidserver/import.py:197
 msgid "Comma separated list of categories."
@@ -266,11 +266,11 @@ msgstr ""
 
 #: ../fdroidserver/init.py:56
 msgid "X.509 'Distiguished Name' used when generating keys"
-msgstr ""
+msgstr "產生金鑰時使用 X.509 '專有名稱'"
 
 #: ../fdroidserver/init.py:58
 msgid "Path to the keystore for the repo signing key"
-msgstr ""
+msgstr "給軟體倉庫簽署金鑰的金鑰庫路徑"
 
 #: ../fdroidserver/init.py:60
 msgid "Alias of the repo signing key in the keystore"
