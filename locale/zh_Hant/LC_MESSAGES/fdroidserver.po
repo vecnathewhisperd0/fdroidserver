@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-08-21 10:44+0000\n"
+"PO-Revision-Date: 2017-08-22 17:54+0000\n"
 "Last-Translator: ezjerry liao <ezjerry@gmail.com>\n"
 "Language-Team: Chinese (Traditional) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hant/>\n"
@@ -124,7 +124,7 @@ msgstr "將日誌推送到 git 遠端軟體倉庫"
 #: ../fdroidserver/publish.py:45 ../fdroidserver/scanner.py:255
 #: ../fdroidserver/verify.py:41
 msgid "app-id with optional versionCode in the form APPID[:VERCODE]"
-msgstr ""
+msgstr "app-id 具有任選的 versionCode 在此格式為 APPID [:VERCODE]"
 
 #: ../fdroidserver/build.py:877
 msgid "Build only the latest version of each package"
@@ -216,7 +216,7 @@ msgstr "將輸出限定為警告和錯誤"
 
 #: ../fdroidserver/dscanner.py:410
 msgid "app-id with optional versioncode in the form APPID[:VERCODE]"
-msgstr ""
+msgstr "app-id 具有任選的 versioncode 在此格式為 APPID [:VERCODE]"
 
 #: ../fdroidserver/dscanner.py:413
 msgid "Scan only the latest version of each package"
