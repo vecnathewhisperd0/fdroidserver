@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-08-12 10:57+0000\n"
-"Last-Translator: nailyk <nailyk_weblate@nailyk.fr>\n"
+"PO-Revision-Date: 2017-08-23 13:05+0000\n"
+"Last-Translator: anonymous <>\n"
 "Language-Team: French "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\n"
 "Language: fr\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 2.16\n"
+"X-Generator: Weblate 2.17-dev\n"
 
 #: ../fdroid:34
 msgid "Build a package from source"
@@ -93,7 +93,7 @@ msgstr ""
 
 #: ../fdroid:56
 msgid "usage: fdroid [-h|--help|--version] <command> [<args>]"
-msgstr ""
+msgstr "utilisation : fdroid [-h|--help|--version] <commande> [<args>]"
 
 #: ../fdroid:58
 msgid "Valid commands are:"
