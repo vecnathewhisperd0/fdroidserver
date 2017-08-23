@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-08-23 13:05+0000\n"
+"PO-Revision-Date: 2017-08-23 22:13+0000\n"
 "Last-Translator: anonymous <>\n"
 "Language-Team: French "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\n"
@@ -21,7 +21,7 @@ msgstr ""
 
 #: ../fdroid:34
 msgid "Build a package from source"
-msgstr ""
+msgstr "Construire un paquet depuis les sources"
 
 #: ../fdroid:35
 msgid "Quickly start a new repository"
@@ -100,14 +100,13 @@ msgid "Valid commands are:"
 msgstr "Les commandes valides sont les suivantes :"
 
 #: ../fdroid:104
-#, c-format, fuzzy
+#, c-format
 msgid "Command '%s' not recognised.\n"
-msgstr "Commande '%s 1' non reconnue.\n"
+msgstr "La commande '%s 1' n'est pas reconnue.\n"
 
 #: ../fdroid:150
-#, fuzzy
 msgid "Unknown exception found!"
-msgstr "Erreur inconnue!"
+msgstr "Exception inconnue détectée!"
 
 #: ../fdroidserver/btlog.py:154
 msgid "Path to the git repo to use as the log"
