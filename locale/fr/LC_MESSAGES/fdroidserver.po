@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
 "PO-Revision-Date: 2017-08-24 10:01+0000\n"
-"Last-Translator: Vincent Finance <linuxmario@linuxmario.net>\n"
+"Last-Translator: anonymous <>\n"
 "Language-Team: French "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\n"
 "Language: fr\n"
@@ -41,7 +41,7 @@ msgstr ""
 
 #: ../fdroid:39
 msgid "Verify the integrity of downloaded packages"
-msgstr ""
+msgstr "Vérifier l'intégrité du paquet téléchargé"
 
 #: ../fdroid:40
 msgid "Check for updates to applications"
