@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-08-24 09:54+0000\n"
-"Last-Translator: nailyk <nailyk_weblate@nailyk.fr>\n"
+"PO-Revision-Date: 2017-08-24 09:57+0000\n"
+"Last-Translator: Vincent Finance <linuxmario@linuxmario.net>\n"
 "Language-Team: French "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\n"
 "Language: fr\n"
@@ -308,12 +308,14 @@ msgid "List files that would be reformatted"
 msgstr ""
 
 #: ../fdroidserver/rewritemeta.py:56
+#, fuzzy
 msgid "Rewrite to a specific format: "
-msgstr ""
+msgstr "Réécrire dans un format spécifique : "
 
 #: ../fdroidserver/server.py:547
+#, fuzzy
 msgid "command to execute, either 'init' or 'update'"
-msgstr ""
+msgstr "Commande à exécuter, soit 'init' soit 'update'"
 
 #: ../fdroidserver/server.py:549
 msgid "Specify an identity file to provide to SSH for rsyncing"
