@@ -421,6 +421,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
     p = None
     gradletasks = []
     bmethod = build.build_method()
+    flavours_cmd = ''
     if bmethod == 'maven':
         logging.info("Cleaning Maven project...")
         cmd = [config['mvn3'], 'clean', '-Dandroid.sdk.path=' + config['sdk_path']]
@@ -804,6 +805,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
     elif omethod == 'gradle':
         src = None
         for apks_dir in [
+                os.path.join(root_dir, 'build', 'outputs', 'apk', flavours_cmd, 'release'),
                 os.path.join(root_dir, 'build', 'outputs', 'apk', 'release'),
                 os.path.join(root_dir, 'build', 'outputs', 'apk'),
                 os.path.join(root_dir, 'build', 'apk'),
