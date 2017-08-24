@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-08-24 10:01+0000\n"
-"Last-Translator: anonymous <>\n"
+"PO-Revision-Date: 2017-08-25 13:45+0000\n"
+"Last-Translator: Vincent Finance <linuxmario@linuxmario.net>\n"
 "Language-Team: French "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\n"
 "Language: fr\n"
@@ -36,12 +36,13 @@ msgid "Add gpg signatures for packages in repo"
 msgstr "Ajouter des signatures GPG pour les paquets dans le dépôt"
 
 #: ../fdroid:38
+#, fuzzy
 msgid "Update repo information for new packages"
-msgstr ""
+msgstr "Mettre à jour les données des dépôts pour les nouveaux paquets"
 
 #: ../fdroid:39
 msgid "Verify the integrity of downloaded packages"
-msgstr "Vérifier l'intégrité du paquet téléchargé"
+msgstr "Vérifier l'intégrité des paquets téléchargés"
 
 #: ../fdroid:40
 msgid "Check for updates to applications"
@@ -52,8 +53,9 @@ msgid "Add a new application from its source code"
 msgstr "Ajouter une nouvelle application depuis son code source"
 
 #: ../fdroid:42
+#, fuzzy
 msgid "Install built packages on devices"
-msgstr ""
+msgstr "Installer les paquets compilés sur le(s) périphérique(s)"
 
 #: ../fdroid:43
 msgid "Read all the metadata files and exit"
@@ -68,12 +70,14 @@ msgid "Warn about possible metadata errors"
 msgstr "Avertir de possible erreurs dans les métadonnées"
 
 #: ../fdroid:46
+#, fuzzy
 msgid "Scan the source code of a package"
-msgstr ""
+msgstr "Scanner le code-source d'un paquet"
 
 #: ../fdroid:47
+#, fuzzy
 msgid "Dynamically scan APKs post build"
-msgstr ""
+msgstr "Analyser dynamiquement les APKs après compilation"
 
 #: ../fdroid:48
 msgid "Update the stats of the repo"
@@ -106,7 +110,7 @@ msgstr "La commande '%s 1' n'est pas reconnue.\n"
 
 #: ../fdroid:150
 msgid "Unknown exception found!"
-msgstr "Exception inconnue détectée!"
+msgstr "Exception inconnue détectée !"
 
 #: ../fdroidserver/btlog.py:154
 msgid "Path to the git repo to use as the log"
@@ -129,8 +133,9 @@ msgid "app-id with optional versionCode in the form APPID[:VERCODE]"
 msgstr ""
 
 #: ../fdroidserver/build.py:877
+#, fuzzy
 msgid "Build only the latest version of each package"
-msgstr ""
+msgstr "Compiler uniquement la dernière version de chaque paquet"
 
 #: ../fdroidserver/build.py:879
 msgid "Make the build stop on exceptions"
@@ -181,12 +186,13 @@ msgid ""
 msgstr ""
 
 #: ../fdroidserver/build.py:899
+#, fuzzy
 msgid "Build all applications available"
-msgstr ""
+msgstr "Compiler toutes les applications disponibles"
 
 #: ../fdroidserver/build.py:901 ../fdroidserver/update.py:1519
 msgid "Update the wiki"
-msgstr ""
+msgstr "Mettre à jour le wiki"
 
 #: ../fdroidserver/checkupdates.py:513
 msgid "app-id to check for updates"
@@ -205,24 +211,27 @@ msgid "Commit changes"
 msgstr ""
 
 #: ../fdroidserver/checkupdates.py:521
+#, fuzzy
 msgid "Only print differences with the Play Store"
-msgstr ""
+msgstr "Afficher seulement les différences avec le Google Play Store"
 
 #: ../fdroidserver/common.py:124
 msgid "Spew out even more information than normal"
 msgstr ""
 
 #: ../fdroidserver/common.py:126
+#, fuzzy
 msgid "Restrict output to warnings and errors"
-msgstr ""
+msgstr "Restreindre les résultats aux avertissements et erreurs"
 
 #: ../fdroidserver/dscanner.py:410
 msgid "app-id with optional versioncode in the form APPID[:VERCODE]"
 msgstr ""
 
 #: ../fdroidserver/dscanner.py:413
+#, fuzzy
 msgid "Scan only the latest version of each package"
-msgstr ""
+msgstr "Analyser seulement la dernière version de chaque paquet"
 
 #: ../fdroidserver/dscanner.py:416
 msgid "Clean after all scans have finished"
@@ -245,8 +254,9 @@ msgid "Override path for repo APKs (default: ./repo)"
 msgstr ""
 
 #: ../fdroidserver/import.py:193
+#, fuzzy
 msgid "Project URL to import from."
-msgstr ""
+msgstr "URL du projet à importer"
 
 #: ../fdroidserver/import.py:195
 msgid "Path to main android project subdirectory, if not in root."
@@ -287,8 +297,9 @@ msgid "Do not prompt for Android SDK path, just fail"
 msgstr ""
 
 #: ../fdroidserver/install.py:54
+#, fuzzy
 msgid "Install all signed applications available"
-msgstr ""
+msgstr "Installer toutes les applications signées disponibles"
 
 #: ../fdroidserver/lint.py:393
 msgid "Also warn about formatting issues, like rewritemeta -l"
@@ -366,17 +377,21 @@ msgstr ""
 "Demander interactivement à propos des choses qui requièrent une mise à jour"
 
 #: ../fdroidserver/update.py:1514
+#, fuzzy
 msgid "Resize all the icons exceeding the max pixel size and exit"
 msgstr ""
+"Redimensionner toutes les icônes excédant la taille maximale en pixels et "
+"quitter"
 
 #: ../fdroidserver/update.py:1516
-#, c-format
+#, c-format, fuzzy
 msgid "Specify editor to use in interactive mode. Default %s"
-msgstr ""
+msgstr "Définir l'éditeur à utiliser en mode interactif. Par défaut %s"
 
 #: ../fdroidserver/update.py:1521
+#, fuzzy
 msgid "Produce human-readable index.xml"
-msgstr ""
+msgstr "Produire un fichier index.xml lisible pour un humain"
 
 #: ../fdroidserver/update.py:1523
 msgid "Clean update - don't uses caches, reprocess all apks"
@@ -389,8 +404,11 @@ msgid ""
 msgstr ""
 
 #: ../fdroidserver/update.py:1527
+#, fuzzy
 msgid "Use date from apk instead of current time for newly added apks"
 msgstr ""
+"Utiliser la date de l'APK à la place de la date actuelle pour les APKs "
+"nouvellement ajoutés"
 
 #: ../fdroidserver/update.py:1529
 msgid "Rename APK files that do not match package.name_123.apk"
