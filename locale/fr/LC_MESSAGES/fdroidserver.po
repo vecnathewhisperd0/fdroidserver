@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-08-24 09:57+0000\n"
-"Last-Translator: Vincent Finance <linuxmario@linuxmario.net>\n"
+"PO-Revision-Date: 2017-08-24 09:59+0000\n"
+"Last-Translator: anonymous <>\n"
 "Language-Team: French "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\n"
 "Language: fr\n"
@@ -29,11 +29,11 @@ msgstr "Démarrage rapide d'un nouveau dépot"
 
 #: ../fdroid:36
 msgid "Sign and place packages in the repo"
-msgstr ""
+msgstr "signer et placer les paquet dans le dépôt"
 
 #: ../fdroid:37
 msgid "Add gpg signatures for packages in repo"
-msgstr ""
+msgstr "Ajouter des signatures gpg pour les paquets dans le dépôt"
 
 #: ../fdroid:38
 msgid "Update repo information for new packages"
