@@ -48,6 +48,7 @@ packages="
  expect
  faketime
  flex
+ g++
  gettext/jessie-backports
  gettext-base/jessie-backports
  git-core
