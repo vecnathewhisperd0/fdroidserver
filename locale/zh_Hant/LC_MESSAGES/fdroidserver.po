@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-08-22 17:54+0000\n"
+"PO-Revision-Date: 2017-08-31 02:59+0000\n"
 "Last-Translator: ezjerry liao <ezjerry@gmail.com>\n"
 "Language-Team: Chinese (Traditional) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hant/>\n"
@@ -262,7 +262,7 @@ msgstr "該專案的整體授權。"
 msgid ""
 "Allows a different revision (or git branch) to be specified for the initial "
 "import"
-msgstr ""
+msgstr "允許為初始匯入指定不同的校訂（或 git 分支）"
 
 #: ../fdroidserver/init.py:56
 msgid "X.509 'Distiguished Name' used when generating keys"
@@ -314,7 +314,7 @@ msgstr "命令執行，'init' 或 'update' 中的任何一個"
 
 #: ../fdroidserver/server.py:549
 msgid "Specify an identity file to provide to SSH for rsyncing"
-msgstr ""
+msgstr "指定一個身份檔案以提供給 SSH 進行 rsync"
 
 #: ../fdroidserver/server.py:551
 msgid "Specify a local folder to sync the repo to"
