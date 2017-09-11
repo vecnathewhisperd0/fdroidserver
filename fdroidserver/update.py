@@ -1390,7 +1390,7 @@ def extract_apk_icons(icon_filename, apk, apkzip, repo_dir):
         if icon_src.endswith('.xml'):
             png = os.path.basename(icon_src)[:-4] + '.png'
             for f in apkzip.namelist():
-                if f.endswith(png):
+                if f.endswith(png) or f.endswith('ic_launcher.png'):
                     m = re.match(r'res/(drawable|mipmap)-(x*[hlm]dpi).*/', f)
                     if m and screen_resolutions[m.group(2)] == density:
                         icon_src = f
