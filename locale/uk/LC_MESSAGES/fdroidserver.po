@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-09-15 19:29+0000\n"
+"PO-Revision-Date: 2017-09-17 23:11+0000\n"
 "Last-Translator: Володимир Бриняк <bardvv@gmail.com>\n"
 "Language-Team: Ukrainian "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/uk/>\n"
@@ -22,67 +22,68 @@ msgstr ""
 
 #: ../fdroid:34
 msgid "Build a package from source"
-msgstr ""
+msgstr "Побудуйте пакет з джерела"
 
 #: ../fdroid:35
 msgid "Quickly start a new repository"
-msgstr ""
+msgstr "Швидкий запуск нового сховища"
 
 #: ../fdroid:36
 msgid "Sign and place packages in the repo"
-msgstr ""
+msgstr "Записати та розмістити пакети в repo"
 
 #: ../fdroid:37
 msgid "Add gpg signatures for packages in repo"
-msgstr ""
+msgstr "Додайте підписи gpg для пакетів у repo"
 
 #: ../fdroid:38
 msgid "Update repo information for new packages"
-msgstr ""
+msgstr "Оновіть інформацію про repo для нових пакетів"
 
 #: ../fdroid:39
 msgid "Verify the integrity of downloaded packages"
-msgstr ""
+msgstr "Перевірте цілісність завантажених пакетів"
 
 #: ../fdroid:40
 msgid "Check for updates to applications"
-msgstr ""
+msgstr "Перевірте наявність оновлень для застосунків"
 
 #: ../fdroid:41
 msgid "Add a new application from its source code"
-msgstr ""
+msgstr "Додайте новий застосунку зі свого вихідного коду"
 
 #: ../fdroid:42
 msgid "Install built packages on devices"
-msgstr ""
+msgstr "Встановити побудовані пакети на пристрої"
 
 #: ../fdroid:43
 msgid "Read all the metadata files and exit"
-msgstr ""
+msgstr "Прочитайте всі файли метаданих і вийдіть"
 
 #: ../fdroid:44
 msgid "Rewrite all the metadata files"
-msgstr ""
+msgstr "Перепишіть усі файли метаданих"
 
 #: ../fdroid:45
 msgid "Warn about possible metadata errors"
-msgstr ""
+msgstr "Попереджати про можливі помилки метаданих"
 
 #: ../fdroid:46
 msgid "Scan the source code of a package"
-msgstr ""
+msgstr "Сканування вихідного коду пакета"
 
 #: ../fdroid:47
+#, fuzzy
 msgid "Dynamically scan APKs post build"
-msgstr ""
+msgstr "Динамічне сканування стовпця публікацій у форматі .apk"
 
 #: ../fdroid:48
 msgid "Update the stats of the repo"
-msgstr ""
+msgstr "Оновити статистику repo"
 
 #: ../fdroid:49
 msgid "Interact with the repo HTTP server"
-msgstr ""
+msgstr "Взаємодія з repo HTTP-сервером"
 
 #: ../fdroid:50
 #, fuzzy
