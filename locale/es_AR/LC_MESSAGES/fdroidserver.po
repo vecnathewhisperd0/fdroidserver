@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-06-01 17:23+0200\n"
-"PO-Revision-Date: 2017-09-29 16:48+0000\n"
+"PO-Revision-Date: 2017-10-01 01:48+0000\n"
 "Last-Translator: who cares? <facevedo@disroot.org>\n"
 "Language-Team: Spanish (Argentina) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/es_AR/>\n"
@@ -119,9 +119,8 @@ msgstr ""
 "https://f-droid.org)"
 
 #: ../fdroidserver/btlog.py:158
-#, fuzzy
 msgid "Push the log to this git remote repository"
-msgstr "Pulse el registro a este repositorio remoto git"
+msgstr "Subir el registro al repositorio remoto de git"
 
 #: ../fdroidserver/build.py:875 ../fdroidserver/install.py:52
 #: ../fdroidserver/publish.py:45 ../fdroidserver/scanner.py:255
@@ -151,10 +150,13 @@ msgid "Use build server"
 msgstr "Usar servidor de construccion"
 
 #: ../fdroidserver/build.py:885
+#, fuzzy
 msgid ""
 "Reset and create a brand new build server, even if the existing one appears "
 "to be ok."
 msgstr ""
+"Resetear y crear un nuevo servidor de construcción, incluso si el existente "
+"parece estar bien."
 
 #: ../fdroidserver/build.py:887
 msgid "Specify that we're running on the build server"
@@ -162,7 +164,7 @@ msgstr ""
 
 #: ../fdroidserver/build.py:889
 msgid "Skip scanning the source code for binaries and other problems"
-msgstr "Saltear el escaneo de binarios y otros problemas en el código fuente."
+msgstr "Saltear el escaneo de binarios y otros problemas en el código fuente"
 
 #: ../fdroidserver/build.py:891
 msgid "Setup an emulator, install the apk on it and perform a drozer scan"
@@ -328,49 +330,51 @@ msgstr "Rescribir a un formato especifico: "
 
 #: ../fdroidserver/server.py:547
 msgid "command to execute, either 'init' or 'update'"
-msgstr ""
+msgstr "comando a ejecutar, ya sea 'iniciar' o 'actualizar'"
 
 #: ../fdroidserver/server.py:549
+#, fuzzy
 msgid "Specify an identity file to provide to SSH for rsyncing"
 msgstr ""
+"Especifique una archivo de identificación para la resincronización vía SSH"
 
 #: ../fdroidserver/server.py:551
 msgid "Specify a local folder to sync the repo to"
-msgstr ""
+msgstr "Especificar un directorio local donde sincronizar el repositorio"
 
 #: ../fdroidserver/server.py:553
 msgid "Don't use rsync checksums"
-msgstr ""
+msgstr "No usar sumas de validación de rsync"
 
 #: ../fdroidserver/stats.py:64
 msgid "Download logs we don't have"
-msgstr ""
+msgstr "Descargar los registros que no faltan"
 
 #: ../fdroidserver/stats.py:66
 msgid "Recalculate aggregate stats - use when changes "
-msgstr ""
+msgstr "Recalcular las agregaciones - usar cuando haya cambios "
 
 #: ../fdroidserver/stats.py:69
+#, fuzzy
 msgid "Don't do anything logs-related"
-msgstr ""
+msgstr "No hacer nada que refiera a los registros"
 
 #: ../fdroidserver/update.py:1504
+#, fuzzy
 msgid "Create a repo signing key in a keystore"
-msgstr ""
+msgstr "Crear una llave de firmado en un almacén de llaves para el repositorio"
 
 #: ../fdroidserver/update.py:1506
-#, fuzzy
 msgid "Create skeleton metadata files that are missing"
-msgstr "Crear esqueleto de metadatos de los archivos faltantes"
+msgstr "Crear plantilla de metadatos de los archivos faltantes"
 
 #: ../fdroidserver/update.py:1508
-#, fuzzy
 msgid "Delete APKs and/or OBBs without metadata from the repo"
-msgstr "Borrar archivos APK y/o OBBs sin metadatos en el repositorio"
+msgstr "Borrar archivos APK y/o OBBs sin metadatos del repositorio"
 
 #: ../fdroidserver/update.py:1510
 msgid "Report on build data status"
-msgstr ""
+msgstr "Reportar el estado de la construcción"
 
 #: ../fdroidserver/update.py:1512
 msgid "Interactively ask about things that need updating."
@@ -383,7 +387,7 @@ msgstr ""
 #: ../fdroidserver/update.py:1516
 #, c-format
 msgid "Specify editor to use in interactive mode. Default %s"
-msgstr ""
+msgstr "Especificar el editor a usar en modo interactivo. Por defecto %s"
 
 #: ../fdroidserver/update.py:1521
 msgid "Produce human-readable index.xml"
@@ -402,6 +406,8 @@ msgstr ""
 #: ../fdroidserver/update.py:1527
 msgid "Use date from apk instead of current time for newly added apks"
 msgstr ""
+"Utilizar la fecha del apk en vez de la actual para los apks nuevos que se "
+"agreguen"
 
 #: ../fdroidserver/update.py:1529
 msgid "Rename APK files that do not match package.name_123.apk"
