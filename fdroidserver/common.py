@@ -223,10 +223,7 @@ def read_config(opts, config_file='config.py'):
     """Read the repository config
 
     The config is read from config_file, which is in the current
-    directory when any of the repo management commands are used. If
-    there is a local metadata file in the git repo, then config.py is
-    not required, just use defaults.
-
+    directory when any of the repo management commands are used.
     """
     global config, options
 
