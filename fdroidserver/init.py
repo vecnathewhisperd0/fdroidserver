@@ -131,7 +131,7 @@ def main():
     if not common.test_sdk_exists(test_config):
         raise FDroidException("Android SDK not found.")
 
-    if not os.path.exists('config.py'):
+    if not os.path.exists('config.py') or not common.is_config_empty():
         # 'metadata' and 'tmp' are created in fdroid
         if not os.path.exists('repo'):
             os.mkdir('repo')

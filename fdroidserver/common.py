@@ -323,6 +323,15 @@ def assert_config_keystore(config):
                               "you can create one using: fdroid update --create-key")
 
 
+def is_config_empty(config_file='config.py'):
+    config = {}
+    if os.path.isfile(config_file):
+        with io.open(config_file, "rb") as f:
+            code = compile(f.read(), config_file, 'exec')
+            exec(code, None, config)
+    return bool(config)
+
+
 def find_sdk_tools_cmd(cmd):
     '''find a working path to a tool from the Android SDK'''
 
