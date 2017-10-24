@@ -332,6 +332,26 @@ def is_config_empty(config_file='config.py'):
     return bool(config)
 
 
+def get_examplesdir(argv0):
+    tmp = os.path.dirname(argv0)
+    examplesdir = None
+    if os.path.basename(tmp) == 'bin':
+        egg_link = os.path.join(tmp, '..', 'local/lib/python2.7/site-packages/fdroidserver.egg-link')
+        if os.path.exists(egg_link):
+            # installed from local git repo
+            examplesdir = os.path.join(open(egg_link).readline().rstrip(), 'examples')
+        else:
+            # try .egg layout
+            examplesdir = os.path.dirname(os.path.dirname(__file__)) + '/share/doc/fdroidserver/examples'
+            if not os.path.exists(examplesdir):  # use UNIX layout
+                examplesdir = os.path.dirname(tmp) + '/share/doc/fdroidserver/examples'
+    else:
+        # we're running straight out of the git repo
+        prefix = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
+        examplesdir = prefix + '/examples'
+    return examplesdir
+
+
 def find_sdk_tools_cmd(cmd):
     '''find a working path to a tool from the Android SDK'''
 
