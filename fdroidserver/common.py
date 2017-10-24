@@ -2680,8 +2680,10 @@ def write_to_config(thisconfig, key, value=None, config_file=None):
 
     # load config file, create one if it doesn't exist
     if not os.path.exists(cfg):
-        open(cfg, 'a').close()
-        logging.info("Creating empty " + cfg)
+        examplesdir = get_examplesdir(sys.argv[0])
+        shutil.copyfile(os.path.join(examplesdir, 'config.py'), 'config.py')
+        os.chmod('config.py', 0o0600)
+        logging.info("Creating default config at " + cfg)
     with open(cfg, 'r', encoding="utf-8") as f:
         lines = f.readlines()
 
