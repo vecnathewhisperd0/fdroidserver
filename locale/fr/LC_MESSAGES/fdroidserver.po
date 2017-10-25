@@ -1,17 +1,17 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# Copyright (C) YEAR Free Software Foundation, Inc.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: https://gitlab.com/fdroid/fdroidserver/issues\n"
 "POT-Creation-Date: 2017-11-22 23:24+0100\n"
-"PO-Revision-Date: 2017-10-17 11:46+0000\n"
-"Last-Translator: xin <xin@riseup.net>\n"
-"Language-Team: French <https://hosted.weblate.org/projects/f-droid/"
-"fdroidserver/fr/>\n"
+"PO-Revision-Date: 2017-11-27 11:17+0100\n"
+"Last-Translator: Bruno Perel <brunoperel@gmail.com>\n"
+"Language-Team: French "
+"<https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -62,7 +62,7 @@ msgstr[1] ""
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
 msgid "%(prog)s: error: %(message)s\n"
-msgstr ""
+msgstr "%(prog)s: erreur: %(message)s\n"
 
 #: ../fdroidserver/scanner.py
 #, python-format
@@ -149,7 +149,7 @@ msgstr ""
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 msgid ".__call__() not defined"
-msgstr ""
+msgstr ".__call__() n'est pas défini"
 
 #: ../fdroidserver/lint.py
 msgid "/issues is missing"
@@ -939,7 +939,7 @@ msgstr ""
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 msgid "Options"
-msgstr ""
+msgstr "Options"
 
 #: ../fdroidserver/import.py
 msgid "Overall license of the project."
@@ -1421,12 +1421,12 @@ msgstr "Mettre à jour le wiki"
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 msgid "Usage"
-msgstr ""
+msgstr "Usage"
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 #, python-format
 msgid "Usage: %s\n"
-msgstr ""
+msgstr "Usage : %s\n"
 
 #: ../fdroidserver/lint.py
 msgid "Use /HEAD instead of /master to point at a file in the default branch"
@@ -1505,7 +1505,7 @@ msgstr ""
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 #, python-format
 msgid "ambiguous option: %s (%s?)"
-msgstr ""
+msgstr "option ambiguë : %s (%s?)"
 
 #: ../fdroidserver/lint.py ../fdroidserver/rewritemeta.py
 msgid "applicationId in the form APPID"
@@ -1683,7 +1683,7 @@ msgstr ""
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 #, python-format
 msgid "no such option: %s"
-msgstr ""
+msgstr "option inexistante : %s"
 
 #: ../fdroid
 #, fuzzy
@@ -1720,9 +1720,9 @@ msgid "option %s: invalid choice: %r (choose from %s)"
 msgstr ""
 
 #: /usr/lib/python3.5/getopt.py /usr/lib/python3.6/getopt.py
-#, fuzzy, python-format
+#, python-format
 msgid "option -%s not recognized"
-msgstr "La commande '%s 1' n'est pas reconnue.\n"
+msgstr "La commande '%s 1' n'est pas reconnue"
 
 #: /usr/lib/python3.5/getopt.py /usr/lib/python3.6/getopt.py
 #, python-format
@@ -1732,7 +1732,7 @@ msgstr ""
 #: /usr/lib/python3.5/getopt.py /usr/lib/python3.6/getopt.py
 #, python-format
 msgid "option --%s must not have an argument"
-msgstr ""
+msgstr "L'option %s ne doit pas avoir d'argument"
 
 #: /usr/lib/python3.5/getopt.py /usr/lib/python3.6/getopt.py
 #, python-format
@@ -1747,11 +1747,11 @@ msgstr "La commande '%s 1' n'est pas reconnue.\n"
 #: /usr/lib/python3.5/getopt.py /usr/lib/python3.6/getopt.py
 #, python-format
 msgid "option --%s requires argument"
-msgstr ""
+msgstr "L'option %s requiert un argument"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 msgid "optional arguments"
-msgstr ""
+msgstr "arguments optionnels"
 
 #: ../fdroidserver/nightly.py
 #, python-brace-format
@@ -1760,7 +1760,7 @@ msgstr ""
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 msgid "positional arguments"
-msgstr ""
+msgstr "arguments de position"
 
 #: ../fdroidserver/signatures.py
 #, python-brace-format
@@ -1783,12 +1783,12 @@ msgstr ""
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 msgid "show program's version number and exit"
-msgstr ""
+msgstr "afficher le numéro de version du programme et quitter"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.5/optparse.py
 #: /usr/lib/python3.6/argparse.py /usr/lib/python3.6/optparse.py
 msgid "show this help message and exit"
-msgstr ""
+msgstr "afficher ce message d'aide et quitter"
 
 #: ../fdroidserver/signatures.py
 msgid "signed APK, either a file-path or HTTPS URL."
@@ -1802,7 +1802,7 @@ msgstr ""
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
 msgid "the following arguments are required: %s"
-msgstr ""
+msgstr "les arguments suivants sont requis  %s"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
@@ -1826,7 +1826,7 @@ msgstr ""
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py ../fdroid
 msgid "usage: "
-msgstr ""
+msgstr "usage : "
 
 #: ../fdroid
 msgid "usage: fdroid [-h|--help|--version] <command> [<args>]"
