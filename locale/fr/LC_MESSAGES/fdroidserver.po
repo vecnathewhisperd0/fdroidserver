@@ -6,10 +6,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: https://gitlab.com/fdroid/fdroidserver/issues\n"
+"Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-11-22 23:24+0100\n"
-"PO-Revision-Date: 2017-11-27 11:17+0100\n"
-"Last-Translator: Bruno Perel <brunoperel@gmail.com>\n"
+"PO-Revision-Date: 2017-11-27 11:22+0100\n"
+"Last-Translator: nailyk <nailyk_weblate@nailyk.fr>\n"
 "Language-Team: French "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\n"
 "Language: fr\n"
@@ -74,9 +74,9 @@ msgid "%prog [options]"
 msgstr ""
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
-#, python-format
+#, fuzzy, python-format
 msgid "%r is not callable"
-msgstr ""
+msgstr "%r n'est pas appelable"
 
 #: ../fdroidserver/lint.py
 #, python-format
@@ -1498,9 +1498,9 @@ msgid "adding to {name}: {path}"
 msgstr ""
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
-#, python-format
+#, fuzzy, python-format
 msgid "ambiguous option: %(option)s could match %(matches)s"
-msgstr ""
+msgstr "option ambiguë: %(option)s peut correspondre à %(matches)s"
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 #, python-format
@@ -1534,7 +1534,7 @@ msgstr ""
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
 msgid "can't open '%s': %s"
-msgstr ""
+msgstr "Impossible d'ouvrir %s : %s"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 msgid "cannot have multiple subparser arguments"
@@ -1727,7 +1727,7 @@ msgstr "La commande '%s 1' n'est pas reconnue"
 #: /usr/lib/python3.5/getopt.py /usr/lib/python3.6/getopt.py
 #, python-format
 msgid "option -%s requires argument"
-msgstr ""
+msgstr "L'option -%s requiert un argument"
 
 #: /usr/lib/python3.5/getopt.py /usr/lib/python3.6/getopt.py
 #, python-format
@@ -1740,9 +1740,9 @@ msgid "option --%s not a unique prefix"
 msgstr ""
 
 #: /usr/lib/python3.5/getopt.py /usr/lib/python3.6/getopt.py
-#, fuzzy, python-format
+#, python-format
 msgid "option --%s not recognized"
-msgstr "La commande '%s 1' n'est pas reconnue.\n"
+msgstr "Option --%s non reconnue"
 
 #: /usr/lib/python3.5/getopt.py /usr/lib/python3.6/getopt.py
 #, python-format
