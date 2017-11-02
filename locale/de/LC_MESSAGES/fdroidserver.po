@@ -6,10 +6,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: https://gitlab.com/fdroid/fdroidserver/issues\n"
+"Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-11-22 23:24+0100\n"
 "PO-Revision-Date: 2017-11-27 11:20+0100\n"
-"Last-Translator: Andreas Kleinert <Andy.Kleinert@gmail.com>\n"
+"Last-Translator: Tobias Groza <tooobi14@gmail.com>\n"
 "Language-Team: German "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\n"
 "Language: de\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2.17\n"
+"X-Generator: Weblate 2.18-dev\n"
 
 #: ../fdroidserver/nightly.py
 msgid ""
@@ -67,7 +67,7 @@ msgstr "%(prog)s: Fehler: %(message)s\n"
 #: ../fdroidserver/scanner.py
 #, python-format
 msgid "%d problems found"
-msgstr ""
+msgstr "%d Probleme gefunden"
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 msgid "%prog [options]"
@@ -201,17 +201,17 @@ msgstr ""
 
 #: ../fdroidserver/common.py
 msgid "Android SDK not found!"
-msgstr ""
+msgstr "Android SDK nicht gefunden!"
 
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "Android SDK path '{path}' does not exist!"
-msgstr ""
+msgstr "Android SDK Pfad '{path}' existiert nicht!"
 
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "Android SDK path '{path}' is not a directory!"
-msgstr ""
+msgstr "Android SDK Pfad '{path}' ist kein Verzeichnis!"
 
 #. Translators: "build-tools" is the file name of a package from
 #. Google, it is part of the Android SDK. So it probably shouldn't be
@@ -310,7 +310,7 @@ msgstr ""
 #: ../fdroidserver/lint.py
 #, python-format
 msgid "Category '%s' is not valid"
-msgstr ""
+msgstr "Kategorie '%s' ist nicht gültig"
 
 #: ../fdroid
 msgid "Check for updates to applications"
@@ -455,7 +455,7 @@ msgstr ""
 #: ../fdroidserver/lint.py
 #, python-brace-format
 msgid "Description of length {length} is over the {limit} char limit"
-msgstr ""
+msgstr "Beschreibung der Länge {length} ist über dem {limit}-Zeichen Limit"
 
 #: ../fdroidserver/init.py
 msgid "Do not prompt for Android SDK path, just fail"
