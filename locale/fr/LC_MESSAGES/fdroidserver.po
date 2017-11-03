@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
-"POT-Creation-Date: 2017-11-22 23:24+0100\n"
-"PO-Revision-Date: 2017-11-27 11:22+0100\n"
-"Last-Translator: Ldm Public <ldmpub@gmail.com>\n"
+"POT-Creation-Date: 2017-10-17 17:48+0200\n"
+"PO-Revision-Date: 2017-11-03 20:05+0000\n"
+"Last-Translator: Stéphane <git@nazgul.fr>\n"
 "Language-Team: French "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\n"
 "Language: fr\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
-"X-Generator: Weblate 2.17\n"
+"X-Generator: Weblate 2.18-dev\n"
 
 #: ../fdroidserver/nightly.py
 msgid ""
@@ -67,7 +67,7 @@ msgstr "%(prog)s: erreur: %(message)s\n"
 #: ../fdroidserver/scanner.py
 #, python-format
 msgid "%d problems found"
-msgstr ""
+msgstr "%d problèmes trouvés"
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 msgid "%prog [options]"
@@ -86,7 +86,7 @@ msgstr ""
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 #, python-format
 msgid "%s option does not take a value"
-msgstr ""
+msgstr "l'option %s ne prend pas de valeur"
 
 #: ../fdroidserver/index.py ../fdroidserver/common.py
 msgid "'keypass' not found in config.py!"
@@ -135,7 +135,7 @@ msgstr ""
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "'{path}' failed to execute!"
-msgstr ""
+msgstr "'{path}' n'a pas pu être exécuté !"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
@@ -304,7 +304,7 @@ msgstr ""
 
 #: ../fdroidserver/lint.py
 msgid "Categories are not set"
-msgstr ""
+msgstr "Catégories non définies"
 
 #: ../fdroidserver/lint.py
 #, python-format
@@ -370,7 +370,7 @@ msgstr ""
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vcode
 #: ../fdroidserver/import.py
 msgid "Couldn't find latest version code"
-msgstr ""
+msgstr "Impossible de trouver la dernière code du version"
 
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vname
 #: ../fdroidserver/import.py
@@ -400,7 +400,7 @@ msgstr ""
 
 #: ../fdroidserver/publish.py
 msgid "Creating log directory"
-msgstr ""
+msgstr "Création du répertoire des logs"
 
 #: ../fdroidserver/server.py
 #, python-brace-format
@@ -418,7 +418,7 @@ msgstr ""
 #: ../fdroidserver/import.py ../fdroidserver/verify.py
 #: ../fdroidserver/publish.py
 msgid "Creating temporary directory"
-msgstr ""
+msgstr "Création du répertoire temporaire"
 
 #: ../fdroidserver/index.py
 msgid "Creating unsigned index in preparation for signing"
@@ -444,7 +444,7 @@ msgstr ""
 
 #: ../fdroidserver/lint.py
 msgid "Description has a duplicate line"
-msgstr ""
+msgstr "La description a une ligne dupliquée"
 
 #: ../fdroidserver/lint.py
 #, python-format
@@ -576,7 +576,7 @@ msgstr ""
 
 #: ../fdroidserver/publish.py
 msgid "Failed to sign application"
-msgstr ""
+msgstr "Signature de l'application en échec"
 
 #: ../fdroidserver/signatures.py
 #, python-brace-format
@@ -588,7 +588,7 @@ msgstr ""
 #: ../fdroidserver/checkupdates.py ../fdroidserver/scanner.py
 #: ../fdroidserver/install.py
 msgid "Finished"
-msgstr ""
+msgstr "Fini"
 
 #: ../fdroidserver/lint.py
 msgid "Flattr donation methods belong in the FlattrID flag"
@@ -622,6 +622,7 @@ msgstr "Créer les métadonnées de base manquantes"
 #: ../fdroidserver/index.py
 msgid "Found multiple signing certificates for repository."
 msgstr ""
+"Plusieurs certificats de signature ont étés trouvés pour le référentiel."
 
 #: ../fdroidserver/update.py
 #, python-brace-format
@@ -815,7 +816,7 @@ msgstr ""
 
 #: ../fdroidserver/gpgsign.py
 msgid "Missing output directory"
-msgstr ""
+msgstr "Répertoire de destination manquant"
 
 #: ../fdroidserver/lint.py
 #, python-format
@@ -853,15 +854,15 @@ msgstr ""
 
 #: ../fdroidserver/import.py
 msgid "No information found."
-msgstr ""
+msgstr "Aucune information trouvée."
 
 #: ../fdroidserver/lint.py
 msgid "No need to specify that the app is Free Software"
-msgstr ""
+msgstr "Pas besoin de spécifier que l'application est un logiciel libre"
 
 #: ../fdroidserver/lint.py
 msgid "No need to specify that the app is for Android"
-msgstr ""
+msgstr "Pas besoin de spécifier que l'application est pour Android"
 
 #: ../fdroidserver/server.py
 msgid "No option set! Edit your config.py to set at least one of these:"
@@ -902,12 +903,12 @@ msgstr ""
 
 #: ../fdroidserver/signindex.py
 msgid "Nothing to do"
-msgstr ""
+msgstr "Rien à faire"
 
 #: ../fdroidserver/checkupdates.py
 #, python-brace-format
 msgid "Nothing to do for {appid}."
-msgstr ""
+msgstr "Rien à faire pour {appid}"
 
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vcode
 #: ../fdroidserver/update.py
@@ -943,7 +944,7 @@ msgstr "Options"
 
 #: ../fdroidserver/import.py
 msgid "Overall license of the project."
-msgstr ""
+msgstr "Licence globale du projet."
 
 #: ../fdroidserver/dscanner.py
 msgid "Override path for repo APKs (default: ./repo)"
@@ -956,7 +957,7 @@ msgstr ""
 
 #: ../fdroidserver/common.py
 msgid "Password required with username"
-msgstr ""
+msgstr "Mot de passe requis avec nom d'utilisateur"
 
 #: ../fdroidserver/import.py
 msgid "Path to main Android project subdirectory, if not in root."
@@ -1807,7 +1808,7 @@ msgstr "les arguments suivants sont requis  %s"
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
 msgid "unexpected option string: %s"
-msgstr ""
+msgstr "chaîne d'option inattendue : %s"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
@@ -1817,7 +1818,7 @@ msgstr ""
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
 msgid "unrecognized arguments: %s"
-msgstr ""
+msgstr "arguments non reconnu : %s"
 
 #: ../fdroidserver/common.py
 #, python-brace-format
