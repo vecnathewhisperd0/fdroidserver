@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
-"PO-Revision-Date: 2017-11-05 10:11+0000\n"
+"PO-Revision-Date: 2017-11-06 15:50+0000\n"
 "Last-Translator: tenzin tselek <omaahum99@yahoo.in>\n"
 "Language-Team: Tibetan "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/bo/>\n"
@@ -746,8 +746,9 @@ msgid "Include APKs that are signed with disabled algorithms like MD5"
 msgstr ""
 
 #: ../fdroidserver/common.py
+#, fuzzy
 msgid "Initialising submodules"
-msgstr ""
+msgstr "ཐོག་མིའི་ཡན་ལག་རྒྱ་ཁྱོན།"
 
 #: ../fdroidserver/install.py
 msgid "Install all signed applications available"
@@ -758,14 +759,14 @@ msgid "Install built packages on devices"
 msgstr "ཡོ་བྱད་སྒང་གི་ཐུམ་སྒྲིལ་བཟོས་པ་རྣམས་འགྲིག་བཅུག་བྱེད།"
 
 #: ../fdroidserver/install.py
-#, python-format
+#, fuzzy, python-format
 msgid "Installing %s..."
-msgstr ""
+msgstr "སྒྲིག་བཅུག་བྱེད་བཞིན་པ།%s..."
 
 #: ../fdroidserver/install.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Installing '{apkfilename}' on {dev}..."
-msgstr ""
+msgstr "'{apkfilename}' སྒྲིག་བཅུག་བྱེད་བཞིན་པ་{dev}གྱི་སྒང་ལ་..."
 
 #: ../fdroid
 msgid "Interact with the repo HTTP server"
@@ -799,14 +800,19 @@ msgid "Invalid bulleted list"
 msgstr ""
 
 #: ../fdroidserver/lint.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "Invalid license tag \"%s\"! Use only tags from https://spdx.org/license-list"
 msgstr ""
+"ཁུངས་ལྡན་མིན་པའི་ཆོག་མཆན་ལག་ཁྱེར་སྦྱར་ \"%s\"! https://spdx.org/license-list "
+"ཁོ་ན་ནས་ཡིན་པ་སྦྱར་ཏེ་བེད་སྤྱོད་བྱེད་།"
 
 #: ../fdroidserver/lint.py
+#, fuzzy
 msgid "Invalid link - use [http://foo.bar Link title] or [http://foo.bar]"
 msgstr ""
+"ཁུངས་ལྡན་མིན་པའི་སྦྲེལ་མཐུད།  - [http://foo.bar Link title] or "
+"[http://foo.bar]བེད་སྤྱོད་བྱེད།"
 
 #: ../fdroidserver/metadata.py
 #, python-format
@@ -818,14 +824,14 @@ msgid "Invalid metadata in: "
 msgstr ""
 
 #: ../fdroidserver/common.py
-#, python-format
+#, fuzzy, python-format
 msgid "Invalid name for published file: %s"
-msgstr ""
+msgstr "པར་སྐྲུན་ཡིག་ཆའི་ཆེད་དུ་ཁུངས་ལྡན་མིན་པའིན་མིང་།: %s"
 
 #: ../fdroidserver/common.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Invalid package name {0}"
-msgstr ""
+msgstr "ཁུངས་ལྡན་མིན་པའི་ཐུམ་སྒྲིལ་གྱི་མིང་།{0}"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
@@ -835,11 +841,16 @@ msgstr ""
 #: ../fdroidserver/publish.py ../fdroidserver/update.py
 msgid "Java JDK not found! Install in standard location or set java_paths!"
 msgstr ""
+"Java JDK རྙེད་མ་སོང་།! ཚད་ལྡན་གྱི་ས་གནས་ནང་སྒྲིག་བཅུག་བྱེད་པའམ་ཡང་ན་"
+"java_paths སྒྲིག!"
 
 #: ../fdroidserver/signindex.py
+#, fuzzy
 msgid ""
 "Java jarsigner not found! Install in standard location or set java_paths!"
 msgstr ""
+"Java jarsigner རྙེད་མ་སོང་། !ཚད་ལྡན་གྱི་ས་གནས་ནང་སྒྲིག་བཅུག་བྱེད་པའམ་ཡང་ན་"
+"java_paths སྒྲིག!"
 
 #: ../fdroidserver/init.py
 #, fuzzy
@@ -847,11 +858,13 @@ msgid "Keystore for signing key:\t"
 msgstr "རེ་པོ་མིང་རྟགས་བཀོད་པའི་ལྡེ་མིག་ཆེད་དུ་སྟོན་པའི་ལྡེ་མིག་གསོག་ཉར་ཁང་གི་ལམ།"
 
 #: ../fdroidserver/lint.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Last used commit '{commit}' looks like a tag, but Update Check Mode is "
 "'{ucm}'"
 msgstr ""
+"ཁས་ལེན་བྱས་པའི་བེད་སྤྱོད་ཐ་མ་ '{commit}' སྦྱར་བ་འདྲ་པོ་འདུག, "
+"འོན་ཀྱང་གསར་བསྒྱུར་ཡོད་མེད་འཚོལ་བྱེད་ནི།'{ucm}'"
 
 #: ../fdroidserver/rewritemeta.py
 msgid "List files that would be reformatted"
@@ -862,37 +875,45 @@ msgid "Make the build stop on exceptions"
 msgstr "དམིགས་བསལ་གྱི་གནས་སྐབས་ལ་ཐོན་སྐྱེད་དེ་བཀག་ཆོག"
 
 #: ../fdroidserver/index.py
+#, fuzzy
 msgid "Malformed repository mirrors."
-msgstr ""
+msgstr "བཟོ་ལྟ་མེད་པའི་མཛོད་ཁང་ཤེལ་སྒོ་རྣམས།"
 
 #: ../fdroidserver/server.py
+#, fuzzy
 msgid "Malformed serverwebroot line:"
-msgstr ""
+msgstr "བཟོ་ལྟ་ཤོར་བའི་serverwebroot line:"
 
 #: ../fdroidserver/gpgsign.py
+#, fuzzy
 msgid "Missing output directory"
-msgstr ""
+msgstr "ཕྱོགས་དེབ་ཐོན་སྐྱེད་བོར་བརླག"
 
 #: ../fdroidserver/lint.py
-#, python-format
+#, fuzzy, python-format
 msgid "Name '%s' is just the auto name - remove it"
-msgstr ""
+msgstr "མིང་། '%s' ནི་རང་མིང་ཁོ་ན་རེད་།  - མེད་པ་བཟོས།"
 
 #: ../fdroidserver/common.py
+#, fuzzy
 msgid "No 'config.py' found, using defaults."
-msgstr ""
+msgstr "'config.py' རྙེད་མ་སོང་།, སོར་བཞག་བེད་སྤྱོད་བྱེད་བཞིན་པ།"
 
 #: ../fdroidserver/common.py
+#, fuzzy
 msgid "No Android SDK found!"
-msgstr ""
+msgstr "ཨེན་ཀྲོཌ་SDKརྙེད་མ་སོང་།"
 
 #: ../fdroidserver/import.py
+#, fuzzy
 msgid "No android or kivy project could be found. Specify --subdir?"
 msgstr ""
+"ཨེན་ཀྲོཌ་དང་ཡང་ན་ཀི་བི་ལས་འཆར་གང་ཡང་རྙེད་ས་མ་རེད། དམིགས་སྟོན་བྱེད་--subdir?"
 
 #: ../fdroidserver/install.py
+#, fuzzy
 msgid "No attached devices found"
-msgstr ""
+msgstr "ཟུར་སྣོན་ཡོ་བྱད་རྙེད་མ་སོང་།"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
@@ -900,41 +921,51 @@ msgid "No commit specified for {versionName} in {linedesc}"
 msgstr ""
 
 #: ../fdroidserver/index.py
+#, fuzzy
 msgid "No fingerprint in URL."
-msgstr ""
+msgstr "URLནང་ལག་མཐིལ་པར་ཤུས་རྙེད་མ་སོང་།"
 
 #: ../fdroidserver/common.py
+#, fuzzy
 msgid "No git submodules available"
-msgstr ""
+msgstr "གིཊ་ཡན་ལག་རྒྱ་ཁྱོན་མིན་འདུག"
 
 #: ../fdroidserver/import.py
+#, fuzzy
 msgid "No information found."
-msgstr ""
+msgstr "གནས་ཚུལ་རྙེད་མ་སོང་།"
 
 #: ../fdroidserver/lint.py
+#, fuzzy
 msgid "No need to specify that the app is Free Software"
-msgstr ""
+msgstr "མཉེས་ཆས་འདི་རིན་མེད་མཉེན་ཆས་ཡིན་པ་དམིགས་སྟོན་བྱེད་དགོས་དོན་མེད་།"
 
 #: ../fdroidserver/lint.py
+#, fuzzy
 msgid "No need to specify that the app is for Android"
-msgstr ""
+msgstr "མཉེན་ཆས་འདི་ཨེན་ཀྲོཌ་ཆེད་དུ་ཡིན་པ་དམིགས་སྟོན་བྱེད་དགོས་དོན་མེད།"
 
 #: ../fdroidserver/server.py
+#, fuzzy
 msgid "No option set! Edit your config.py to set at least one of these:"
 msgstr ""
+"གདམ་ཀ་མེད་པ་སྒྲིག།! ཁྱེད་རང་གི་config.py "
+"འདིའི་ནང་ནས་མ་མཐའ་ཡིན་ཡང་གང་རུང་ཞིག་རྩོམ་སྒྲིག་བྱེད་:"
 
 #: ../fdroidserver/common.py
+#, fuzzy
 msgid "No packages specified"
-msgstr ""
+msgstr "ཐུམ་སྒྲིལ་དམིགས་སྟོན་བྱེད་མེད།"
 
 #: ../fdroidserver/install.py
-#, python-format
+#, fuzzy, python-format
 msgid "No signed apk available for %s"
-msgstr ""
+msgstr "%sཆེད་དུ་མིང་རྟགས་བཀོད་པའི་apkམེད།"
 
 #: ../fdroidserver/install.py
+#, fuzzy
 msgid "No signed output directory - nothing to do"
-msgstr ""
+msgstr "མིང་རྟགས་མ་བཀོད་པའི་ཕྱོགས་དེབ་ཐོན་སྐྱེད། -བྱ་རྒྱུ་གང་ཡང་མེད།"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
@@ -942,28 +973,30 @@ msgid "No signing certificates found in {path}"
 msgstr ""
 
 #: ../fdroidserver/common.py
-#, python-format
+#, fuzzy, python-format
 msgid "No such package: %s"
-msgstr ""
+msgstr "ཐུམ་སྒྲིལ་དེ་འདྲ་མིན་འདུག: %s"
 
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vcode
 #: ../fdroidserver/common.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "No such versionCode {versionCode} for app {appid}"
-msgstr ""
+msgstr "ཐོན་རིམ་ཨང་རྟགས་དེ་འདྲ་མིན་འདུག {versionCode} མཉེན་ཆས་ཆེད་དུ།{appid}"
 
 #: ../fdroidserver/verify.py ../fdroidserver/publish.py
+#, fuzzy
 msgid "No unsigned directory - nothing to do"
-msgstr ""
+msgstr "མིང་རྟགས་མ་བཀོད་པའི་ཕྱོགས་དེབ་མིན་འདུག-བྱ་རྒྱུ་གང་ཡང་མེད།"
 
 #: ../fdroidserver/signindex.py
+#, fuzzy
 msgid "Nothing to do"
-msgstr ""
+msgstr "བྱ་རྒྱུ་གང་ཡང་མེད་།"
 
 #: ../fdroidserver/checkupdates.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Nothing to do for {appid}."
-msgstr ""
+msgstr "{appid}ཆེད་དུ་བྱ་རྒྱུ་གང་ཡང་མེད་།"
 
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vcode
 #: ../fdroidserver/update.py
@@ -1011,8 +1044,9 @@ msgid "Parsing manifest at '{path}'"
 msgstr ""
 
 #: ../fdroidserver/common.py
+#, fuzzy
 msgid "Password required with username"
-msgstr ""
+msgstr "སྤྱོད་མིང་དང་མཉམ་དུ་གསང་ཨང་དགོས།"
 
 #: ../fdroidserver/import.py
 #, fuzzy
@@ -1054,23 +1088,23 @@ msgid "Problem with description of {appid}: {error}"
 msgstr ""
 
 #: ../fdroidserver/common.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Problem with xml at '{path}'"
-msgstr ""
+msgstr "'{path}'ལ་xml མཉམ་དུ་སྐྱོན་འདུག"
 
 #: ../fdroidserver/checkupdates.py
 msgid "Process auto-updates"
 msgstr "རང་འགུལ་གྱི་གསར་བསྒྱུར་རྣམས་བྱེད།"
 
 #: ../fdroidserver/publish.py ../fdroidserver/update.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Processing {apkfilename}"
-msgstr ""
+msgstr "ལས་ཀ་བྱེད་བཞིན་པ་{apkfilename}"
 
 #: ../fdroidserver/checkupdates.py ../fdroidserver/scanner.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Processing {appid}"
-msgstr ""
+msgstr "ལས་ཀ་བྱེད་བཞིན་པ།{appid}"
 
 #: ../fdroidserver/update.py
 #, fuzzy
@@ -1086,8 +1120,9 @@ msgid "Project URL to import from."
 msgstr "URL ལས་འཆར་ནང་འདྲེན།"
 
 #: ../fdroidserver/lint.py
+#, fuzzy
 msgid "Punctuation should be avoided"
-msgstr ""
+msgstr "ཡི་གེའི་བར་རྟགས་རིགས་ངེས་པར་མེད་པ་དགོས་།"
 
 #: ../fdroidserver/btlog.py
 msgid "Push the log to this git remote repository"
@@ -1099,9 +1134,9 @@ msgid "Pushing binary transparency log to {url}"
 msgstr "URLཆེད་དུ་ཨང་གྲངས་ཀྱི་ཐོ་གཞུང་གསར་བསྒྱུར།"
 
 #: ../fdroidserver/server.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Pushing to {url}"
-msgstr ""
+msgstr "{url}ཕྱོགས་ལ་འབུད་རྒྱབ་རྒྱོབ།"
 
 #: ../fdroid
 msgid "Quickly start a new repository"
@@ -1112,18 +1147,20 @@ msgid "Read all the metadata files and exit"
 msgstr "ཡིག་ཚགས་ཀྱི་རྒྱབ་ལྗོངས་ལོ་རྒྱུས་ཀློག་ནས་ཕྱིར་ཐོན།"
 
 #: ../fdroidserver/common.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Reading '{config_file}'"
-msgstr ""
+msgstr "ཀློག་བཞིན་པ་། '{config_file}'"
 
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vcode
 #. https://developer.android.com/guide/topics/manifest/manifest-element.html#vname
 #: ../fdroidserver/common.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "Reading packageName/versionCode/versionName failed, APK invalid: "
 "'{apkfilename}'"
 msgstr ""
+"ཐུམ་སྒྲིལ་གྱི་མིང་ཀློག་བཞིནཔ།/ཐོན་རིམ་ཨང་རྟགས་/ཐོན་རིམ་གྱི་མིང་བདེ་སྤྱོད་མེད།"
+" APK ཁུངས་ལྡན་མིན།: '{apkfilename}'"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
@@ -1138,8 +1175,9 @@ msgid ""
 msgstr "ཕྱོགས་བསྡོམས་བྱས་པའི་གྲངས་ཐོ་རྣམས་སྐྱར་རྩིས་བྱེད། -བསྒྱུར་བ་འགྲོ་བའི་སྐབས་ལ་བེད་སྤྱོད་བྱེད། "
 
 #: ../fdroidserver/common.py
+#, fuzzy
 msgid "Removing specified files"
-msgstr ""
+msgstr "དམིགས་སྟོན་བྱས་པའི་ཡིག་ཆ་རྣམས་མེད་པ་བཟོ་བཞིན་པ།"
 
 #: ../fdroidserver/update.py
 msgid "Rename APK files that do not match package.name_123.apk"
@@ -1174,14 +1212,14 @@ msgid "Rewrite to a specific format: "
 msgstr "བཀོད་སྒྲིག་འདི་ག་རང་ལ་སྐྱར་བྲིས་བྱེད།: "
 
 #: ../fdroidserver/rewritemeta.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Rewriting '{appid}'"
-msgstr ""
+msgstr "སྐྱར་བྲིས། '{appid}'"
 
 #: ../fdroidserver/rewritemeta.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Rewriting '{appid}' to '{path}'"
-msgstr ""
+msgstr "སྐྱར་བྲིས '{appid}' དེ་ནས། '{path}'"
 
 #: ../fdroidserver/lint.py
 #, fuzzy
@@ -1189,8 +1227,9 @@ msgid "Run rewritemeta to fix formatting"
 msgstr "བཀོད་སྒྲིག་འདི་ག་རང་ལ་སྐྱར་བྲིས་བྱེད།: "
 
 #: ../fdroidserver/server.py
+#, fuzzy
 msgid "Running first pass with MD5 checking disabled"
-msgstr ""
+msgstr "MD5 ཚོད་ལྟ་བེད་སྤྱོད་མེད་པ་དང་མཉམ་དུ་ཐེངས་དང་པོ་འཁོར་སྐྱོད་བྱེད་བཞིན་པ།"
 
 #: ../fdroidserver/dscanner.py
 msgid "Scan only the latest version of each package"
@@ -1203,7 +1242,7 @@ msgstr "ཐུམ་སྒྲིལ་བྱས་པའི་འབྱུང་
 #: ../fdroidserver/build.py
 msgid "Scanner found {} problem"
 msgid_plural "Scanner found {} problems"
-msgstr[0] ""
+msgstr[0] "འཚག་རྒྱབ་ལ་སྐྱོན་རྙེད་པ།"
 
 #: ../fdroid
 msgid "Set up an app build for a nightly build repo"
@@ -1234,9 +1273,9 @@ msgid "Skip scanning the source code for binaries and other problems"
 msgstr "འབྱུང་ཁུངས་ཨ་རྟགས་དང་དཀའ་ངལ་གཞན་རྣམས་འཚག་རྒྱབ་མ་དགོས་པར་མཆོང་།"
 
 #: ../fdroidserver/update.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Skipping '{apkfilename}' with invalid signature!"
-msgstr ""
+msgstr "'{apkfilename}'མཆོང་ནས་ཁུངས་ལྡན་མ་ཡིན་པའི་མིང་རྟགས་དང་མཉམ་དུ།!"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
@@ -1249,14 +1288,14 @@ msgid "Skipping {apkfilename} with invalid signature!"
 msgstr ""
 
 #: ../fdroidserver/scanner.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Skipping {appid}: disabled"
-msgstr ""
+msgstr "མཆོང་བཞིན་པ་ {appid}: བེད་མེད།"
 
 #: ../fdroidserver/scanner.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Skipping {appid}: no builds specified"
-msgstr ""
+msgstr "མཆོང་བཞིན་པ་ {appid}: བཟོ་སྐྲུན་དམིགས་སྟོན་མིན་འདུག"
 
 #: ../fdroidserver/server.py
 msgid "Specify a local folder to sync the repo to"
@@ -1289,14 +1328,14 @@ msgid "Spew out even more information than normal"
 msgstr "ནམ་རྒྱུན་ལས་ཀྱང་མང་བའི་གནས་ཚུལ་ཕྱིར་སྟོན།"
 
 #: ../fdroidserver/lint.py
-#, python-format
+#, fuzzy, python-format
 msgid "Summary '%s' is just the app's name"
-msgstr ""
+msgstr "སྙིང་བསྔུས་ '%s' ནི་མཉེན་ཆས་ཀྱི་མིང་ཞིག་རེད་།"
 
 #: ../fdroidserver/lint.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Summary of length {length} is over the {limit} char limit"
-msgstr ""
+msgstr "སྙིང་བསྔུས་ཀྱི་རིང་ཐུང་། {length}  {ཚད་} ལས་བརྒལ་འདུག char limit"
 
 #: ../fdroidserver/build.py
 msgid ""
@@ -1322,36 +1361,42 @@ msgid "The only commands currently supported are 'init' and 'update'"
 msgstr "ལག་བསྟར་བྱེད་རྒྱུར་བཀའ་གཏོང། ཡང་ན་'init'འམ་ཡང་ན་ 'གསར་བསྒྱུར།'"
 
 #: ../fdroidserver/index.py
+#, fuzzy
 msgid "The repository's fingerprint does not match."
-msgstr ""
+msgstr "མཛོད་ཁང་གི་མཛུབ་མཐིལ་དང་མཐུན་གྱི་མིན་འདུག"
 
 #: ../fdroidserver/common.py
+#, fuzzy
 msgid "The repository's index could not be verified."
-msgstr ""
+msgstr "མཛོད་ཁང་གི་ཕྱོགས་སྟོན་ར་སྤྲོད་ཐུབ་མ་སོང་།"
 
 #: ../fdroidserver/server.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "The root dir for local_copy_dir \"{path}\" does not exist!"
-msgstr ""
+msgstr "dir གྱི་རྩ་བ་ for local_copy_dir \"{path}\" མིན་འདུག!"
 
 #: ../fdroidserver/nightly.py
 msgid "The the file to be included in the repo (path or glob)"
 msgstr ""
 
 #: ../fdroidserver/publish.py
+#, fuzzy
 msgid "There is a keyalias collision - publishing halted"
-msgstr ""
+msgstr "ལྡེ་མིག་གཞན་ལ་སྐྱོན་ཆ་འདུག། -པར་སྐྲུན་བཀག"
 
 #: ../fdroidserver/import.py
-#, python-format
+#, fuzzy, python-format
 msgid "This repo already has local metadata: %s"
-msgstr ""
+msgstr "རེ་པོ་འདི་ལ་སྔོན་ཚོད་ནས་ས་གནས་ཀྱི་རྒྱབ་ལྗོངས་ཡིག་ཆ་འདུག: %s"
 
 #: ../fdroidserver/server.py
+#, fuzzy
 msgid ""
 "To use awsbucket, awssecretkey and awsaccesskeyid must also be set in config."
 "py!"
 msgstr ""
+"awsbucket, awssecretkey དང་། awsaccesskeyid བེད་སྤྱོད་བྱེད་པའི་ཆེད་དུ་ "
+"config.py ནང་དུ་ངེས་པར་དུ་སྒྲིག་དགོས།!"
 
 #: ../fdroidserver/lint.py
 msgid "UCM is set but it looks like checkupdates hasn't been run yet"
