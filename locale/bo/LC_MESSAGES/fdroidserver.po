@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
-"PO-Revision-Date: 2017-11-06 15:50+0000\n"
+"PO-Revision-Date: 2017-11-06 19:17+0000\n"
 "Last-Translator: tenzin tselek <omaahum99@yahoo.in>\n"
 "Language-Team: Tibetan "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/bo/>\n"
@@ -1403,17 +1403,18 @@ msgid "UCM is set but it looks like checkupdates hasn't been run yet"
 msgstr ""
 
 #: ../fdroidserver/lint.py
+#, fuzzy
 msgid "URL shorteners should not be used"
-msgstr ""
+msgstr "URL ཐུང་དུ་གཏོང་མཁན་ངེས་པར་དུ་བེད་སྤྱོད་བྱེད།"
 
 #: ../fdroidserver/metadata.py
 msgid "URL title is just the URL, use brackets: [URL]"
 msgstr ""
 
 #: ../fdroidserver/lint.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "URL {url} in Description: {error}"
-msgstr ""
+msgstr "URL {url} ནང་འགྲེལ་བཤད་རྒྱབ་པ་: {error}"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
@@ -1426,9 +1427,10 @@ msgstr "ཆ་རྒྱུས་མེད་པའི་དམིགས་བས
 
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vname
 #: ../fdroidserver/lint.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Unknown file '{filename}' in build '{versionName}'"
 msgstr ""
+"ངོས་འཛིན་མི་ཐུབ་པའི་ཡིག་ཆ། '{filename}' བཟོ་སྐྲུན་གྱི་ནང་།'{versionName}'"
 
 #: ../fdroidserver/metadata.py
 #, python-format
@@ -1441,20 +1443,26 @@ msgid "Unknown metadata format: {path}"
 msgstr "བོར་བརླག་ཏུ་སོང་བའི་ཡིག་ཚགས་ཀྱི་རྒྱབ་ལྗོངས་ལོ་རྒྱུས་ཡང་སྐྱར་བཟོས།"
 
 #: ../fdroidserver/common.py
+#, fuzzy
 msgid "Unknown version of aapt, might cause problems: "
-msgstr ""
+msgstr "aapt གྱི་ངོས་འཛིན་མ་ཐུབ་པའི་ཐོན་རིམ། དཀའ་ངལ་ཕྲད་སྲིད་པ།: "
 
 #: ../fdroidserver/lint.py
+#, fuzzy
 msgid "Unlinkified link - use [http://foo.bar Link title] or [http://foo.bar]"
 msgstr ""
+"སྦྲེལ་མཐུད་བྱེད་མི་ཐུབ་པའི་སྦྲེལ་མཐུད། -བེད་སྤྱོད། [http://foo.bar Link "
+"title] or [http://foo.bar]"
 
 #: ../fdroidserver/lint.py
+#, fuzzy
 msgid "Unnecessary leading space"
-msgstr ""
+msgstr "དགོས་མེད་ཀྱི་སྣེ་ཁྲིད་བར་མཚམས།"
 
 #: ../fdroidserver/lint.py
+#, fuzzy
 msgid "Unnecessary trailing space"
-msgstr ""
+msgstr "དགོས་མེད་ཀྱི་རྫེས་ཤུལ་བར་མཚམས།"
 
 #: ../fdroidserver/metadata.py
 msgid "Unrecognised app field: "
@@ -1471,9 +1479,11 @@ msgid "Unsupported graphics file found: {path}"
 msgstr ""
 
 #: ../fdroidserver/rewritemeta.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Unsupported metadata format, use: --to [{supported}]"
 msgstr ""
+"རྒྱབ་སྐྱོར་མེད་པའི་རྒྱབ་ལྗོངས་ཡིག་ཆའི་འགྲོ་ལུགས། བེད་སྤྱོད་: --to "
+"[{supported}]"
 
 #: ../fdroidserver/metadata.py
 msgid "Unterminated ]"
@@ -1494,14 +1504,14 @@ msgid "Unterminated continuation in {name}"
 msgstr ""
 
 #: ../fdroidserver/lint.py
-#, python-format
+#, fuzzy, python-format
 msgid "Unused extlib at %s"
-msgstr ""
+msgstr "བེད་སྤྱོད་མེད་པའི་ extlib at %s"
 
 #: ../fdroidserver/lint.py
-#, python-format
+#, fuzzy, python-format
 msgid "Unused file at %s"
-msgstr ""
+msgstr "%sདེ་ལ་བེད་སྤྱོད་མེད་པའི་ཡིག་ཆ།"
 
 #: ../fdroidserver/lint.py
 msgid "Update Check Name is set to the known app id - it can be removed"
@@ -1534,8 +1544,9 @@ msgid "Usage: %s\n"
 msgstr "བེད་སྤྱོད།: %s\n"
 
 #: ../fdroidserver/lint.py
+#, fuzzy
 msgid "Use /HEAD instead of /master to point at a file in the default branch"
-msgstr ""
+msgstr "བེད་སྤྱོད།/HEAD གྱི་ཚབ་ཏུ།/ སོར་བཞག་ཡན་ལག་ནང་དུ་ཡོད་པའི་དོན་ཚན་ཨ་མ།"
 
 #: ../fdroidserver/update.py
 msgid "Use `fdroid update -c` to create it."
@@ -1556,9 +1567,9 @@ msgstr ""
 "apk རང་གི་ཚེས་གྲངས་དེ་བེད་སྤྱོད་བྱས་པ་ལས་ཁ་སྣོན་བྱས་པའི་apk གསར་པའི་དུས་ཚོས་བེད་སྤྱོད་མ་བྱེད།"
 
 #: ../fdroidserver/server.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Using s3cmd to sync with: {url}"
-msgstr ""
+msgstr "s3cmd བེད་སྤྱོད་བྱས་ནས་: {url}དང་མཉམ་དུ་sync"
 
 #: ../fdroid
 msgid "Valid commands are:"
@@ -1588,8 +1599,11 @@ msgid "X.509 'Distinguished Name' used when generating keys"
 msgstr "X.509 'ཁྱད་པར་ཅན་གྱི་མིང་' ལྡེ་མིག་བཟོས་པའི་སྐབས་ལ་བེད་སྤྱོད་བྱེད།"
 
 #: ../fdroidserver/common.py
+#, fuzzy
 msgid "You can use ANDROID_HOME to set the path to your SDK, i.e.:"
 msgstr ""
+"ཁྱེད་རང་གིས་ཨེན་ཀྲོཌ་མདུན་ངོས་བེད་སྤྱོད་བྱས་ནས་ཁྱེད་རང་གི་SDKའགྲོ་ལམ་སྒྲིག་བཀ"
+"ོད་བྱེད། དེ་ནི།:"
 
 #: ../fdroidserver/nightly.py
 #, python-brace-format
@@ -1630,9 +1644,9 @@ msgid "applicationId with optional versionCode in the form APPID[:VERCODE]"
 msgstr "མཉེན་ཆས་ཀྱི་ངོ་བོ་དང་མཉམ་དུ་གདམ་ཀ་ཅན་གྱི་ཐོན་རིམ་ཨང་རྟགས་APPID[:VERCODE]"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
-#, python-format
+#, fuzzy, python-format
 msgid "argument \"-\" with mode %r"
-msgstr ""
+msgstr "རྩོད་པ།\"-\" འགྲོ་ལུགས་འདི་དང་མཉམ་དུ། %r"
 
 #: ../fdroidserver/nightly.py
 msgid "attempting bare ssh connection to test deploy key:"
@@ -1644,13 +1658,14 @@ msgid "can't open '%s': %s"
 msgstr "ཁ་ཕྱེས་ཐུབ་མ་སོང་།'%s': %s"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
+#, fuzzy
 msgid "cannot have multiple subparser arguments"
-msgstr ""
+msgstr "subparser རྩོད་པ་དུ་མ་ཡོད་ཐབས་མེད།"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
-#, python-format
+#, fuzzy, python-format
 msgid "cannot merge actions - two groups are named %r"
-msgstr ""
+msgstr "བྱ་བ་ཟླ་སྒྲིལ་བཏང་ཐུབ་མ་སོང་། - སྡེ་ཚན་གཉིས་ཀྱི་མིང་ལ་%r 1"
 
 #: ../fdroidserver/nightly.py
 msgid "cannot publish update, did you set the deploy key?"
@@ -1666,14 +1681,15 @@ msgid "command to execute, either 'init' or 'update'"
 msgstr "ལག་བསྟར་བྱེད་རྒྱུར་བཀའ་གཏོང། ཡང་ན་'init'འམ་ཡང་ན་ 'གསར་བསྒྱུར།'"
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
+#, fuzzy
 msgid "complex"
-msgstr ""
+msgstr "མགོ་རྙོག"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
-#, python-format
+#, fuzzy, python-format
 msgid "conflicting option string: %s"
 msgid_plural "conflicting option strings: %s"
-msgstr[0] ""
+msgstr[0] "ཚིག་སྒྲུབ་ཀྱི་གདམ་ཀའི་རྙོག་ཕྲ།: %s"
 
 #: ../fdroidserver/nightly.py
 #, python-brace-format
@@ -1686,27 +1702,30 @@ msgid "deleting: repo/{apkfilename}"
 msgstr ""
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
-#, python-format
+#, fuzzy, python-format
 msgid "dest= is required for options like %r"
-msgstr ""
+msgstr "dest= ནི་གདམ་ཀ་འདི་འདྲ་ལ་%rདགོས་པ་ཡོད།"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
-#, python-format
+#, fuzzy, python-format
 msgid "expected %s argument"
 msgid_plural "expected %s arguments"
-msgstr[0] ""
+msgstr[0] "ཚོད་དཔག་བྱེད་པའི་%s རྩོད་པ་"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
+#, fuzzy
 msgid "expected at least one argument"
-msgstr ""
+msgstr "མ་མཐའ་ཡིན་ནའང་རེ་བ་བྱེད་པའི་རྩོད་པ།"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
+#, fuzzy
 msgid "expected at most one argument"
-msgstr ""
+msgstr "རེ་བ་བྱས་པའི་རྩོད་པ་ཆེ་ཤེོས་གཅིག"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
+#, fuzzy
 msgid "expected one argument"
-msgstr ""
+msgstr "རེ་བ་བྱས་པའི་རྩོད་པ་གཅིག"
 
 #: ../fdroid
 #, fuzzy
@@ -1722,66 +1741,74 @@ msgid "force errors to be warnings, or ignore"
 msgstr "སྐྱོན་ཤོར་བ་ལ་ཉེན་བརྡ་ངེས་པར་དུ་གཏོང་དགོས་པ་དང་། ཡང་ན་ཡ་མ་བྱེད།"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
-#, python-format
+#, fuzzy, python-format
 msgid "ignored explicit argument %r"
-msgstr ""
+msgstr "དངོས་སུ་རྩོད་པ་པ་ལ་ཡ་ལན་མེད།%r"
 
 #: ../fdroidserver/index.py
+#, fuzzy
 msgid "index-v1 must have a signature, use `fdroid signindex` to create it!"
 msgstr ""
+"index-v1 ངེས་པར་དུ་མིང་རྟགས་དགོས། བེད་སྤྱོད་`fdroid "
+"signindex`འདི་བཟོས་པ་རེད།!"
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 msgid "integer"
 msgstr ""
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
-#, python-format
+#, fuzzy, python-format
 msgid "invalid %(type)s value: %(value)r"
-msgstr ""
+msgstr "ཁུངས་ལྡན་མིན་པ་ %(type)s value: %(value)r"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
-#, python-format
+#, fuzzy, python-format
 msgid "invalid choice: %(value)r (choose from %(choices)s)"
-msgstr ""
+msgstr "ཁུངས་ལྡན་མིན་པའི་གདམ་ཀ: %(value)r (དེ་ནས་གདམ་ཀ་%(choices)s)"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
-#, python-format
+#, fuzzy, python-format
 msgid "invalid conflict_resolution value: %r"
-msgstr ""
+msgstr "ཁུངས་ལྡན་མིན་པའི་རྙོག་ཕྲ།_resolution value: %r"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
-#, python-format
+#, fuzzy, python-format
 msgid ""
 "invalid option string %(option)r: must start with a character "
 "%(prefix_chars)r"
 msgstr ""
+"ཁུངས་ལྡན་མིན་པའི་ཚིག་སྒྲུབ་གདམ་ཀ། %(option)r: ཁྱད་ཆོས་དང་མཉམ་དུ་འགོ་བཙུགས། "
+"%(prefix_chars)r"
 
 #: ../fdroidserver/server.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid ""
 "local_copy_dir does not end with \"fdroid\", perhaps you meant: \"{path}\""
-msgstr ""
+msgstr "local_copy_dir  \"fdroid\"གིས་མཇུག་སྐྱོང་མིན་འདུག་ : \"{path}\""
 
 #: ../fdroidserver/server.py
+#, fuzzy
 msgid "local_copy_dir must be an absolute path!"
-msgstr ""
+msgstr "local_copy_dir ནི་ངེས་པར་དུ་མཐའ་མའི་འགྲོ་ལམ་དེ་ཆགས་ཡོད།!"
 
 #: ../fdroidserver/server.py
+#, fuzzy
 msgid "local_copy_dir must be directory, not a file!"
-msgstr ""
+msgstr "local_copy_dir ངེས་པར་ཕྱོགས་དེབ་ཡིན་དགོས། ཡིག་ཆ་མ་རེད།!"
 
 #: ../fdroidserver/index.py
-#, python-format
+#, fuzzy, python-format
 msgid "mirror '%s' does not end with 'fdroid'!"
-msgstr ""
+msgstr "མེ་ལོང་། '%s'  'fdroid'དང་མཉམ་དུ་མཇུག་སྐྱོང་མི་ཐུབ།!"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 msgid "mutually exclusive arguments must be optional"
 msgstr ""
 
 #: ../fdroidserver/signatures.py
+#, fuzzy
 msgid "no APK supplied"
-msgstr ""
+msgstr "APK མཁོ་སྤྲོད་མིན་འདུག"
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 #, fuzzy, python-format
@@ -1794,33 +1821,35 @@ msgid "no version info found!"
 msgstr "ཆ་རྒྱུས་མེད་པའི་དམིགས་བསལ་ཞིག་རྙེད་སོང་།"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
-#, python-format
+#, fuzzy, python-format
 msgid "not allowed with argument %s"
-msgstr ""
+msgstr "རྩོད་པ་དང་མཉམ་དུ་ཆོག་མཆན་མེད། %s"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
-#, python-format
+#, fuzzy, python-format
 msgid "one of the arguments %s is required"
-msgstr ""
+msgstr "རྩོད་པ་གཅིག་དགོས་ཀྱི་ཡོད།%s"
 
 #: ../fdroidserver/index.py ../fdroidserver/common.py
 msgid "only accepts strings, lists, and tuples"
 msgstr ""
 
 #: ../fdroidserver/install.py
-#, python-format
+#, fuzzy, python-format
 msgid "option %s: If you really want to install all the signed apps, use --all"
 msgstr ""
+"གདམ་ཀ %s: གལ་ཏེ་ཁྱེད་ཀྱིས་མིང་རྟགས་བཀོད་པའི་མཉེན་ཆས་རིགས་ཚང་མ་ངེས་པར་དུ་སྒྲིག"
+"་བཅུག་བྱེད་འདོད་ཡོད་། བེད་སྤྱོད་ --ཚང་མ།"
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
-#, python-format
+#, fuzzy, python-format
 msgid "option %s: invalid %s value: %r"
-msgstr ""
+msgstr "གདམ་ཀ %s: ཁུངས་ལྡན་མིན་པ་ %s རིན་ཐང་།: %r"
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
-#, python-format
+#, fuzzy, python-format
 msgid "option %s: invalid choice: %r (choose from %s)"
-msgstr ""
+msgstr "གདམ་ཀ %s: ཁུངས་ལྡན་མིན་པའི་གདམ་ཀ: %r (choose from %s)"
 
 #: /usr/lib/python3.5/getopt.py /usr/lib/python3.6/getopt.py
 #, fuzzy, python-format
@@ -1882,9 +1911,9 @@ msgid ""
 msgstr ""
 
 #: ../fdroidserver/server.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "s3cmd sync indexes {path} to {url} and delete"
-msgstr ""
+msgstr "s3cmd sync ཕྱོགས་སྟོན།{path} དེ་ནས {url} དང་སུབས།"
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 #, fuzzy
@@ -1898,8 +1927,9 @@ msgid "show this help message and exit"
 msgstr "རོགས་པ་བྱེད་པའི་འཕྲིན་ཐུང་སྟོན་ནས་ཕྱིར་ཐོན།"
 
 #: ../fdroidserver/signatures.py
+#, fuzzy
 msgid "signed APK, either a file-path or HTTPS URL."
-msgstr ""
+msgstr "APKམིང་རྟགས་, ཡིག་ཆའི་འགྲོ་ལམ་མམ་ཡང་ན།  HTTPS URL."
 
 #: ../fdroidserver/update.py
 #, python-brace-format
@@ -1917,9 +1947,9 @@ msgid "unexpected option string: %s"
 msgstr "རེ་བ་མེད་པའི་གདམ་ཀ་ཅན་གྱི་ཚིག་སྒྲུབ།:%s"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
-#, python-format
+#, fuzzy, python-format
 msgid "unknown parser %(parser_name)r (choices: %(choices)s)"
-msgstr ""
+msgstr "ངོས་འཛིན་མི་ཐུབ་པའི་ parser %(parser_name)r (གདམ་ཀ།: %(choices)s)"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, fuzzy, python-format
@@ -1940,15 +1970,15 @@ msgid "usage: fdroid [-h|--help|--version] <command> [<args>]"
 msgstr "བེད་སྤྱོད་: ཨེཕ་རོཌ་ [-h|-རོགས་པ་|--ཐོན་རིམ་] <command> [<args>]"
 
 #: ../fdroidserver/server.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "using Apache libcloud to sync with {url}"
-msgstr ""
+msgstr "Apache libcloud བེད་སྤྱོད་བྱས་པའི་ཐོག་ {url}དང་མཉམ་དུ་ཟླ་སྒྲིལ་གཏོང་།"
 
 #: ../fdroidserver/publish.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{0} app, {1} key aliases"
 msgid_plural "{0} apps, {1} key aliases"
-msgstr[0] ""
+msgstr[0] "{0} མཉེས་ཆས་, {1} key aliases"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
@@ -1962,9 +1992,10 @@ msgstr ""
 
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vname
 #: ../fdroidserver/lint.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "{appid}: Unknown extlib {path} in build '{versionName}'"
 msgstr ""
+"{appid}: ངོས་འཛིན་མི་ཐུབ་པའི་ extlib {path} བཟོ་སྐྲུན་ནང་ལ '{versionName}'"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
@@ -1982,21 +2013,16 @@ msgid "{path} is zero size!"
 msgstr ""
 
 #: ../fdroidserver/build.py
+#, fuzzy
 msgid "{} build failed"
 msgid_plural "{} builds failed"
-msgstr[0] ""
+msgstr[0] "{} བཟོ་སྐྲུན་བྱེད་མི་ཐུབ།"
 
 #: ../fdroidserver/build.py
+#, fuzzy
 msgid "{} build succeeded"
 msgid_plural "{} builds succeeded"
-msgstr[0] ""
-
-#, fuzzy
-#~ msgid "Add PGP signatures for packages in repo using GnuPG"
-#~ msgstr "gpg གྱི་མིང་རྟགས་དེ་ཐུམ་སྒྲིལ་ནང་ཁ་སྣོན་བྱས་ནས་རེ་པོ་ནང་ལ་བཅུག"
-
-#~ msgid "Add gpg signatures for packages in repo"
-#~ msgstr "gpg གྱི་མིང་རྟགས་དེ་ཐུམ་སྒྲིལ་ནང་ཁ་སྣོན་བྱས་ནས་རེ་པོ་ནང་ལ་བཅུག"
+msgstr[0] "{} བཟོ་སྐྲུན་ལེགས་སྒྲུབ།"
 
 #~ msgid "Clean update - don't uses caches, reprocess all apks"
 #~ msgstr "གསར་བསྒྱུར་གཙང་བཟོ།-ཡིག་ཆ་གསོག་ཉར་བེད་སྤྱོ་མ་བྱེད། apks ཚང་མ་སྐྱར་སྤྱོད་བྱེད།"
@@ -2012,3 +2038,4 @@ msgstr[0] ""
 
 #~ msgid "app-id with optional versioncode in the form APPID[:VERCODE]"
 #~ msgstr "མཉེས་ཆས་ཁ་བྱང་དང་མཉམ་དུ་གདམ་ཀ་ཅན་གྱི་ཐོན་རིམ་ཨང་རྟགས།APPID[:VERCODE]"
+
