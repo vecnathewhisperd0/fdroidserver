@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
-"POT-Creation-Date: 2017-11-22 23:24+0100\n"
-"PO-Revision-Date: 2017-11-27 11:20+0100\n"
-"Last-Translator: Tobias Groza <tooobi14@gmail.com>\n"
+"POT-Creation-Date: 2017-10-17 17:48+0200\n"
+"PO-Revision-Date: 2017-11-23 15:46+0000\n"
+"Last-Translator: Tobias Bannert <tobannert@gmail.com>\n"
 "Language-Team: German "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\n"
 "Language: de\n"
@@ -201,17 +201,17 @@ msgstr ""
 
 #: ../fdroidserver/common.py
 msgid "Android SDK not found!"
-msgstr "Android SDK nicht gefunden!"
+msgstr "Android-SDK nicht gefunden!"
 
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "Android SDK path '{path}' does not exist!"
-msgstr "Android SDK Pfad '{path}' existiert nicht!"
+msgstr "Android-SDK-Pfad »{path}« nicht vorhanden!"
 
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "Android SDK path '{path}' is not a directory!"
-msgstr "Android SDK Pfad '{path}' ist kein Verzeichnis!"
+msgstr "Android-SDK-Pfad »{path}« ist kein Verzeichnis!"
 
 #. Translators: "build-tools" is the file name of a package from
 #. Google, it is part of the Android SDK. So it probably shouldn't be
@@ -310,7 +310,7 @@ msgstr ""
 #: ../fdroidserver/lint.py
 #, python-format
 msgid "Category '%s' is not valid"
-msgstr "Kategorie '%s' ist nicht gültig"
+msgstr "Kategorie »%s« ist nicht gültig"
 
 #: ../fdroid
 msgid "Check for updates to applications"
@@ -1550,7 +1550,7 @@ msgstr ""
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
 msgid "can't open '%s': %s"
-msgstr ""
+msgstr "»%s« kann nicht geöffnet werden: %s"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 msgid "cannot have multiple subparser arguments"
