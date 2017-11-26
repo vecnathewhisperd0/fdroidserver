@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
 "PO-Revision-Date: 2017-11-26 12:57+0000\n"
-"Last-Translator: Ldm Public <ldmpub@gmail.com>\n"
+"Last-Translator: anonymous <>\n"
 "Language-Team: French "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\n"
 "Language: fr\n"
@@ -102,7 +102,7 @@ msgstr ""
 
 #: ../fdroidserver/index.py ../fdroidserver/common.py
 msgid "'repo_keyalias' not found in config.py!"
-msgstr ""
+msgstr "'repo_keyalias' non trouvé dans config.py!"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 msgid "'required' is an invalid argument for positionals"
