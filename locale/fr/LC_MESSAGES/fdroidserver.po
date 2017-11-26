@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
-"PO-Revision-Date: 2017-11-26 12:59+0000\n"
-"Last-Translator: anonymous <>\n"
+"PO-Revision-Date: 2017-11-26 21:48+0000\n"
+"Last-Translator: Ldm Public <ldmpub@gmail.com>\n"
 "Language-Team: French "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\n"
 "Language: fr\n"
@@ -90,7 +90,7 @@ msgstr "l'option %s ne prend pas de valeur"
 
 #: ../fdroidserver/index.py ../fdroidserver/common.py
 msgid "'keypass' not found in config.py!"
-msgstr "'keypass' non trouvé dans config.py!"
+msgstr "'keypass' non trouvé dans config.py !"
 
 #: ../fdroidserver/index.py ../fdroidserver/common.py
 msgid "'keystore' not found in config.py!"
@@ -353,7 +353,7 @@ msgstr ""
 #: ../fdroid
 #, c-format, python-format
 msgid "Command '%s' not recognised.\n"
-msgstr "La commande '%s 1' n'est pas reconnue.\n"
+msgstr "La commande '%s' n'est pas reconnue.\n"
 
 #: ../fdroidserver/checkupdates.py
 msgid "Commit changes"
@@ -1040,9 +1040,8 @@ msgid "Punctuation should be avoided"
 msgstr ""
 
 #: ../fdroidserver/btlog.py
-#, fuzzy
 msgid "Push the log to this git remote repository"
-msgstr "Envoyer les logs dans ce dépôt distant"
+msgstr "Envoyer les logs dans ce dépôt git distant"
 
 #: ../fdroidserver/server.py
 #, python-brace-format
