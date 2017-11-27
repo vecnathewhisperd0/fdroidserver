@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: fdroidserver 0.8-135-g16dd6d28\n"
-"Report-Msgid-Bugs-To: team@f-droid.org\n"
+"Report-Msgid-Bugs-To: https://gitlab.com/fdroid/fdroidserver/issues\n"
 "POT-Creation-Date: 2017-10-13 12:47+0000\n"
 "PO-Revision-Date: 2017-11-03 13:14+0000\n"
 "Last-Translator: Myeongjin Lee <aranet100@gmail.com>\n"
