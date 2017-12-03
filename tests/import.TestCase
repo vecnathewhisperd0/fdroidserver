@@ -9,6 +9,7 @@ import os
 import requests
 import sys
 import unittest
+import tempfile
 
 localmodule = os.path.realpath(
     os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())), '..'))
@@ -34,6 +35,8 @@ class ImportTest(unittest.TestCase):
         os.chdir(self.basedir)
 
     def test_import_gitlab(self):
+        testdir = tempfile.mkdtemp(prefix=inspect.currentframe().f_code.co_name, dir=self.tmpdir)
+        os.chdir(testdir)
         # FDroidPopen needs some config to work
         config = dict()
         fdroidserver.common.fill_config_defaults(config)
