@@ -219,12 +219,7 @@ class CommonTest(unittest.TestCase):
         os.mkdir('build')
         os.mkdir('metadata')
 
-        # use a local copy if available to avoid hitting the network
-        tmprepo = os.path.join(self.basedir, 'tmp', 'importer')
-        if os.path.exists(tmprepo):
-            git_url = tmprepo
-        else:
-            git_url = 'https://gitlab.com/fdroid/ci-test-app.git'
+        git_url = 'https://gitlab.com/fdroid/ci-test-app.git'
 
         metadata = dict()
         metadata['Description'] = 'This is just a test app'
