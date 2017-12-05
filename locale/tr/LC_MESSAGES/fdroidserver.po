@@ -5,10 +5,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
-"Report-Msgid-Bugs-To: https://gitlab.com/fdroid/fdroidserver/issues\n"
+"Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
-"PO-Revision-Date: 2017-11-27 12:41+0100\n"
-"Last-Translator: monolifed <monolifed@gmail.com>\n"
+"PO-Revision-Date: 2017-12-05 11:34+0000\n"
+"Last-Translator: Veli Tasalı <veli.tasali@gmail.com>\n"
 "Language-Team: Turkish "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/tr/>\n"
 "Language: tr\n"
@@ -39,17 +39,17 @@ msgstr ""
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "\"{path}\" contains outdated {name} ({version})"
-msgstr ""
+msgstr "\"{path}\" tarihi geçmiş {name} ({version}) içeriyor"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "\"{path}\" contains recent {name} ({version})"
-msgstr ""
+msgstr "\"{path}\" en son {name} ({version}) içeriyor"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "\"{path}\" is not an accepted format, convert to: {formats}"
-msgstr ""
+msgstr "\"{path}\" kabul edilebilir bir tür değil, şuna dönüştürün: {formats}"
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 #, python-format
@@ -1812,7 +1812,7 @@ msgstr "tanınmayan argümanlar: %s"
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "unsafe permissions on '{config_file}' (should be 0600)!"
-msgstr ""
+msgstr "'{config_file}' üzerinde güvenli olmayan izinler (0600 olmalı)!"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py ../fdroid
 msgid "usage: "
