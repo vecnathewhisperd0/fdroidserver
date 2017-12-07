@@ -10,7 +10,7 @@ copy_apks_into_repo() {
     set +x
     find $APKDIR -type f -name '*.apk' -print0 | while IFS= read -r -d '' f; do
         echo $f | grep -F -v -e unaligned -e unsigned -e badsig -e badcert -e bad-unicode || continue
-        apk=`$aapt dump badging "$f" | sed -n "s,^package: name='\(.*\)' versionCode='\([0-9][0-9]*\)' .*,\1_\2.apk,p"`
+        apk=$($aapt dump badging "$f" | sed -n "s,^package: name='\(.*\)' versionCode='\([0-9][0-9]*\)' .*,\1_\2.apk,p")
         test "$f" -nt repo/$apk && rm -f repo/$apk  # delete existing if $f is newer
         if [ ! -e repo/$apk ] && [ ! -e archive/$apk ]; then
             echo "$f --> repo/$apk"
@@ -43,7 +43,7 @@ create_test_file() {
 
 # the < is reverse since 0 means success in exit codes
 have_git_2_3() {
-    python3 -c "import sys; from distutils.version import LooseVersion as V; sys.exit(V(sys.argv[3]) < V('2.3'))" `git --version`
+    python3 -c "import sys; from distutils.version import LooseVersion as V; sys.exit(V(sys.argv[3]) < V('2.3'))" $(git --version)
 }
 
 is_MD5_disabled() {
@@ -79,13 +79,13 @@ if [ -d tests ]; then
 fi
 
 if [ -z "$1" ]; then
-    APKDIR=`pwd`
+    APKDIR=$(pwd)
 else
     APKDIR=$1
 fi
 
 if [ -z $WORKSPACE ]; then
-    WORKSPACE=`dirname $(pwd)`
+    WORKSPACE=$(dirname $(pwd))
     echo "Setting Workspace to $WORKSPACE"
 fi
 
@@ -96,7 +96,7 @@ fi
 
 # allow the location of aapt to be overridden
 if [ -z $aapt ]; then
-    aapt=`ls -1 $ANDROID_HOME/build-tools/*/aapt | sort | tail -1`
+    aapt=$(ls -1 $ANDROID_HOME/build-tools/*/aapt | sort | tail -1)
 fi
 
 # allow the location of python to be overridden
@@ -144,7 +144,7 @@ $fdroid --version
 #------------------------------------------------------------------------------#
 echo_header 'run process when building and signing are on separate machines'
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 cd $REPOROOT
 cp $WORKSPACE/tests/keystore.jks $REPOROOT/
 $fdroid init --keystore keystore.jks --repo-keyalias=sova
@@ -173,7 +173,7 @@ grep -F '<application id=' repo/index.xml > /dev/null
 #------------------------------------------------------------------------------#
 echo_header "test UTF-8 metadata"
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 cd $REPOROOT
 
 $fdroid init
@@ -196,7 +196,7 @@ git clean -fdx
 # stick with known working commit, in case future commits break things for this code
 git reset --hard fea54e1161d5eb9eb1a54e26253ef84d3ab63705
 if [ -d $ANDROID_HOME/platforms/android-23 && -d $ANDROID_HOME/build-tools/23.0.3 ]; then
-    echo "build_tools = '`ls -1 $ANDROID_HOME/build-tools/ | sort -n | tail -1`'" > config.py
+    echo "build_tools = '$(ls -1 $ANDROID_HOME/build-tools/ | sort -n | tail -1)'" > config.py
     echo "force_build_tools = True" >> config.py
     $fdroid build --verbose org.fdroid.ci.test.app:300
 else
@@ -206,7 +206,7 @@ fi
 #------------------------------------------------------------------------------#
 echo_header 'copy git import and run "fdroid scanner" on it'
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 cd $REPOROOT
 cp $WORKSPACE/examples/fdroid-icon.png $REPOROOT/
 mkdir metadata
@@ -228,7 +228,7 @@ $fdroid scanner org.fdroid.ci.test.app --verbose
 #------------------------------------------------------------------------------#
 echo_header "copy tests/repo, generate java/gpg keys, update, and gpgsign"
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 GNUPGHOME=$REPOROOT/gnupghome
 KEYSTORE=$WORKSPACE/tests/keystore.jks
 cd $REPOROOT
@@ -272,7 +272,7 @@ diff -uw $WORKSPACE/tests/repo/index-v1.json repo/index-v1.json
 #------------------------------------------------------------------------------#
 echo_header 'test moving lots of APKs to the archive'
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 cd $REPOROOT
 cp $WORKSPACE/tests/keystore.jks $REPOROOT/
 $fdroid init --keystore keystore.jks --repo-keyalias=sova
@@ -295,14 +295,14 @@ $sed -i.tmp 's,archive_older = [0-9],archive_older = 3,' config.py
 
 $fdroid update --pretty --nosign
 echo "This will fail when jarsigner allows MD5 for APK signatures"
-test `grep '<package>' archive/index.xml | wc -l` -eq 5
-test `grep '<package>' repo/index.xml | wc -l` -eq 7
+test $(grep '<package>' archive/index.xml | wc -l) -eq 5
+test $(grep '<package>' repo/index.xml | wc -l) -eq 7
 
 
 #------------------------------------------------------------------------------#
 echo_header 'test per-app "Archive Policy"'
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 cd $REPOROOT
 cp $WORKSPACE/tests/keystore.jks $REPOROOT/
 $fdroid init --keystore keystore.jks --repo-keyalias=sova
@@ -316,8 +316,8 @@ cp $WORKSPACE/tests/repo/com.politedroid_[0-9].apk repo/
 $sed -i.tmp 's,archive_older = [0-9],archive_older = 3,' config.py
 
 $fdroid update --pretty --nosign
-test `grep '<package>' archive/index.xml | wc -l` -eq 0
-test `grep '<package>' repo/index.xml | wc -l` -eq 4
+test $(grep '<package>' archive/index.xml | wc -l) -eq 0
+test $(grep '<package>' repo/index.xml | wc -l) -eq 4
 grep -F com.politedroid_3.apk repo/index.xml
 grep -F com.politedroid_4.apk repo/index.xml
 grep -F com.politedroid_5.apk repo/index.xml
@@ -330,8 +330,8 @@ test -e repo/com.politedroid_6.apk
 echo "enable one app in the repo"
 $sed -i.tmp 's,^Archive Policy:4,Archive Policy:1,' metadata/com.politedroid.txt
 $fdroid update --pretty --nosign
-test `grep '<package>' archive/index.xml | wc -l` -eq 3
-test `grep '<package>' repo/index.xml | wc -l` -eq 1
+test $(grep '<package>' archive/index.xml | wc -l) -eq 3
+test $(grep '<package>' repo/index.xml | wc -l) -eq 1
 grep -F com.politedroid_3.apk archive/index.xml
 grep -F com.politedroid_4.apk archive/index.xml
 grep -F com.politedroid_5.apk archive/index.xml
@@ -344,8 +344,8 @@ test -e repo/com.politedroid_6.apk
 echo "remove all apps from the repo"
 $sed -i.tmp 's,^Archive Policy:1,Archive Policy:0,' metadata/com.politedroid.txt
 $fdroid update --pretty --nosign
-test `grep '<package>' archive/index.xml | wc -l` -eq 4
-test `grep '<package>' repo/index.xml | wc -l` -eq 0
+test $(grep '<package>' archive/index.xml | wc -l) -eq 4
+test $(grep '<package>' repo/index.xml | wc -l) -eq 0
 grep -F com.politedroid_3.apk archive/index.xml
 grep -F com.politedroid_4.apk archive/index.xml
 grep -F com.politedroid_5.apk archive/index.xml
@@ -359,8 +359,8 @@ test -e archive/com.politedroid_6.apk
 echo "move back one from archive to the repo"
 $sed -i.tmp 's,^Archive Policy:0,Archive Policy:1,' metadata/com.politedroid.txt
 $fdroid update --pretty --nosign
-test `grep '<package>' archive/index.xml | wc -l` -eq 3
-test `grep '<package>' repo/index.xml | wc -l` -eq 1
+test $(grep '<package>' archive/index.xml | wc -l) -eq 3
+test $(grep '<package>' repo/index.xml | wc -l) -eq 1
 grep -F com.politedroid_3.apk archive/index.xml
 grep -F com.politedroid_4.apk archive/index.xml
 grep -F com.politedroid_5.apk archive/index.xml
@@ -376,7 +376,7 @@ test -e repo/com.politedroid_6.apk
 #------------------------------------------------------------------------------#
 echo_header 'test moving old APKs to and from the archive'
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 cd $REPOROOT
 cp $WORKSPACE/tests/keystore.jks $REPOROOT/
 $fdroid init --keystore keystore.jks --repo-keyalias=sova
@@ -391,8 +391,8 @@ cp $WORKSPACE/tests/repo/com.politedroid_[0-9].apk repo/
 $sed -i.tmp 's,archive_older = [0-9],archive_older = 3,' config.py
 
 $fdroid update --pretty --nosign
-test `grep '<package>' archive/index.xml | wc -l` -eq 1
-test `grep '<package>' repo/index.xml | wc -l` -eq 3
+test $(grep '<package>' archive/index.xml | wc -l) -eq 1
+test $(grep '<package>' repo/index.xml | wc -l) -eq 3
 grep -F com.politedroid_3.apk archive/index.xml
 grep -F com.politedroid_4.apk repo/index.xml
 grep -F com.politedroid_5.apk repo/index.xml
@@ -404,8 +404,8 @@ test -e repo/com.politedroid_6.apk
 
 $sed -i.tmp 's,archive_older = 3,archive_older = 1,' config.py
 $fdroid update --pretty --nosign
-test `grep '<package>' archive/index.xml | wc -l` -eq 3
-test `grep '<package>' repo/index.xml | wc -l` -eq 1
+test $(grep '<package>' archive/index.xml | wc -l) -eq 3
+test $(grep '<package>' repo/index.xml | wc -l) -eq 1
 grep -F com.politedroid_3.apk archive/index.xml
 grep -F com.politedroid_4.apk archive/index.xml
 grep -F com.politedroid_5.apk archive/index.xml
@@ -418,8 +418,8 @@ test -e repo/com.politedroid_6.apk
 # disabling deletes from the archive
 $sed -i.tmp 's/Build:1.3,4/Build:1.3,4\n    disable=testing deletion/' metadata/com.politedroid.txt
 $fdroid update --pretty --nosign
-test `grep '<package>' archive/index.xml | wc -l` -eq 2
-test `grep '<package>' repo/index.xml | wc -l` -eq 1
+test $(grep '<package>' archive/index.xml | wc -l) -eq 2
+test $(grep '<package>' repo/index.xml | wc -l) -eq 1
 grep -F com.politedroid_3.apk archive/index.xml
 ! grep -F com.politedroid_4.apk archive/index.xml
 grep -F com.politedroid_5.apk archive/index.xml
@@ -432,8 +432,8 @@ test -e repo/com.politedroid_6.apk
 # disabling deletes from the repo, and promotes one from the archive
 $sed -i.tmp 's/Build:1.5,6/Build:1.5,6\n    disable=testing deletion/' metadata/com.politedroid.txt
 $fdroid update --pretty --nosign
-test `grep '<package>' archive/index.xml | wc -l` -eq 1
-test `grep '<package>' repo/index.xml | wc -l` -eq 1
+test $(grep '<package>' archive/index.xml | wc -l) -eq 1
+test $(grep '<package>' repo/index.xml | wc -l) -eq 1
 grep -F com.politedroid_3.apk archive/index.xml
 grep -F com.politedroid_5.apk repo/index.xml
 ! grep -F com.politedroid_6.apk repo/index.xml
@@ -445,7 +445,7 @@ test -e repo/com.politedroid_5.apk
 #------------------------------------------------------------------------------#
 echo_header 'test allowing disabled signatures in repo and archive'
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 cd $REPOROOT
 cp $WORKSPACE/tests/keystore.jks $REPOROOT/
 $fdroid init --keystore keystore.jks --repo-keyalias=sova
@@ -466,8 +466,8 @@ cp $WORKSPACE/tests/repo/com.politedroid_[0-9].apk \
    repo/
 
 $fdroid update --pretty --nosign
-test `grep '<package>' archive/index.xml | wc -l` -eq 2
-test `grep '<package>' repo/index.xml | wc -l` -eq 6
+test $(grep '<package>' archive/index.xml | wc -l) -eq 2
+test $(grep '<package>' repo/index.xml | wc -l) -eq 6
 grep -F com.politedroid_3.apk archive/index.xml
 grep -F com.politedroid_4.apk repo/index.xml
 grep -F com.politedroid_5.apk repo/index.xml
@@ -490,8 +490,8 @@ test -e archive/urzip-badsig.apk
 
 $sed -i.tmp '/allow_disabled_algorithms/d' config.py
 $fdroid update --pretty --nosign
-test `grep '<package>' archive/index.xml | wc -l` -eq 5
-test `grep '<package>' repo/index.xml | wc -l` -eq 3
+test $(grep '<package>' archive/index.xml | wc -l) -eq 5
+test $(grep '<package>' repo/index.xml | wc -l) -eq 3
 grep -F org.bitbucket.tickytacky.mirrormirror_1.apk archive/index.xml
 grep -F org.bitbucket.tickytacky.mirrormirror_2.apk archive/index.xml
 grep -F org.bitbucket.tickytacky.mirrormirror_3.apk archive/index.xml
@@ -516,7 +516,7 @@ test -e repo/com.politedroid_6.apk
 #------------------------------------------------------------------------------#
 echo_header 'rename apks with `fdroid update --rename-apks`, --nosign for speed'
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 cd $REPOROOT
 cp $WORKSPACE/tests/keystore.jks $REPOROOT/
 $fdroid init --keystore keystore.jks --repo-keyalias=sova
@@ -551,7 +551,7 @@ grep -F 'info.guardianproject.urzip_100_b4964fd.apk' repo/index-v1.json
 #------------------------------------------------------------------------------#
 echo_header "test metadata checks"
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 cd $REPOROOT
 
 mkdir repo
@@ -588,7 +588,7 @@ set -e
 #------------------------------------------------------------------------------#
 echo_header "ensure commands that don't need the JDK work without a JDK configed"
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 cd $REPOROOT
 mkdir repo
 mkdir metadata
@@ -602,7 +602,7 @@ echo "." >> metadata/fake.txt
 # fake that no JDKs are available
 echo 'java_paths = {}' > config.py
 
-LOCAL_COPY_DIR=`create_test_dir`/fdroid
+LOCAL_COPY_DIR=$(create_test_dir)/fdroid
 mkdir -p $LOCAL_COPY_DIR/repo
 echo "local_copy_dir = '$LOCAL_COPY_DIR'" >> config.py
 
@@ -626,9 +626,9 @@ echo_header "create a source tarball and use that to build a repo"
 cd $WORKSPACE
 $python setup.py sdist
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 cd $REPOROOT
-tar xzf `ls -1 $WORKSPACE/dist/fdroidserver-*.tar.gz | sort -n | tail -1`
+tar xzf $(ls -1 $WORKSPACE/dist/fdroidserver-*.tar.gz | sort -n | tail -1)
 cd $REPOROOT
 ./fdroidserver-*/fdroid init
 copy_apks_into_repo $REPOROOT
@@ -638,7 +638,7 @@ copy_apks_into_repo $REPOROOT
 #------------------------------------------------------------------------------#
 echo_header "test config checks of local_copy_dir"
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 cd $REPOROOT
 $fdroid init
 $fdroid update --create-metadata --verbose
@@ -674,7 +674,7 @@ set -e
 #------------------------------------------------------------------------------#
 echo_header "setup a new repo from scratch using ANDROID_HOME and do a local sync"
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 cd $REPOROOT
 $fdroid init
 copy_apks_into_repo $REPOROOT
@@ -682,9 +682,9 @@ $fdroid update --create-metadata --verbose
 $fdroid readmeta
 grep -F '<application id=' repo/index.xml > /dev/null
 
-LOCALCOPYDIR=`create_test_dir`/fdroid
+LOCALCOPYDIR=$(create_test_dir)/fdroid
 $fdroid server update --local-copy-dir=$LOCALCOPYDIR
-NEWREPOROOT=`create_test_dir`
+NEWREPOROOT=$(create_test_dir)
 cd $NEWREPOROOT
 $fdroid init
 echo "sync_from_local_copy_dir = True" >> config.py
@@ -694,7 +694,7 @@ $fdroid server update --local-copy-dir=$LOCALCOPYDIR
 #------------------------------------------------------------------------------#
 # check that --android-home fails when dir does not exist or is not a dir
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 KEYSTORE=$REPOROOT/keystore.jks
 cd $REPOROOT
 set +e
@@ -705,7 +705,7 @@ if [ $? -eq 0 ]; then
 else
     echo "testing android-home path checker passed"
 fi
-TESTFILE=`create_test_file`
+TESTFILE=$(create_test_file)
 $fdroid init --keystore $KEYSTORE --android-home $TESTFILE
 if [ $? -eq 0 ]; then
     echo "This should have failed because $TESTFILE is a file not a dir!"
@@ -719,8 +719,8 @@ set -e
 #------------------------------------------------------------------------------#
 echo_header "check that fake android home passes 'fdroid init'"
 
-REPOROOT=`create_test_dir`
-FAKE_ANDROID_HOME=`create_test_dir`
+REPOROOT=$(create_test_dir)
+FAKE_ANDROID_HOME=$(create_test_dir)
 create_fake_android_home $FAKE_ANDROID_HOME
 KEYSTORE=$REPOROOT/keystore.jks
 cd $REPOROOT
@@ -733,8 +733,8 @@ echo_header "check that 'fdroid init' fails when build-tools cannot be found"
 if [ -e /usr/bin/aapt ]; then
     echo "/usr/bin/aapt exists, not running test"
 else
-    REPOROOT=`create_test_dir`
-    FAKE_ANDROID_HOME=`create_test_dir`
+    REPOROOT=$(create_test_dir)
+    FAKE_ANDROID_HOME=$(create_test_dir)
     create_fake_android_home $FAKE_ANDROID_HOME
     rm -f $FAKE_ANDROID_HOME/build-tools/*/aapt
     KEYSTORE=$REPOROOT/keystore.jks
@@ -749,8 +749,8 @@ fi
 #------------------------------------------------------------------------------#
 echo_header "check that --android-home overrides ANDROID_HOME"
 
-REPOROOT=`create_test_dir`
-FAKE_ANDROID_HOME=`create_test_dir`
+REPOROOT=$(create_test_dir)
+FAKE_ANDROID_HOME=$(create_test_dir)
 create_fake_android_home $FAKE_ANDROID_HOME
 KEYSTORE=$REPOROOT/keystore.jks
 cd $REPOROOT
@@ -772,9 +772,9 @@ set -e
 # --android-home provides a working one.
 echo_header "setup a new repo from scratch with keystore and android-home set on cmd line"
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 KEYSTORE=$REPOROOT/keystore.jks
-FAKE_ANDROID_HOME=`create_test_dir`
+FAKE_ANDROID_HOME=$(create_test_dir)
 create_fake_android_home $FAKE_ANDROID_HOME
 STORED_ANDROID_HOME=$ANDROID_HOME
 unset ANDROID_HOME
@@ -797,7 +797,7 @@ export ANDROID_HOME=$STORED_ANDROID_HOME
 #------------------------------------------------------------------------------#
 echo_header "check duplicate files are properly handled by fdroid update"
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 KEYSTORE=$WORKSPACE/tests/keystore.jks
 cd $REPOROOT
 $fdroid init --keystore $KEYSTORE --repo-keyalias=sova
@@ -820,7 +820,7 @@ cp $WORKSPACE/tests/repo/obb.mainpatch.current_1619.apk $REPOROOT/repo/duplicate
 #------------------------------------------------------------------------------#
 echo_header "setup new repo from scratch using ANDROID_HOME, putting APKs in repo first"
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 cd $REPOROOT
 mkdir repo
 copy_apks_into_repo $REPOROOT
@@ -833,7 +833,7 @@ grep -F '<application id=' repo/index.xml > /dev/null
 #------------------------------------------------------------------------------#
 echo_header "setup a new repo from scratch and generate a keystore"
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 KEYSTORE=$REPOROOT/keystore.jks
 cd $REPOROOT
 $fdroid init --keystore $KEYSTORE
@@ -852,7 +852,7 @@ grep -F '<application id=' repo/index.xml > /dev/null
 #------------------------------------------------------------------------------#
 echo_header "setup a new repo manually and generate a keystore"
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 KEYSTORE=$REPOROOT/keystore.jks
 cd $REPOROOT
 cp $WORKSPACE/examples/fdroid-icon.png $REPOROOT/
@@ -882,7 +882,7 @@ grep -F '<application id=' repo/index.xml > /dev/null
 #------------------------------------------------------------------------------#
 echo_header "setup a new repo from scratch, generate a keystore, then add APK and update"
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 KEYSTORE=$REPOROOT/keystore.jks
 cd $REPOROOT
 $fdroid init --keystore $KEYSTORE
@@ -908,7 +908,7 @@ grep -F '<application id=' repo/index.xml > /dev/null
 
 #------------------------------------------------------------------------------#
 echo_header "setup a new repo from scratch with a HSM/smartcard"
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 cd $REPOROOT
 $fdroid init --keystore NONE
 test -e opensc-fdroid.cfg
@@ -918,7 +918,7 @@ test ! -e NONE
 #------------------------------------------------------------------------------#
 echo_header "setup a new repo with no keystore, add APK, and update"
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 KEYSTORE=$REPOROOT/keystore.jks
 cd $REPOROOT
 touch fdroid-icon.png
@@ -954,8 +954,8 @@ set -e
 #------------------------------------------------------------------------------#
 echo_header "copy tests/repo, update with binary transparency log"
 
-REPOROOT=`create_test_dir`
-GIT_REMOTE=`create_test_dir`
+REPOROOT=$(create_test_dir)
+GIT_REMOTE=$(create_test_dir)
 GNUPGHOME=$REPOROOT/gnupghome
 KEYSTORE=$WORKSPACE/tests/keystore.jks
 cd $REPOROOT
@@ -973,18 +973,18 @@ if have_git_2_3; then
     test -e repo/index-v1.jar
     grep -F '<application id=' repo/index.xml > /dev/null
     cd binary_transparency
-    [ `git rev-list --count HEAD` == "2" ]
+    [ $(git rev-list --count HEAD) == "2" ]
     cd $GIT_REMOTE
-    [ `git rev-list --count HEAD` == "2" ]
+    [ $(git rev-list --count HEAD) == "2" ]
 else
-    echo "Skipping test, `git --version` older than 2.3"
+    echo "Skipping test, $(git --version) older than 2.3"
 fi
 
 
 #------------------------------------------------------------------------------#
 echo_header "setup a new repo with keystore with APK, update, then without key"
 
-REPOROOT=`create_test_dir`
+REPOROOT=$(create_test_dir)
 KEYSTORE=$REPOROOT/keystore.jks
 cd $REPOROOT
 $fdroid init --keystore $KEYSTORE
@@ -1033,12 +1033,12 @@ test -e $KEYSTORE
 #------------------------------------------------------------------------------#
 echo_header "sign binary repo in offline box, then publishing from online box"
 
-OFFLINE_ROOT=`create_test_dir`
+OFFLINE_ROOT=$(create_test_dir)
 KEYSTORE=$WORKSPACE/tests/keystore.jks
-LOCAL_COPY_DIR=`create_test_dir`/fdroid
+LOCAL_COPY_DIR=$(create_test_dir)/fdroid
 mkdir $LOCAL_COPY_DIR
-ONLINE_ROOT=`create_test_dir`
-SERVERWEBROOT=`create_test_dir`
+ONLINE_ROOT=$(create_test_dir)
+SERVERWEBROOT=$(create_test_dir)
 
 # create offline binary transparency log
 cd $OFFLINE_ROOT
@@ -1047,10 +1047,10 @@ cd binary_transparency
 git init
 
 # fake git remote server for binary transparency log
-BINARY_TRANSPARENCY_REMOTE=`create_test_dir`
+BINARY_TRANSPARENCY_REMOTE=$(create_test_dir)
 
 # fake git remote server for repo mirror
-SERVER_GIT_MIRROR=`create_test_dir`
+SERVER_GIT_MIRROR=$(create_test_dir)
 cd $SERVER_GIT_MIRROR
 git init
 if have_git_2_3; then
@@ -1071,10 +1071,10 @@ $fdroid update --pretty
 grep -F '<application id=' repo/index.xml > /dev/null
 grep -F '/fdroid/repo</mirror>' repo/index.xml
 grep -F '/fdroid/archive</mirror>' archive/index.xml
-test `grep '<mirror>' repo/index.xml | wc -l` -eq 2
-test `grep '<mirror>' archive/index.xml | wc -l` -eq 2
+test $(grep '<mirror>' repo/index.xml | wc -l) -eq 2
+test $(grep '<mirror>' archive/index.xml | wc -l) -eq 2
 cd binary_transparency
-[ `git rev-list --count HEAD` == "1" ]
+[ $(git rev-list --count HEAD) == "1" ]
 cd ..
 $fdroid server update --verbose
 grep -F '<application id=' $LOCAL_COPY_DIR/repo/index.xml > /dev/null
@@ -1087,9 +1087,9 @@ echo "local_copy_dir = '$LOCAL_COPY_DIR'" >> config.py
 echo "binary_transparency_remote = '$BINARY_TRANSPARENCY_REMOTE'" >> config.py
 $fdroid server update --verbose
 cd $BINARY_TRANSPARENCY_REMOTE
-[ `git rev-list --count HEAD` == "1" ]
+[ $(git rev-list --count HEAD) == "1" ]
 cd $SERVER_GIT_MIRROR
-[ `git rev-list --count HEAD` == "1" ]
+[ $(git rev-list --count HEAD) == "1" ]
 
 
 #------------------------------------------------------------------------------#
