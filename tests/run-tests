@@ -188,9 +188,11 @@ $fdroid update
 
 
 #------------------------------------------------------------------------------#
-echo_header 'run "fdroid build" in fresh git checkout from import.TestCase'
+echo_header 'run "fdroid build" in fresh git checkout of ci-test-app'
 
-cd $(get_git_CI_app)
+TESTDIR=$(create_test_dir)
+cd $TESTDIR
+cp -a $(get_git_CI_app) . && cd ci-test-app.git
 git remote update -p
 git clean -fdx
 # stick with known working commit, in case future commits break things for this code
