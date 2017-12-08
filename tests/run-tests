@@ -51,6 +51,14 @@ is_MD5_disabled() {
     return $?
 }
 
+get_git_CI_app() {
+    test -e $WORKSPACE/.testfiles || mkdir $WORKSPACE/.testfiles
+    if [ ! -d $WORKSPACE/.testfiles/ci-test-app.git/.git ]; then
+        git clone https://gitlab.com/fdroid/ci-test-app.git $WORKSPACE/.testfiles/ci-test-app.git
+    fi
+	echo "$WORKSPACE/.testfiles/ci-test-app.git"
+}
+
 #------------------------------------------------------------------------------#
 # "main"
 
@@ -118,6 +126,9 @@ echo_header "test python getsig replacement"
 cd $WORKSPACE/tests/getsig
 ./make.sh
 
+# some testCases need the ci-app to be present
+get_git_CI_app
+
 cd $WORKSPACE/tests
 for testcase in $WORKSPACE/tests/*.TestCase; do
     $testcase
@@ -179,7 +190,7 @@ $fdroid update
 #------------------------------------------------------------------------------#
 echo_header 'run "fdroid build" in fresh git checkout from import.TestCase'
 
-cd $WORKSPACE/tests/tmp/importer
+cd $(get_git_CI_app)
 git remote update -p
 git clean -fdx
 # stick with known working commit, in case future commits break things for this code
@@ -209,7 +220,7 @@ echo "" >> metadata/org.fdroid.ci.test.app.txt
 echo "Repo:https://gitlab.com/fdroid/ci-test-app.git" >> metadata/org.fdroid.ci.test.app.txt
 echo "Repo Type:git" >> metadata/org.fdroid.ci.test.app.txt
 mkdir build
-cp -a $WORKSPACE/tests/tmp/importer build/org.fdroid.ci.test.app
+cp -a $(get_git_CI_app) build/org.fdroid.ci.test.app
 ls -l build/org.fdroid.ci.test.app
 $fdroid scanner org.fdroid.ci.test.app --verbose
 

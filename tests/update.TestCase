@@ -105,17 +105,17 @@ class UpdateTest(unittest.TestCase):
                 self.assertEqual(79, len(app['localized']['en-US']['summary']))
 
     def test_insert_triple_t_metadata(self):
-        importer = os.path.join(localmodule, 'tests', 'tmp', 'importer')
+        ciAppGit = os.path.join(localmodule, '.testfiles', 'ci-test-app.git')
         packageName = 'org.fdroid.ci.test.app'
-        if not os.path.isdir(importer):
-            logging.warning('skipping test_insert_triple_t_metadata, import.TestCase must run first!')
+        if not os.path.isdir(ciAppGit):
+            logging.warning('skipping test_insert_triple_t_metadata, needs {} !'.format(ciAppGit))
             return
         tmpdir = os.path.join(localmodule, '.testfiles')
         if not os.path.exists(tmpdir):
             os.makedirs(tmpdir)
         tmptestsdir = tempfile.mkdtemp(prefix=inspect.currentframe().f_code.co_name, dir=tmpdir)
         packageDir = os.path.join(tmptestsdir, 'build', packageName)
-        shutil.copytree(importer, packageDir)
+        shutil.copytree(ciAppGit, packageDir)
 
         # always use the same commit so these tests work when ci-test-app.git is updated
         repo = git.Repo(packageDir)
