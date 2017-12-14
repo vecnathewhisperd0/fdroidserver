@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
-"PO-Revision-Date: 2017-12-14 08:50+0000\n"
+"PO-Revision-Date: 2017-12-14 09:45+0000\n"
 "Last-Translator: jxt <chihsun.tsai@gmail.com>\n"
 "Language-Team: Chinese (Traditional) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hant/>\n"
@@ -480,12 +480,12 @@ msgstr "下載我們沒有的日誌"
 
 #: ../fdroidserver/common.py
 msgid "Downloading the repository already failed once, not trying again."
-msgstr ""
+msgstr "下載軟體倉庫已失敗過一次,尚未重試."
 
 #: ../fdroidserver/verify.py
 #, python-brace-format
 msgid "Downloading {url} failed. {error}"
-msgstr ""
+msgstr "{url} 下載失敗,錯誤訊息 {error}"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
@@ -496,7 +496,7 @@ msgstr ""
 #: ../fdroidserver/lint.py
 #, python-brace-format
 msgid "Duplicate link in '{field}': {url}"
-msgstr ""
+msgstr "'{field}' 有重複的連結: {url}"
 
 #: ../fdroid
 msgid "Dynamically scan APKs post build"
@@ -504,7 +504,7 @@ msgstr "動態掃描建置後的 APK"
 
 #: ../fdroidserver/nightly.py
 msgid "ERROR: unsupported CI type, patches welcome!"
-msgstr ""
+msgstr "出錯: 未支援 CI 類型, 歡迎補強 !"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
@@ -517,14 +517,16 @@ msgid ""
 "Enter the path to the Android SDK (%s) here:\n"
 "> "
 msgstr ""
+"請在此輸入 Android SDK (%s) 的路徑:\n"
+"> "
 
 #: ../fdroidserver/import.py
 msgid "Error while getting repo address"
-msgstr ""
+msgstr "在接取軟體庫的地址時出錯"
 
 #: ../fdroid
 msgid "Extract signatures from APKs"
-msgstr ""
+msgstr "自 APKs 捽取出簽名"
 
 #: ../fdroidserver/signatures.py
 #, python-brace-format
@@ -534,7 +536,7 @@ msgstr ""
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Failed reading {path}: {error}"
-msgstr ""
+msgstr "讀取 {path} 失敗: 錯誤訊息{error}"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
@@ -1630,11 +1632,11 @@ msgstr ""
 
 #: ../fdroidserver/server.py
 msgid "local_copy_dir must be an absolute path!"
-msgstr ""
+msgstr "local_copy_dir 必須為絕對路徑!"
 
 #: ../fdroidserver/server.py
 msgid "local_copy_dir must be directory, not a file!"
-msgstr ""
+msgstr "local_copy_dir 為目錄,不是檔案!"
 
 #: ../fdroidserver/index.py
 #, python-format
@@ -1803,7 +1805,7 @@ msgstr "用法：fdroid [-h|--help|--version] <command> [<args>]"
 #: ../fdroidserver/server.py
 #, python-brace-format
 msgid "using Apache libcloud to sync with {url}"
-msgstr ""
+msgstr "使用 Apache libcloud 來同步 {url}"
 
 #: ../fdroidserver/publish.py
 #, python-brace-format
