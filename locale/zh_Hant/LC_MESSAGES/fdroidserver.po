@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
-"PO-Revision-Date: 2017-12-14 09:45+0000\n"
+"PO-Revision-Date: 2017-12-15 11:23+0000\n"
 "Last-Translator: jxt <chihsun.tsai@gmail.com>\n"
 "Language-Team: Chinese (Traditional) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hant/>\n"
@@ -108,7 +108,7 @@ msgstr "config.py 找不到 'repo_keyalias'!"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 msgid "'required' is an invalid argument for positionals"
-msgstr ""
+msgstr "這些地方的 '必填' 為無效引數"
 
 #: ../fdroidserver/common.py
 msgid "'sdk_path' not set in 'config.py'!"
@@ -235,7 +235,7 @@ msgstr "不必附加上 .git"
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Archiving {apkfilename} with invalid signature!"
-msgstr ""
+msgstr "以無效的簽名歸檔 {apkfilename} !"
 
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vname
 #: ../fdroidserver/lint.py
@@ -269,12 +269,12 @@ msgstr "只構建每個套件包的最後版本"
 msgid ""
 "Build should have comma-separated versionName and versionCode, not "
 "\"{value}\", in {linedesc}"
-msgstr ""
+msgstr "在 {linedesc} 版本編譯的版本名稱和版本代號應以逗號分隔,而不是 \"{value}\""
 
 #: ../fdroidserver/init.py
 #, python-format
 msgid "Built repo based in \"%s\" with this config:"
-msgstr ""
+msgstr "軟體庫的編譯依照 \"%s\" 與此設定:"
 
 #: ../fdroidserver/build.py
 msgid "Can't build due to {} error while scanning"
@@ -284,7 +284,7 @@ msgstr[0] "掃描時由於 {} 出錯，無法進行編譯"
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "Cannot find a packageName for {path}!"
-msgstr ""
+msgstr "路徑 {path} 找不到套件名稱 !"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
@@ -318,7 +318,7 @@ msgstr "檢查應用程式更新"
 msgid ""
 "Checking archiving for {appid} - apks:{integer}, keepversions:{keep}, "
 "archapks:{arch}"
-msgstr ""
+msgstr "檢查 {appid} 的歸檔 - apks:{integer}, keepversions:{keep}, archapks:{arch}"
 
 #: ../fdroidserver/dscanner.py
 msgid "Clean after all scans have finished"
@@ -491,7 +491,7 @@ msgstr "{url} 下載失敗,錯誤訊息 {error}"
 #, python-brace-format
 msgid ""
 "Duplicate build recipe found for versionCode {versionCode} in {linedesc}"
-msgstr ""
+msgstr "在 {linedesc} 找到版本編號 {versionCode} 重複的編譯處方"
 
 #: ../fdroidserver/lint.py
 #, python-brace-format
@@ -509,7 +509,7 @@ msgstr "出錯: 未支援 CI 類型, 歡迎補強 !"
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "Empty build flag at {linedesc}"
-msgstr ""
+msgstr "{linedesc} 空白的編譯標誌"
 
 #: ../fdroidserver/init.py
 #, python-format
@@ -531,7 +531,7 @@ msgstr "自 APKs 捽取出簽名"
 #: ../fdroidserver/signatures.py
 #, python-brace-format
 msgid "Failed fetching signatures for '{apkfilename}': {error}"
-msgstr ""
+msgstr "'{apkfilename}' 無法抓取簽名: 錯誤訊息{error}"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
@@ -541,7 +541,7 @@ msgstr "讀取 {path} 失敗: 錯誤訊息{error}"
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Failed resizing {path}: {error}"
-msgstr ""
+msgstr "{path} 無法調整大小:錯誤訊息 {error}"
 
 #: ../fdroidserver/publish.py
 msgid "Failed to align application"
@@ -550,46 +550,46 @@ msgstr "校正應用程式失敗"
 #: ../fdroidserver/server.py
 #, python-brace-format
 msgid "Failed to create S3 bucket: {url}"
-msgstr ""
+msgstr "無法建立 S3 bucket : {url}"
 
 #: ../fdroidserver/common.py
 msgid "Failed to get APK manifest information"
-msgstr ""
+msgstr "無法取得 APK 單號資訊"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Failed to get apk information, deleting {path}"
-msgstr ""
+msgstr "無法取得 apk 資訊，刪除 {path}"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Failed to get apk information, skipping {path}"
-msgstr ""
+msgstr "無法取得 apk 資訊，略過 {path}"
 
 #: ../fdroidserver/install.py
 #, python-brace-format
 msgid "Failed to install '{apkfilename}' on {dev}: {error}"
-msgstr ""
+msgstr "無法在 {dev} 安裝 '{apkfilename}': {error}"
 
 #: ../fdroidserver/publish.py
 msgid "Failed to sign application"
-msgstr ""
+msgstr "無法簽署應用程式"
 
 #: ../fdroidserver/signatures.py
 #, python-brace-format
 msgid "Fetched signatures for '{apkfilename}' -> '{sigdir}'"
-msgstr ""
+msgstr "抓取 '{apkfilename}' 的簽署資料 -> '{sigdir}'"
 
 #: ../fdroidserver/verify.py ../fdroidserver/stats.py ../fdroidserver/update.py
 #: ../fdroidserver/rewritemeta.py ../fdroidserver/build.py
 #: ../fdroidserver/checkupdates.py ../fdroidserver/scanner.py
 #: ../fdroidserver/install.py
 msgid "Finished"
-msgstr ""
+msgstr "已完成"
 
 #: ../fdroidserver/lint.py
 msgid "Flattr donation methods belong in the FlattrID flag"
-msgstr ""
+msgstr "Flattr 捐款方式在 FlattrID 標誌下"
 
 #: ../fdroidserver/build.py
 msgid ""
@@ -600,16 +600,16 @@ msgstr "強制停用應用程式的構建，並且忽視掃描問題而繼續。
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Found \"{path}\" graphic without metadata for app \"{name}\"!"
-msgstr ""
+msgstr "找到 \"{path}\" 圖像不包含 \"{name}\" 應用的中介資料!"
 
 #: ../fdroidserver/common.py
 msgid "Found invalid appids in arguments"
-msgstr ""
+msgstr "引數中找到無效的 appids"
 
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vcode
 #: ../fdroidserver/common.py
 msgid "Found invalid versionCodes for some apps"
-msgstr ""
+msgstr "有些應用的版本代號無效"
 
 #: ../fdroidserver/metadata.py
 #, fuzzy, python-brace-format
@@ -618,69 +618,69 @@ msgstr "建立缺少的骨幹中介資料檔案"
 
 #: ../fdroidserver/index.py
 msgid "Found multiple signing certificates for repository."
-msgstr ""
+msgstr "軟體倉庫找到多份簽署證書."
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Found multiple signing certificates in {path}"
-msgstr ""
+msgstr "{path} 找到多筆簽名證書"
 
 #: ../fdroidserver/index.py
 msgid "Found no signing certificates for repository."
-msgstr ""
+msgstr "軟體倉庫查無簽名證書"
 
 #: ../fdroidserver/lint.py
 #, python-format
 msgid "Found non-file at %s"
-msgstr ""
+msgstr "%s 中找到 non-file"
 
 #: ../fdroidserver/update.py
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Generated skeleton metadata for {appid}"
-msgstr "建立缺少的骨幹中介資料檔案"
+msgstr "為 {appid} 建立缺少的骨幹中介資料檔案"
 
 #: ../fdroidserver/common.py
 #, python-format
 msgid "Git checkout of '%s' failed"
-msgstr ""
+msgstr "Git  '%s' 還原失敗"
 
 #: ../fdroidserver/common.py
 msgid "Git clean failed"
-msgstr ""
+msgstr "Git 清理失敗"
 
 #: ../fdroidserver/common.py
 msgid "Git fetch failed"
-msgstr ""
+msgstr "Git 抓取失敗"
 
 #: ../fdroidserver/common.py
 msgid "Git remote set-head failed"
-msgstr ""
+msgstr "Git 遠端 set-head 失敗"
 
 #: ../fdroidserver/common.py
 msgid "Git reset failed"
-msgstr ""
+msgstr "Git 重置失敗"
 
 #: ../fdroidserver/common.py
 msgid "Git submodule sync failed"
-msgstr ""
+msgstr "Git 子模組同步失敗"
 
 #: ../fdroidserver/common.py
 msgid "Git submodule update failed"
-msgstr ""
+msgstr "Git 子模組更新失敗"
 
 #: ../fdroidserver/index.py
 msgid "Ignoring package without metadata: "
-msgstr ""
+msgstr "忽略無中介資料的包件: "
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Ignoring stale cache data for {apkfilename}"
-msgstr ""
+msgstr "忽略 {apkfilename} 陳舊的緩存資料"
 
 #: ../fdroidserver/rewritemeta.py
 #, python-brace-format
 msgid "Ignoring {ext} file at '{path}'"
-msgstr ""
+msgstr "忽略在 '{path}' 的 {ext} 檔案"
 
 #: ../fdroidserver/update.py
 msgid "Include APKs that are signed with disabled algorithms like MD5"
@@ -688,7 +688,7 @@ msgstr ""
 
 #: ../fdroidserver/common.py
 msgid "Initialising submodules"
-msgstr ""
+msgstr "初始化子模組"
 
 #: ../fdroidserver/install.py
 msgid "Install all signed applications available"
@@ -701,12 +701,12 @@ msgstr "在裝置上安裝構建套件包"
 #: ../fdroidserver/install.py
 #, python-format
 msgid "Installing %s..."
-msgstr ""
+msgstr "安裝 %s..."
 
 #: ../fdroidserver/install.py
 #, python-brace-format
 msgid "Installing '{apkfilename}' on {dev}..."
-msgstr ""
+msgstr "在 {dev} 安裝 '{apkfilename}' ..."
 
 #: ../fdroid
 msgid "Interact with the repo HTTP server"
@@ -718,12 +718,12 @@ msgstr "以對話方式詢問需要更新的內容。"
 
 #: ../fdroidserver/update.py
 msgid "Invalid APK"
-msgstr ""
+msgstr "無效的 APK"
 
 #: ../fdroidserver/metadata.py
 #, python-format
 msgid "Invalid boolean '%s'"
-msgstr ""
+msgstr "無效的布林 '%s'"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
@@ -737,26 +737,26 @@ msgstr ""
 
 #: ../fdroidserver/lint.py
 msgid "Invalid bulleted list"
-msgstr ""
+msgstr "無效的排序列表"
 
 #: ../fdroidserver/lint.py
 #, python-format
 msgid ""
 "Invalid license tag \"%s\"! Use only tags from https://spdx.org/license-list"
-msgstr ""
+msgstr "無效的執照標籤 \"%s\"! 請使用 https://spdx.org/license-list 標籤"
 
 #: ../fdroidserver/lint.py
 msgid "Invalid link - use [http://foo.bar Link title] or [http://foo.bar]"
-msgstr ""
+msgstr "無效連結 - 請使用 [http://foo.bar Link title] 或 [http://foo.bar]"
 
 #: ../fdroidserver/metadata.py
 #, python-format
 msgid "Invalid metadata in %s:%d"
-msgstr ""
+msgstr "%s 中有無效的中介資料 : %d"
 
 #: ../fdroidserver/metadata.py
 msgid "Invalid metadata in: "
-msgstr ""
+msgstr "無效的中介資料: "
 
 #: ../fdroidserver/common.py
 #, python-format
@@ -766,21 +766,21 @@ msgstr ""
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "Invalid package name {0}"
-msgstr ""
+msgstr "無效的套件包稱 {0}"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "Invalid versionCode: \"{versionCode}\" is not an integer!"
-msgstr ""
+msgstr "無效的版本代號: \"{versionCode}\" 不是整數!"
 
 #: ../fdroidserver/publish.py ../fdroidserver/update.py
 msgid "Java JDK not found! Install in standard location or set java_paths!"
-msgstr ""
+msgstr "找不到 Java JDK ! 請安裝在標準的位置或是設定 java_paths!"
 
 #: ../fdroidserver/signindex.py
 msgid ""
 "Java jarsigner not found! Install in standard location or set java_paths!"
-msgstr ""
+msgstr "找不到 Java jarsigner ! 請安裝在標準的位置或是設定 java_paths!"
 
 #: ../fdroidserver/init.py
 msgid "Keystore for signing key:\t"
@@ -791,7 +791,7 @@ msgstr "金鑰庫的簽署金鑰：\t"
 msgid ""
 "Last used commit '{commit}' looks like a tag, but Update Check Mode is "
 "'{ucm}'"
-msgstr ""
+msgstr "最近採用的提交 '{commit}' 似乎是一個標籤, 但更新的檢查模式為 '{ucm}'"
 
 #: ../fdroidserver/rewritemeta.py
 msgid "List files that would be reformatted"
@@ -803,7 +803,7 @@ msgstr "異常時停止做構建"
 
 #: ../fdroidserver/index.py
 msgid "Malformed repository mirrors."
-msgstr ""
+msgstr "軟體庫鏡像異常."
 
 #: ../fdroidserver/server.py
 msgid "Malformed serverwebroot line:"
@@ -811,20 +811,20 @@ msgstr ""
 
 #: ../fdroidserver/gpgsign.py
 msgid "Missing output directory"
-msgstr ""
+msgstr "輸出目錄消失"
 
 #: ../fdroidserver/lint.py
 #, python-format
 msgid "Name '%s' is just the auto name - remove it"
-msgstr ""
+msgstr "名稱 '%s' 為自動產生 - 請移除它"
 
 #: ../fdroidserver/common.py
 msgid "No 'config.py' found, using defaults."
-msgstr ""
+msgstr "找不到 'config.py' , 使用默認."
 
 #: ../fdroidserver/common.py
 msgid "No Android SDK found!"
-msgstr ""
+msgstr "未找到 Android SDK !"
 
 #: ../fdroidserver/import.py
 msgid "No android or kivy project could be found. Specify --subdir?"
@@ -837,7 +837,7 @@ msgstr ""
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "No commit specified for {versionName} in {linedesc}"
-msgstr ""
+msgstr "{linedesc} 沒有指定給 {versionName} 的提交"
 
 #: ../fdroidserver/index.py
 msgid "No fingerprint in URL."
@@ -845,84 +845,84 @@ msgstr ""
 
 #: ../fdroidserver/common.py
 msgid "No git submodules available"
-msgstr ""
+msgstr "無可用的 git 子模組"
 
 #: ../fdroidserver/import.py
 msgid "No information found."
-msgstr ""
+msgstr "查無資訊"
 
 #: ../fdroidserver/lint.py
 msgid "No need to specify that the app is Free Software"
-msgstr ""
+msgstr "不必要指明的應用程式為自由軟體"
 
 #: ../fdroidserver/lint.py
 msgid "No need to specify that the app is for Android"
-msgstr ""
+msgstr "不必指明該應用為 Android 版本"
 
 #: ../fdroidserver/server.py
 msgid "No option set! Edit your config.py to set at least one of these:"
-msgstr ""
+msgstr "未設定選項! 編輯 config.py 檔,其中至少要設定一個:"
 
 #: ../fdroidserver/common.py
 msgid "No packages specified"
-msgstr ""
+msgstr "未指定套件"
 
 #: ../fdroidserver/install.py
 #, python-format
 msgid "No signed apk available for %s"
-msgstr ""
+msgstr "%s 沒有已簽署的 apk"
 
 #: ../fdroidserver/install.py
 msgid "No signed output directory - nothing to do"
-msgstr ""
+msgstr "輸出目錄無簽署 - 無須採取動作"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "No signing certificates found in {path}"
-msgstr ""
+msgstr "{path} 找不到簽署證書"
 
 #: ../fdroidserver/common.py
 #, python-format
 msgid "No such package: %s"
-msgstr ""
+msgstr "無此套件包: %s"
 
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vcode
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "No such versionCode {versionCode} for app {appid}"
-msgstr ""
+msgstr "應用 {appid} 無版本代號 {versionCode}"
 
 #: ../fdroidserver/verify.py ../fdroidserver/publish.py
 msgid "No unsigned directory - nothing to do"
-msgstr ""
+msgstr "無未簽署目錄 - 無須採取行動"
 
 #: ../fdroidserver/signindex.py
 msgid "Nothing to do"
-msgstr ""
+msgstr "無須採取動作"
 
 #: ../fdroidserver/checkupdates.py
 #, python-brace-format
 msgid "Nothing to do for {appid}."
-msgstr ""
+msgstr "{appid} 無須採取行動."
 
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vcode
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "OBB file has newer versionCode({integer}) than any APK:"
-msgstr ""
+msgstr "比起任何 APK, OBB 檔案有較新的版本代號 ({integer}):"
 
 #: ../fdroidserver/update.py
 msgid "OBB filename must start with \"main.\" or \"patch.\":"
-msgstr ""
+msgstr "OBB 檔名的前綴須為 \"main.\" 或 \"patch.\":"
 
 #: ../fdroidserver/update.py
 msgid "OBB's packagename does not match a supported APK:"
-msgstr ""
+msgstr "OBB 的套件包名稱與支援的 APK 並不相符:"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Only PNG and JPEG are supported for graphics, found: {path}"
-msgstr ""
+msgstr "圖像僅支援 PNG 和 JPEG,可在下方找到 : {path}"
 
 #: ../fdroidserver/checkupdates.py
 msgid "Only print differences with the Play Store"
@@ -947,11 +947,11 @@ msgstr "覆蓋軟體倉庫 APK 的路徑 (預設：./repo)"
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "Parsing manifest at '{path}'"
-msgstr ""
+msgstr "解析 '{path}' 的單號"
 
 #: ../fdroidserver/common.py
 msgid "Password required with username"
-msgstr ""
+msgstr "用戶名稱須有密碼"
 
 #: ../fdroidserver/import.py
 msgid "Path to main Android project subdirectory, if not in root."
