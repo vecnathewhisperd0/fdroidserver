@@ -1359,6 +1359,10 @@ def parse_androidmanifests(paths, app):
                     matches = vcsearch_g(resultgroup)
                     if matches:
                         vercode = matches.group(1)
+                    else:
+                        matches = vcsearch_g(buildfile)
+                        if matches:
+                            vercode = matches.group(1)
             else:
                 # fall back to parse file line by line
                 with open(path, 'r') as f:
