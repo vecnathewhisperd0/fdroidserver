@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
-"PO-Revision-Date: 2017-12-15 11:23+0000\n"
+"PO-Revision-Date: 2017-12-19 21:58+0000\n"
 "Last-Translator: jxt <chihsun.tsai@gmail.com>\n"
 "Language-Team: Chinese (Traditional) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hant/>\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 2.18-dev\n"
+"X-Generator: Weblate 2.18\n"
 
 #: ../fdroidserver/nightly.py
 msgid ""
@@ -612,9 +612,9 @@ msgid "Found invalid versionCodes for some apps"
 msgstr "有些應用的版本代號無效"
 
 #: ../fdroidserver/metadata.py
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Found multiple metadata files for {appid}"
-msgstr "建立缺少的骨幹中介資料檔案"
+msgstr "{appid} 找到多件中介資料檔案"
 
 #: ../fdroidserver/index.py
 msgid "Found multiple signing certificates for repository."
@@ -728,12 +728,12 @@ msgstr "無效的布林 '%s'"
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "Invalid build flag at {line} in {linedesc}"
-msgstr ""
+msgstr "{linedesc} 中在 {line} 行出現無效的編譯標誌"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "Invalid build format: {value} in {name}"
-msgstr ""
+msgstr "無效編譯格式: {name} 的 {value}"
 
 #: ../fdroidserver/lint.py
 msgid "Invalid bulleted list"
@@ -761,7 +761,7 @@ msgstr "無效的中介資料: "
 #: ../fdroidserver/common.py
 #, python-format
 msgid "Invalid name for published file: %s"
-msgstr ""
+msgstr "無效的已發佈檔案名稱: %s"
 
 #: ../fdroidserver/common.py
 #, python-brace-format
@@ -828,11 +828,11 @@ msgstr "未找到 Android SDK !"
 
 #: ../fdroidserver/import.py
 msgid "No android or kivy project could be found. Specify --subdir?"
-msgstr ""
+msgstr "找無 android 或 kivy 專案。指定子目錄嗎 ?"
 
 #: ../fdroidserver/install.py
 msgid "No attached devices found"
-msgstr ""
+msgstr "查無附加的設備"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
@@ -841,7 +841,7 @@ msgstr "{linedesc} 沒有指定給 {versionName} 的提交"
 
 #: ../fdroidserver/index.py
 msgid "No fingerprint in URL."
-msgstr ""
+msgstr "URL 無指紋."
 
 #: ../fdroidserver/common.py
 msgid "No git submodules available"
@@ -981,17 +981,17 @@ msgstr "準備 drozer 以執行掃描"
 
 #: ../fdroidserver/nightly.py
 msgid "Print the secret variable to the terminal for easy copy/paste"
-msgstr ""
+msgstr "在終端機顥示祕密變數以便於複製/貼上"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "Problem with description of {appid}: {error}"
-msgstr ""
+msgstr "{appid}的描述有問題: {error}"
 
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "Problem with xml at '{path}'"
-msgstr ""
+msgstr "'{path}' 的 xml 有問題"
 
 #: ../fdroidserver/checkupdates.py
 msgid "Process auto-updates"
@@ -1000,17 +1000,16 @@ msgstr "處理自動更新"
 #: ../fdroidserver/publish.py ../fdroidserver/update.py
 #, python-brace-format
 msgid "Processing {apkfilename}"
-msgstr ""
+msgstr "處理 {apkfilename}"
 
 #: ../fdroidserver/checkupdates.py ../fdroidserver/scanner.py
 #, python-brace-format
 msgid "Processing {appid}"
-msgstr ""
+msgstr "處理 {appid}"
 
 #: ../fdroidserver/update.py
-#, fuzzy
 msgid "Produce human-readable XML/JSON for index files"
-msgstr "產生可讀懂的 index.xml 格式"
+msgstr "產生可讀懂的 XML/JSON 格式以進行檔案索引"
 
 #: ../fdroidserver/update.py
 msgid "Produce human-readable index.xml"
@@ -1022,7 +1021,7 @@ msgstr "要導入的專案網址。"
 
 #: ../fdroidserver/lint.py
 msgid "Punctuation should be avoided"
-msgstr ""
+msgstr "標點應予避免"
 
 #: ../fdroidserver/btlog.py
 msgid "Push the log to this git remote repository"
@@ -1036,7 +1035,7 @@ msgstr "推二進制的透明日誌到{url}"
 #: ../fdroidserver/server.py
 #, python-brace-format
 msgid "Pushing to {url}"
-msgstr ""
+msgstr "發佈到 {url}"
 
 #: ../fdroid
 msgid "Quickly start a new repository"
@@ -1049,7 +1048,7 @@ msgstr "讀取所有的中介資料檔案並退出"
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "Reading '{config_file}'"
-msgstr ""
+msgstr "讀取 '{config_file}' 中"
 
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vcode
 #. https://developer.android.com/guide/topics/manifest/manifest-element.html#vname
@@ -1058,12 +1057,12 @@ msgstr ""
 msgid ""
 "Reading packageName/versionCode/versionName failed, APK invalid: "
 "'{apkfilename}'"
-msgstr ""
+msgstr "讀取 套件名稱/版本代碼/版本名稱 失敗, APK 無效: '{apkfilename}'"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Reading {apkfilename} from cache"
-msgstr ""
+msgstr "從緩存讀取 {apkfilename}"
 
 #: ../fdroidserver/stats.py
 msgid ""
@@ -1073,7 +1072,7 @@ msgstr "重新計算集合統計 - 使用時進行更改，這會使得舊的快
 
 #: ../fdroidserver/common.py
 msgid "Removing specified files"
-msgstr ""
+msgstr "移除指定檔案"
 
 #: ../fdroidserver/update.py
 msgid "Rename APK files that do not match package.name_123.apk"
@@ -1108,12 +1107,12 @@ msgstr "重寫為特定的格式： "
 #: ../fdroidserver/rewritemeta.py
 #, python-brace-format
 msgid "Rewriting '{appid}'"
-msgstr ""
+msgstr "重覆寫入 '{appid}'"
 
 #: ../fdroidserver/rewritemeta.py
 #, python-brace-format
 msgid "Rewriting '{appid}' to '{path}'"
-msgstr ""
+msgstr "把 '{appid}' 重寫到 '{path}'"
 
 #: ../fdroidserver/lint.py
 msgid "Run rewritemeta to fix formatting"
@@ -1134,7 +1133,7 @@ msgstr "掃描套件包的原始碼"
 #: ../fdroidserver/build.py
 msgid "Scanner found {} problem"
 msgid_plural "Scanner found {} problems"
-msgstr[0] ""
+msgstr[0] "掃瞄器發現 {} 問題"
 
 #: ../fdroid
 msgid "Set up an app build for a nightly build repo"
@@ -1167,22 +1166,22 @@ msgstr ""
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Skipping index generation for {appid}"
-msgstr ""
+msgstr "略過 {appid} 的索引產生"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Skipping {apkfilename} with invalid signature!"
-msgstr ""
+msgstr "略過無效簽名的 {apkfilename} !"
 
 #: ../fdroidserver/scanner.py
 #, python-brace-format
 msgid "Skipping {appid}: disabled"
-msgstr ""
+msgstr "略過 {appid}: 關閉"
 
 #: ../fdroidserver/scanner.py
 #, python-brace-format
 msgid "Skipping {appid}: no builds specified"
-msgstr ""
+msgstr "略過 {appid}: 無指定編譯"
 
 #: ../fdroidserver/server.py
 msgid "Specify a local folder to sync the repo to"
@@ -1201,9 +1200,9 @@ msgid "Specify editor to use in interactive mode. Default %s"
 msgstr "指定編輯器在互動模式使用。預設 %s"
 
 #: ../fdroidserver/update.py
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Specify editor to use in interactive mode. Default is {path}"
-msgstr "指定編輯器在互動模式使用。預設 %s"
+msgstr "指定編輯器在互動模式使用。預設 {path}"
 
 #: ../fdroidserver/build.py
 msgid "Specify that we're running on the build server"
@@ -1216,12 +1215,12 @@ msgstr "傾湧出比正常情況下更多的資訊"
 #: ../fdroidserver/lint.py
 #, python-format
 msgid "Summary '%s' is just the app's name"
-msgstr ""
+msgstr "摘要 '%s' 僅是應用程式的名稱"
 
 #: ../fdroidserver/lint.py
 #, python-brace-format
 msgid "Summary of length {length} is over the {limit} char limit"
-msgstr ""
+msgstr "摘要的長度 {length} 超過了字符 {limit} 限制"
 
 #: ../fdroidserver/build.py
 msgid ""
@@ -1233,7 +1232,7 @@ msgstr "測試模式 - 將輸出只放在 tmp 目錄中，即使輸出已經存�
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "The OBB version code must come after \"{name}.\":"
-msgstr ""
+msgstr "OBB 版本代碼須在 \"{name}.\" 之後:"
 
 #: ../fdroidserver/btlog.py
 msgid "The base URL for the repo to log (default: https://f-droid.org)"
@@ -1245,16 +1244,16 @@ msgstr "目前支援的命令僅 'init' 或 'update'"
 
 #: ../fdroidserver/index.py
 msgid "The repository's fingerprint does not match."
-msgstr ""
+msgstr "軟體倉庫的指紋並不相符."
 
 #: ../fdroidserver/common.py
 msgid "The repository's index could not be verified."
-msgstr ""
+msgstr "軟體庫的索引無法被驗證."
 
 #: ../fdroidserver/server.py
 #, python-brace-format
 msgid "The root dir for local_copy_dir \"{path}\" does not exist!"
-msgstr ""
+msgstr "local_copy_dir \"{path}\" 根目錄不存在!"
 
 #: ../fdroidserver/nightly.py
 msgid "The the file to be included in the repo (path or glob)"
