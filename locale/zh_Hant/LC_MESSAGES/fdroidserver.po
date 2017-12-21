@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
-"PO-Revision-Date: 2017-12-19 21:58+0000\n"
+"PO-Revision-Date: 2017-12-21 09:18+0000\n"
 "Last-Translator: jxt <chihsun.tsai@gmail.com>\n"
 "Language-Team: Chinese (Traditional) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hant/>\n"
@@ -1161,7 +1161,7 @@ msgstr "跳過掃描二進制碼和其它問題的原始碼"
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Skipping '{apkfilename}' with invalid signature!"
-msgstr ""
+msgstr "略過帶無效簽署的 '{apkfilename}'!"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
@@ -1272,7 +1272,7 @@ msgstr ""
 msgid ""
 "To use awsbucket, awssecretkey and awsaccesskeyid must also be set in config."
 "py!"
-msgstr ""
+msgstr "要使用 awsbucket, awssecretkey 與 awsaccesskeyid 必須在 config.py 進行設定!"
 
 #: ../fdroidserver/lint.py
 msgid "UCM is set but it looks like checkupdates hasn't been run yet"
