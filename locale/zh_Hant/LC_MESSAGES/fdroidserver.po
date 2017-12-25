@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
-"PO-Revision-Date: 2017-12-22 08:51+0000\n"
+"PO-Revision-Date: 2017-12-27 19:32+0000\n"
 "Last-Translator: jxt <chihsun.tsai@gmail.com>\n"
 "Language-Team: Chinese (Traditional) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hant/>\n"
@@ -379,7 +379,7 @@ msgstr "找不到包 ID"
 
 #: ../fdroidserver/update.py
 msgid "Cowardily refusing to overwrite existing signing key setup!"
-msgstr ""
+msgstr "拒絕覆寫現有的簽署金鑰設定!"
 
 #: ../fdroidserver/update.py
 msgid "Create a repo signing key in a keystore"
@@ -684,7 +684,7 @@ msgstr "忽略在 '{path}' 的 {ext} 檔案"
 
 #: ../fdroidserver/update.py
 msgid "Include APKs that are signed with disabled algorithms like MD5"
-msgstr ""
+msgstr "包含 APKs 其簽名為有弱點的演算法,如 MD5"
 
 #: ../fdroidserver/common.py
 msgid "Initialising submodules"
@@ -807,7 +807,7 @@ msgstr "軟體庫鏡像異常."
 
 #: ../fdroidserver/server.py
 msgid "Malformed serverwebroot line:"
-msgstr ""
+msgstr "異常的 serverwebroot 行:"
 
 #: ../fdroidserver/gpgsign.py
 msgid "Missing output directory"
@@ -1137,7 +1137,7 @@ msgstr[0] "掃瞄器發現 {} 問題"
 
 #: ../fdroid
 msgid "Set up an app build for a nightly build repo"
-msgstr ""
+msgstr "為非正式編譯庫建立一個應用編譯"
 
 #: ../fdroidserver/build.py
 msgid "Setup an emulator, install the APK on it and perform a Drozer scan"
@@ -1261,12 +1261,12 @@ msgstr ""
 
 #: ../fdroidserver/publish.py
 msgid "There is a keyalias collision - publishing halted"
-msgstr ""
+msgstr "發生主要別名衝突 - 發佈中止"
 
 #: ../fdroidserver/import.py
 #, python-format
 msgid "This repo already has local metadata: %s"
-msgstr ""
+msgstr "這個軟體庫已有本地的中介資料: %s"
 
 #: ../fdroidserver/server.py
 msgid ""
@@ -1276,25 +1276,25 @@ msgstr "要使用 awsbucket, awssecretkey 與 awsaccesskeyid 必須在 config.py
 
 #: ../fdroidserver/lint.py
 msgid "UCM is set but it looks like checkupdates hasn't been run yet"
-msgstr ""
+msgstr "UCM 已被設定但它似乎尚未曾執行更新檢查"
 
 #: ../fdroidserver/lint.py
 msgid "URL shorteners should not be used"
-msgstr ""
+msgstr "不應使用  URL 縮短網址"
 
 #: ../fdroidserver/metadata.py
 msgid "URL title is just the URL, use brackets: [URL]"
-msgstr ""
+msgstr "URL 標題就是 URL, 請用括號: [URL]"
 
 #: ../fdroidserver/lint.py
 #, python-brace-format
 msgid "URL {url} in Description: {error}"
-msgstr ""
+msgstr "描述中的 URL {url} : {error}"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "Unexpected text on same line as {field} in {linedesc}"
-msgstr ""
+msgstr "在 {linedesc} 在同一行的 {field} 出現未預期的文字"
 
 #: ../fdroid
 msgid "Unknown exception found!"
@@ -1304,21 +1304,21 @@ msgstr "發現未知的異常！"
 #: ../fdroidserver/lint.py
 #, python-brace-format
 msgid "Unknown file '{filename}' in build '{versionName}'"
-msgstr ""
+msgstr "在 '{versionName}' 編譯出現不明的檔案 '{filename}'"
 
 #: ../fdroidserver/metadata.py
 #, python-format
 msgid "Unknown metadata format: %s"
-msgstr ""
+msgstr "未知的中介資料格式: %s"
 
 #: ../fdroidserver/metadata.py
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Unknown metadata format: {path}"
-msgstr "建立缺少的骨幹中介資料檔案"
+msgstr "未知的中介資料格式t: {path}"
 
 #: ../fdroidserver/common.py
 msgid "Unknown version of aapt, might cause problems: "
-msgstr ""
+msgstr "不明的 aapt 版本, 可能會出問題: "
 
 #: ../fdroidserver/lint.py
 msgid "Unlinkified link - use [http://foo.bar Link title] or [http://foo.bar]"
@@ -1326,62 +1326,62 @@ msgstr ""
 
 #: ../fdroidserver/lint.py
 msgid "Unnecessary leading space"
-msgstr ""
+msgstr "不必要的前導空間"
 
 #: ../fdroidserver/lint.py
 msgid "Unnecessary trailing space"
-msgstr ""
+msgstr "不必要的尾隨空間"
 
 #: ../fdroidserver/metadata.py
 msgid "Unrecognised app field: "
-msgstr ""
+msgstr "無法辨識的 app 欄位: "
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "Unrecognised field '{field}' in {linedesc}"
-msgstr ""
+msgstr "在 {linedesc} 無法辨識的欄位 '{field}'"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Unsupported graphics file found: {path}"
-msgstr ""
+msgstr "找到不支援的圖形檔案: {path}"
 
 #: ../fdroidserver/rewritemeta.py
 #, python-brace-format
 msgid "Unsupported metadata format, use: --to [{supported}]"
-msgstr ""
+msgstr "未支援的中介資料格式, 使用: --to [{supported}]"
 
 #: ../fdroidserver/metadata.py
 msgid "Unterminated ]"
-msgstr ""
+msgstr "未結束的 ]"
 
 #: ../fdroidserver/metadata.py
 msgid "Unterminated ]]"
-msgstr ""
+msgstr "未結束的 ]]"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "Unterminated build in {name}"
-msgstr ""
+msgstr "在 {name} 未結束的編譯"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "Unterminated continuation in {name}"
-msgstr ""
+msgstr "在 {name}未結束的續編"
 
 #: ../fdroidserver/lint.py
 #, python-format
 msgid "Unused extlib at %s"
-msgstr ""
+msgstr "在 %s 未使用的 extlib"
 
 #: ../fdroidserver/lint.py
 #, python-format
 msgid "Unused file at %s"
-msgstr ""
+msgstr "在 %s 未使用的檔案"
 
 #: ../fdroidserver/lint.py
 msgid "Update Check Name is set to the known app id - it can be removed"
-msgstr ""
+msgstr "更新 Check Name 被設定成已知的應用 id - 它可以被移除"
 
 #: ../fdroid
 msgid "Update repo information for new packages"
@@ -1410,11 +1410,11 @@ msgstr "使用：%s\n"
 
 #: ../fdroidserver/lint.py
 msgid "Use /HEAD instead of /master to point at a file in the default branch"
-msgstr ""
+msgstr "使用 /HEAD 取代 /master 來指向默認分支的一個檔案"
 
 #: ../fdroidserver/update.py
 msgid "Use `fdroid update -c` to create it."
-msgstr ""
+msgstr "利用`fdroid update -c` 指令來建立."
 
 #: ../fdroidserver/build.py
 msgid "Use build server"
@@ -1459,17 +1459,17 @@ msgstr "產生金鑰時使用 X.509 的'專有名稱'"
 
 #: ../fdroidserver/common.py
 msgid "You can use ANDROID_HOME to set the path to your SDK, i.e.:"
-msgstr ""
+msgstr "可以使用 ANDROID_HOME 來設定 SDK 的路徑, i.e.:"
 
 #: ../fdroidserver/nightly.py
 #, python-brace-format
 msgid "adding IdentityFile to {path}"
-msgstr ""
+msgstr "添增 IdentityFile 到 {path}"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "adding to {name}: {path}"
-msgstr ""
+msgstr "添加到 {name}: {path}"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
@@ -1499,11 +1499,11 @@ msgstr "applicationId 具有任選的 versionCode 在此格式為 APPID [:VERCOD
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
 msgid "argument \"-\" with mode %r"
-msgstr ""
+msgstr "引數 \"-\" 為帶 %r 模式"
 
 #: ../fdroidserver/nightly.py
 msgid "attempting bare ssh connection to test deploy key:"
-msgstr ""
+msgstr "試圖顯露 ssh 連線來測試佈署金鑰:"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
@@ -1512,21 +1512,21 @@ msgstr "無法打開 '%s'：%s"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 msgid "cannot have multiple subparser arguments"
-msgstr ""
+msgstr "無法有多個子解析器引數"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
 msgid "cannot merge actions - two groups are named %r"
-msgstr ""
+msgstr "無法合併動作 - 二個群體被命名為 %r"
 
 #: ../fdroidserver/nightly.py
 msgid "cannot publish update, did you set the deploy key?"
-msgstr ""
+msgstr "無法發佈更新, 是否正確地設定了佈署金鑰?"
 
 #: ../fdroidserver/nightly.py
 #, python-brace-format
 msgid "cloning {url}"
-msgstr ""
+msgstr "複製 {url}"
 
 #: ../fdroidserver/server.py
 msgid "command to execute, either 'init' or 'update'"
@@ -1534,38 +1534,38 @@ msgstr "命令執行，'init' 或 'update' 中的任何一個"
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 msgid "complex"
-msgstr ""
+msgstr "複雜"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
 msgid "conflicting option string: %s"
 msgid_plural "conflicting option strings: %s"
-msgstr[0] ""
+msgstr[0] "相衝突的選項字串: %s"
 
 #: ../fdroidserver/nightly.py
 #, python-brace-format
 msgid "copying {apkfilename} into {path}"
-msgstr ""
+msgstr "複製 {apkfilename} 到 {path}"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "deleting: repo/{apkfilename}"
-msgstr ""
+msgstr "刪除: repo/{apkfilename}"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
 msgid "dest= is required for options like %r"
-msgstr ""
+msgstr "dest=  如 %r 選項為必須"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
 msgid "expected %s argument"
 msgid_plural "expected %s arguments"
-msgstr[0] ""
+msgstr[0] "預期的 %s 引數"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 msgid "expected at least one argument"
-msgstr ""
+msgstr "預期至少有一個引數"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 msgid "expected at most one argument"
