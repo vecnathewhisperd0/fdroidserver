@@ -50,7 +50,7 @@ except ImportError:
 
 
 # Note that 'force' here also implies test mode.
-def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
+def build_server(app, build, vcs, build_dir, output_dir, log_dir, force, test):
     """Do a build on the builder vm.
 
     :param app: app metadata dict
@@ -208,6 +208,8 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
         cmdline += ' build --on-server'
         if force:
             cmdline += ' --force --test'
+        elif test:
+            cmdline += ' --test'
         if options.verbose:
             cmdline += ' --verbose'
         if options.skipscan:
@@ -420,15 +422,16 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
                 raise BuildException("Error running sudo command for %s:%s" %
                                      (app.id, build.versionName), p.output)
 
-        p = FDroidPopen(['sudo', 'passwd', '--lock', 'root'])
-        if p.returncode != 0:
-            raise BuildException("Error locking root account for %s:%s" %
-                                 (app.id, build.versionName), p.output)
+        if not options.test:
+            p = FDroidPopen(['sudo', 'passwd', '--lock', 'root'])
+            if p.returncode != 0:
+                raise BuildException("Error locking root account for %s:%s" %
+                                     (app.id, build.versionName), p.output)
 
-        p = FDroidPopen(['sudo', 'SUDO_FORCE_REMOVE=yes', 'dpkg', '--purge', 'sudo'])
-        if p.returncode != 0:
-            raise BuildException("Error removing sudo for %s:%s" %
-                                 (app.id, build.versionName), p.output)
+            p = FDroidPopen(['sudo', 'SUDO_FORCE_REMOVE=yes', 'dpkg', '--purge', 'sudo'])
+            if p.returncode != 0:
+                raise BuildException("Error removing sudo for %s:%s" %
+                                     (app.id, build.versionName), p.output)
 
         log_path = os.path.join(log_dir,
                                 common.get_toolsversion_logname(app, build))
@@ -976,7 +979,7 @@ def trybuild(app, build, build_dir, output_dir, log_dir, also_check_dir,
         # grabbing the source now.
         vcs.gotorevision(build.commit, refresh)
 
-        build_server(app, build, vcs, build_dir, output_dir, log_dir, force)
+        build_server(app, build, vcs, build_dir, output_dir, log_dir, force, test)
     else:
         build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, extlib_dir, tmp_dir, force, onserver, refresh)
     return True
