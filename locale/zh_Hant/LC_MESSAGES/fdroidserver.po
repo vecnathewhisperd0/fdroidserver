@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
-"PO-Revision-Date: 2017-12-27 19:32+0000\n"
+"PO-Revision-Date: 2018-01-15 00:40+0000\n"
 "Last-Translator: jxt <chihsun.tsai@gmail.com>\n"
 "Language-Team: Chinese (Traditional) "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/zh_Hant/>\n"
@@ -1120,7 +1120,7 @@ msgstr "執行 rewritemeta 到固定格式"
 
 #: ../fdroidserver/server.py
 msgid "Running first pass with MD5 checking disabled"
-msgstr ""
+msgstr "關閉 MD5 檢查以執行首次通過"
 
 #: ../fdroidserver/dscanner.py
 msgid "Scan only the latest version of each package"
@@ -1257,7 +1257,7 @@ msgstr "local_copy_dir \"{path}\" 根目錄不存在!"
 
 #: ../fdroidserver/nightly.py
 msgid "The the file to be included in the repo (path or glob)"
-msgstr ""
+msgstr "包含在此軟體庫的檔案 (path 或 glob)"
 
 #: ../fdroidserver/publish.py
 msgid "There is a keyalias collision - publishing halted"
@@ -1322,7 +1322,7 @@ msgstr "不明的 aapt 版本, 可能會出問題: "
 
 #: ../fdroidserver/lint.py
 msgid "Unlinkified link - use [http://foo.bar Link title] or [http://foo.bar]"
-msgstr ""
+msgstr "無連鏈的連結 - 使用 [http://foo.bar 鏈結標題] 或 [http://foo.bar]"
 
 #: ../fdroidserver/lint.py
 msgid "Unnecessary leading space"
@@ -1576,7 +1576,6 @@ msgid "expected one argument"
 msgstr "預期有一個引數"
 
 #: ../fdroid
-#, fuzzy
 msgid "fdroid [-h|--help|--version] <command> [<args>]"
 msgstr "用法：fdroid [-h|--help|--version] <command> [<args>]"
 
