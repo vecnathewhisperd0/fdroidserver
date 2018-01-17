@@ -12,7 +12,20 @@ cat << EOF > /etc/profile.d/bsenv.sh
 # generated on $(date)
 export ANDROID_HOME=$1
 export PATH=\$PATH:\$ANDROID_HOME/tools:\$ANDROID_HOME/platform-tools:/opt/gradle/bin
+export BASH_ENV=/home/vagrant/profile.sh
 EOF
+
+# include custom, user-defined variables
+cat << EOF > /home/vagrant/profile.sh
+# generated on $(date)
+for i in \$HOME/profile.d/*.sh; do
+    if [ -r "\$i" ]; then
+        source "\$i"
+    fi
+done
+EOF
+mkdir /home/vagrant/profile.d
+chown vagrant:vagrant /home/vagrant/profile.sh /home/vagrant/profile.d
 
 # make sure that SSH never hangs at a password or key prompt
 printf '    StrictHostKeyChecking yes' >> /etc/ssh/ssh_config
