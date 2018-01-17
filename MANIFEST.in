@@ -6,7 +6,7 @@ include buildserver/provision-apt-get-install
 include buildserver/provision-apt-proxy
 include buildserver/provision-gradle
 include buildserver/provision-pip
-include buildserver/setup-env-vars
+include buildserver/set-up-environment
 include buildserver/Vagrantfile
 include completion/bash-completion
 include docker/Dockerfile

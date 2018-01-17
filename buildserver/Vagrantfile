@@ -65,7 +65,7 @@ Vagrant.configure("2") do |config|
       owner: 'root', group: 'root', create: true
   end
 
-  config.vm.provision "shell", path: "setup-env-vars",
+  config.vm.provision "shell", path: "set-up-environment",
     args: ["/home/vagrant/android-sdk"]
   config.vm.provision "shell", path: "provision-apt-get-install",
     args: [configfile['debian_mirror']]
