@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
-"PO-Revision-Date: 2018-01-28 22:06+0000\n"
-"Last-Translator: anonymous <>\n"
+"PO-Revision-Date: 2018-01-28 22:07+0000\n"
+"Last-Translator: dadnal <liberapay-weblate@com.beintner.de>\n"
 "Language-Team: German "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\n"
 "Language: de\n"
@@ -23,6 +23,8 @@ msgid ""
 "\n"
 "SSH Public Key to be used as Deploy Key:"
 msgstr ""
+"\n"
+"SSH Public Key, der als Deploy Key verwendet werden soll:"
 
 #: ../fdroidserver/nightly.py
 #, python-brace-format
@@ -1833,7 +1835,7 @@ msgstr "nicht erkannte Argumente: %s"
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "unsafe permissions on '{config_file}' (should be 0600)!"
-msgstr ""
+msgstr "'{config_file}' hat unsichere Dateirechte (sollte 0600 sein)!"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py ../fdroid
 msgid "usage: "
