@@ -8,7 +8,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
 "PO-Revision-Date: 2018-01-28 22:09+0000\n"
-"Last-Translator: anonymous <>\n"
+"Last-Translator: dadnal <liberapay-weblate@com.beintner.de>\n"
 "Language-Team: German "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\n"
 "Language: de\n"
@@ -46,7 +46,7 @@ msgstr "{name} ({version}) in \"{path}\" veraltet "
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "\"{path}\" contains recent {name} ({version})"
-msgstr ""
+msgstr "{name} ({version}) in \"{path}\" ist aktuell"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
