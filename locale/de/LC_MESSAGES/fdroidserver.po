@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
-"PO-Revision-Date: 2017-12-22 08:51+0000\n"
-"Last-Translator: Tobias_Groza <tobias.groza@outlook.de>\n"
+"PO-Revision-Date: 2018-01-28 22:05+0000\n"
+"Last-Translator: dadnal <liberapay-weblate@com.beintner.de>\n"
 "Language-Team: German "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\n"
 "Language: de\n"
@@ -163,14 +163,13 @@ msgid "Add a new application from its source code"
 msgstr "Eine neue Anwendung aus ihrem Quellcode hinzufügen"
 
 #: ../fdroidserver/update.py
-#, fuzzy
 msgid "Add a repo signing key to an unsigned repo"
-msgstr "Repository-Signierschlüssel in einem Schlüsselspeicher erstellen"
+msgstr ""
+"Füge einen Repository-Signierschlüssel zu einem unsignierten Repository hinzu"
 
 #: ../fdroidserver/update.py
-#, fuzzy
 msgid "Add skeleton metadata files for APKs that are missing them"
-msgstr "Gerüst für fehlende Metadaten-Dateien erstellen"
+msgstr "Füge eine Metadaten-Vorlage für APKs hinzu, die keine haben"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
@@ -620,9 +619,9 @@ msgid "Found invalid versionCodes for some apps"
 msgstr ""
 
 #: ../fdroidserver/metadata.py
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Found multiple metadata files for {appid}"
-msgstr "Gerüst für fehlende Metadaten-Dateien erstellen"
+msgstr "Mehrere Metadaten-Dateien für {appid} gefunden"
 
 #: ../fdroidserver/index.py
 msgid "Found multiple signing certificates for repository."
@@ -643,9 +642,9 @@ msgid "Found non-file at %s"
 msgstr ""
 
 #: ../fdroidserver/update.py
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Generated skeleton metadata for {appid}"
-msgstr "Gerüst für fehlende Metadaten-Dateien erstellen"
+msgstr "Generierte Metadaten aus Vorlage für {appid}"
 
 #: ../fdroidserver/common.py
 #, python-format
@@ -709,7 +708,7 @@ msgstr "Erstellte Programmpakete auf Geräten installieren"
 #: ../fdroidserver/install.py
 #, python-format
 msgid "Installing %s..."
-msgstr "Installiere"
+msgstr "Installiere %s"
 
 #: ../fdroidserver/install.py
 #, python-brace-format
@@ -1022,9 +1021,8 @@ msgid "Processing {appid}"
 msgstr ""
 
 #: ../fdroidserver/update.py
-#, fuzzy
 msgid "Produce human-readable XML/JSON for index files"
-msgstr "Visuell lesbare „index.xml“ herstellen"
+msgstr "Erstelle menschenlesbares XML/JSON für Indexdateien"
 
 #: ../fdroidserver/update.py
 msgid "Produce human-readable index.xml"
@@ -1236,11 +1234,11 @@ msgstr ""
 "%s"
 
 #: ../fdroidserver/update.py
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Specify editor to use in interactive mode. Default is {path}"
 msgstr ""
 "Editor festlegen, der im interaktiven Modus verwendet werden soll. Standard "
-"%s"
+"ist {path}"
 
 #: ../fdroidserver/build.py
 msgid "Specify that we're running on the build server"
@@ -1353,9 +1351,9 @@ msgid "Unknown metadata format: %s"
 msgstr ""
 
 #: ../fdroidserver/metadata.py
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Unknown metadata format: {path}"
-msgstr "Gerüst für fehlende Metadaten-Dateien erstellen"
+msgstr "Unbekanntes Metadaten-Format: {path}"
 
 #: ../fdroidserver/common.py
 msgid "Unknown version of aapt, might cause problems: "
@@ -1621,9 +1619,8 @@ msgid "expected one argument"
 msgstr ""
 
 #: ../fdroid
-#, fuzzy
 msgid "fdroid [-h|--help|--version] <command> [<args>]"
-msgstr "Sprachgebrauch: fdroid [-h|--help|--version] <command> [<args>]"
+msgstr "fdroid [-h|--help|--version] <command> [<args>]"
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 msgid "floating-point"
@@ -1746,12 +1743,12 @@ msgstr "Option -%s erfordert Argument"
 #: /usr/lib/python3.5/getopt.py /usr/lib/python3.6/getopt.py
 #, python-format
 msgid "option --%s must not have an argument"
-msgstr ""
+msgstr "Option --%s darf kein Argument besitzen"
 
 #: /usr/lib/python3.5/getopt.py /usr/lib/python3.6/getopt.py
 #, python-format
 msgid "option --%s not a unique prefix"
-msgstr ""
+msgstr "option --%s ist kein eindeutiges Präfix"
 
 #: /usr/lib/python3.5/getopt.py /usr/lib/python3.6/getopt.py
 #, python-format
@@ -1774,7 +1771,7 @@ msgstr ""
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 msgid "positional arguments"
-msgstr ""
+msgstr "Positionsparameter"
 
 #: ../fdroidserver/signatures.py
 #, python-brace-format
@@ -1821,7 +1818,7 @@ msgstr "die Folgenden Argumente  sind erforderlich: %s"
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
 msgid "unexpected option string: %s"
-msgstr ""
+msgstr "unerwartete Option: %s"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
