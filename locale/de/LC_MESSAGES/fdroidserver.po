@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
-"PO-Revision-Date: 2018-01-28 22:05+0000\n"
-"Last-Translator: dadnal <liberapay-weblate@com.beintner.de>\n"
+"PO-Revision-Date: 2018-01-28 22:06+0000\n"
+"Last-Translator: anonymous <>\n"
 "Language-Team: German "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\n"
 "Language: de\n"
@@ -1828,7 +1828,7 @@ msgstr ""
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
 msgid "unrecognized arguments: %s"
-msgstr ""
+msgstr "nicht erkannte Argumente: %s"
 
 #: ../fdroidserver/common.py
 #, python-brace-format
