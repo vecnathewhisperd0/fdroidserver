@@ -8,7 +8,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
 "PO-Revision-Date: 2018-02-01 18:45+0000\n"
-"Last-Translator: anonymous <>\n"
+"Last-Translator: Andreas Kleinert <Andy.Kleinert@gmail.com>\n"
 "Language-Team: German "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\n"
 "Language: de\n"
@@ -1820,7 +1820,7 @@ msgstr "die Folgenden Argumente  sind erforderlich: %s"
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
 msgid "unexpected option string: %s"
-msgstr "unerwartete Optionsverkettung: %s"
+msgstr "Unerwartete Optionsverkettung: %s"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
