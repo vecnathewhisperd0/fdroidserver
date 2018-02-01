@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
-"PO-Revision-Date: 2018-02-01 18:48+0000\n"
-"Last-Translator: Andreas Kleinert <Andy.Kleinert@gmail.com>\n"
+"PO-Revision-Date: 2018-02-01 18:49+0000\n"
+"Last-Translator: anonymous <>\n"
 "Language-Team: German "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\n"
 "Language: de\n"
@@ -88,7 +88,7 @@ msgstr ""
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 #, python-format
 msgid "%s option does not take a value"
-msgstr ""
+msgstr "Option %s besitzt keinen Wert"
 
 #: ../fdroidserver/index.py ../fdroidserver/common.py
 msgid "'keypass' not found in config.py!"
