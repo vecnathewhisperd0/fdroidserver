@@ -8,7 +8,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
 "PO-Revision-Date: 2018-02-04 09:24+0000\n"
-"Last-Translator: anonymous <>\n"
+"Last-Translator: Follpvosten <wolfi@karpador.xyz>\n"
 "Language-Team: German "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\n"
 "Language: de\n"
@@ -233,7 +233,7 @@ msgstr ""
 
 #: ../fdroidserver/lint.py
 msgid "Appending .git is not necessary"
-msgstr ""
+msgstr "Das Anhängen von .git ist nicht notwendig"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
