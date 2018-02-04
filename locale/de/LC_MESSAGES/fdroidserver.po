@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
-"PO-Revision-Date: 2018-02-02 19:37+0000\n"
-"Last-Translator: Andreas Kleinert <Andy.Kleinert@gmail.com>\n"
+"PO-Revision-Date: 2018-02-04 09:24+0000\n"
+"Last-Translator: anonymous <>\n"
 "Language-Team: German "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\n"
 "Language: de\n"
@@ -112,7 +112,7 @@ msgstr "„required” ist ein ungültiges Argument für Positionsangaben"
 
 #: ../fdroidserver/common.py
 msgid "'sdk_path' not set in 'config.py'!"
-msgstr ""
+msgstr "Kein 'sdk_path' in 'config.py' festgelegt!"
 
 #. Translators: "build-tools" is the file name of a package from
 #. Google, it is part of the Android SDK. So it probably shouldn't be
@@ -120,12 +120,12 @@ msgstr ""
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "'{aapt}' is too old, fdroid requires build-tools-23.0.0 or newer!"
-msgstr ""
+msgstr "'{aapt}' ist zu alt, fdroid benötigt build-tools-23.0.0 oder neuer!"
 
 #: ../fdroidserver/install.py
 #, python-brace-format
 msgid "'{apkfilename}' is already installed on {dev}."
-msgstr ""
+msgstr "'{apkfilename}' ist auf {dev} bereits installiert."
 
 #: ../fdroidserver/common.py
 #, python-brace-format
@@ -147,7 +147,7 @@ msgstr ""
 #: ../fdroidserver/checkupdates.py
 #, python-brace-format
 msgid "...checkupdate failed for {appid} : {error}"
-msgstr ""
+msgstr "...checkupdate für {appid} fehlgeschlagen: {error}"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 msgid ".__call__() not defined"
@@ -220,11 +220,11 @@ msgstr "Android-SDK-Pfad »{path}« ist kein Verzeichnis!"
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "Android build-tools path '{path}' does not exist!"
-msgstr ""
+msgstr "Pfad '{path}' zu den Android Build-Tools nicht vorhanden!"
 
 #: ../fdroidserver/update.py
 msgid "AndroidManifest.xml has no date"
-msgstr ""
+msgstr "AndroidManifest.xml enthält kein Datum"
 
 #: ../fdroidserver/lint.py
 #, python-brace-format
