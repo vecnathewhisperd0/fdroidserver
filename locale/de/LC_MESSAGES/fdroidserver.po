@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2017-10-17 17:48+0200\n"
-"PO-Revision-Date: 2018-02-05 09:37+0000\n"
-"Last-Translator: anonymous <>\n"
+"PO-Revision-Date: 2018-02-10 16:36+0000\n"
+"Last-Translator: Tobias_Groza <tobias.groza@outlook.de>\n"
 "Language-Team: German "
 "<https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\n"
 "Language: de\n"
@@ -306,7 +306,7 @@ msgstr ""
 
 #: ../fdroidserver/lint.py
 msgid "Categories are not set"
-msgstr ""
+msgstr "Kategorien sind nicht festgelegt"
 
 #: ../fdroidserver/lint.py
 #, python-format
@@ -381,7 +381,7 @@ msgstr ""
 
 #: ../fdroidserver/import.py
 msgid "Couldn't find package ID"
-msgstr ""
+msgstr "Konnte Paket-ID nicht finden"
 
 #: ../fdroidserver/update.py
 msgid "Cowardily refusing to overwrite existing signing key setup!"
@@ -411,7 +411,7 @@ msgstr ""
 
 #: ../fdroidserver/publish.py
 msgid "Creating output directory"
-msgstr ""
+msgstr "Erstelle Ausgabeverzeichnis"
 
 #: ../fdroidserver/index.py
 msgid "Creating signed index with this key (SHA256):"
@@ -581,7 +581,7 @@ msgstr ""
 
 #: ../fdroidserver/publish.py
 msgid "Failed to sign application"
-msgstr ""
+msgstr "Signieren der Anwendung fehlgeschlagen"
 
 #: ../fdroidserver/signatures.py
 #, python-brace-format
@@ -834,7 +834,7 @@ msgstr ""
 
 #: ../fdroidserver/common.py
 msgid "No Android SDK found!"
-msgstr ""
+msgstr "Keine Android SDK gefunden!"
 
 #: ../fdroidserver/import.py
 msgid "No android or kivy project could be found. Specify --subdir?"
@@ -961,7 +961,7 @@ msgstr ""
 
 #: ../fdroidserver/common.py
 msgid "Password required with username"
-msgstr ""
+msgstr "Passwort mit Benutzername benötigt"
 
 #: ../fdroidserver/import.py
 msgid "Path to main Android project subdirectory, if not in root."
@@ -1606,12 +1606,12 @@ msgstr ""
 #, python-format
 msgid "expected %s argument"
 msgid_plural "expected %s arguments"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%s Argument erwartet"
+msgstr[1] "%s Argumente erwartet"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 msgid "expected at least one argument"
-msgstr ""
+msgstr "mindestens ein Argument erwartet"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 msgid "expected at most one argument"
@@ -1892,8 +1892,8 @@ msgstr ""
 #: ../fdroidserver/build.py
 msgid "{} build failed"
 msgid_plural "{} builds failed"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "{} Build fehlgeschlagen"
+msgstr[1] "{} Builds fehlgeschlagen"
 
 #: ../fdroidserver/build.py
 msgid "{} build succeeded"
