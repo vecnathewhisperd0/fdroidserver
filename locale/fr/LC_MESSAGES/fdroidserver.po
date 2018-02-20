@@ -3,7 +3,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
-msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-02-20 14:49+0000\nLast-Translator: Anthony Chaput <thonyc4@mailoo.org>\nLanguage-Team: French <https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\nLanguage: fr\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n > 1;\nX-Generator: Weblate 2.19.1\n"
+msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-02-20 14:49+0000\nLast-Translator: anonymous <>\nLanguage-Team: French <https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\nLanguage: fr\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n > 1;\nX-Generator: Weblate 2.19.1\n"
 
 #: ../fdroidserver/nightly.py
 #, fuzzy
@@ -48,8 +48,8 @@ msgstr "\"{path}\" n'est pas un format autorisé, convertir en : {formats}"
 #, python-format
 msgid "%(option)s option requires %(number)d argument"
 msgid_plural "%(option)s option requires %(number)d arguments"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "L'option %(option)s requiert %(number)d argument"
+msgstr[1] "L'option %(option)s requiert %(number)d arguments"
 
 #: ../fdroidserver/mirror.py
 #, fuzzy, python-format
