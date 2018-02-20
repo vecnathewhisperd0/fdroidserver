@@ -3,7 +3,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
-msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-02-20 14:49+0000\nLast-Translator: anonymous <>\nLanguage-Team: French <https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\nLanguage: fr\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n > 1;\nX-Generator: Weblate 2.19.1\n"
+msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-02-20 15:34+0000\nLast-Translator: Anthony Chaput <thonyc4@mailoo.org>\nLanguage-Team: French <https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\nLanguage: fr\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n > 1;\nX-Generator: Weblate 2.19.1\n"
 
 #: ../fdroidserver/nightly.py
 #, fuzzy
@@ -52,9 +52,9 @@ msgstr[0] "L'option %(option)s requiert %(number)d argument"
 msgstr[1] "L'option %(option)s requiert %(number)d arguments"
 
 #: ../fdroidserver/mirror.py
-#, fuzzy, python-format
+#, python-format
 msgid "%(prog)s [options] url"
-msgstr "%prog [options]"
+msgstr "%(prog)s [options] url"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
@@ -107,20 +107,20 @@ msgstr ""
 
 #: ../fdroidserver/common.py
 msgid "'sdk_path' not set in 'config.py'!"
-msgstr ""
+msgstr "'sdk_path' n'est pas configuré dans 'config.py' !"
 
 #. Translators: "build-tools" is the file name of a package from
 #. Google, it is part of the Android SDK. So it probably shouldn't be
 #. translated or transliterated.
 #: ../fdroidserver/common.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "'{aapt}' is too old, fdroid requires build-tools-23.0.0 or newer!"
-msgstr ""
+msgstr "'{aapt}' est obsolète, fdroid requiert buid-tools-23.0.0 ou plus !"
 
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "'{aapt}' is too old, fdroid requires build-tools-{version} or newer!"
-msgstr ""
+msgstr "'{aapt}' est obsolète, fdroid requiert build-tools-{version} ou plus !"
 
 #: ../fdroidserver/install.py
 #, python-brace-format
@@ -157,7 +157,7 @@ msgstr ""
 
 #: ../fdroidserver/lint.py
 msgid "/issues is missing"
-msgstr ""
+msgstr "/issues est manquant"
 
 #: ../fdroidserver/mirror.py
 #, fuzzy
