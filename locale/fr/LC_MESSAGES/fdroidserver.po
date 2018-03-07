@@ -3,7 +3,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
-msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-02-20 15:34+0000\nLast-Translator: Anthony Chaput <thonyc4@mailoo.org>\nLanguage-Team: French <https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\nLanguage: fr\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n > 1;\nX-Generator: Weblate 2.19.1\n"
+msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-03-08 12:59+0000\nLast-Translator: Vincent <vincent.hyvert@sfr.fr>\nLanguage-Team: French <https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\nLanguage: fr\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n > 1;\nX-Generator: Weblate 2.20-dev\n"
 
 #: ../fdroidserver/nightly.py
 #, fuzzy
@@ -71,9 +71,9 @@ msgid "%prog [options]"
 msgstr "%prog [options]"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
-#, fuzzy, python-format
+#, python-format
 msgid "%r is not callable"
-msgstr "%r n'est pas appelable"
+msgstr "%r n’est pas appelable"
 
 #: ../fdroidserver/lint.py
 #, python-format
