@@ -3,7 +3,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
-msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-03-11 20:39+0000\nLast-Translator: Vincent <vincent.hyvert@sfr.fr>\nLanguage-Team: French <https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\nLanguage: fr\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n > 1;\nX-Generator: Weblate 2.20-dev\n"
+msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-03-30 15:36+0000\nLast-Translator: Julien Maulny <julien.maulny@protonmail.com>\nLanguage-Team: French <https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\nLanguage: fr\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n > 1;\nX-Generator: Weblate 2.20-dev\n"
 
 #: ../fdroidserver/nightly.py
 msgid ""
@@ -12,11 +12,11 @@ msgid ""
 msgstr "\nClé Publique SSH à utiliser comme Clé de Déploiement :"
 
 #: ../fdroidserver/nightly.py
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid ""
 "\n"
 "{path} encoded for the DEBUG_KEYSTORE secret variable:"
-msgstr "\n{path} encodé pour la variable secrete DEBUG_KEYSTORE :"
+msgstr "\n{path} encodé pour la variable secrète DEBUG_KEYSTORE :"
 
 #: ../fdroidserver/lint.py
 #, python-format
