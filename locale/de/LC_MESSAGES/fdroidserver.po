@@ -3,7 +3,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
-msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-03-31 10:38+0000\nLast-Translator: ssantos <ssantos@web.de>\nLanguage-Team: German <https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\nLanguage: de\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n != 1;\nX-Generator: Weblate 2.20-dev\n"
+msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-03-31 21:28+0000\nLast-Translator: ssantos <ssantos@web.de>\nLanguage-Team: German <https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\nLanguage: de\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n != 1;\nX-Generator: Weblate 2.20-dev\n"
 
 #: ../fdroidserver/nightly.py
 msgid ""
@@ -746,11 +746,11 @@ msgstr "Ignoriere die Datei {ext} bei '{path}'"
 
 #: ../fdroidserver/update.py
 msgid "Include APKs that are signed with disabled algorithms like MD5"
-msgstr "APKs einschliessen, die mit deaktivierten Algorithmen wie MD5 signiert sind."
+msgstr "APKs einschliessen, die mit deaktivierten Algorithmen wie MD5 signiert sind"
 
 #: ../fdroidserver/common.py
 msgid "Initialising submodules"
-msgstr ""
+msgstr "Initialisiere Submodule"
 
 #: ../fdroidserver/install.py
 msgid "Install all signed applications available"
@@ -768,7 +768,7 @@ msgstr "%s installieren …"
 #: ../fdroidserver/install.py
 #, python-brace-format
 msgid "Installing '{apkfilename}' on {dev}..."
-msgstr ""
+msgstr "Installiere '{apkfilename}' auf {dev}...."
 
 #: ../fdroid
 msgid "Interact with the repo HTTP server"
@@ -785,17 +785,17 @@ msgstr "Ungültige APK"
 #: ../fdroidserver/metadata.py
 #, python-format
 msgid "Invalid boolean '%s'"
-msgstr ""
+msgstr "Ungültiger boolescher Wert '%s'"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "Invalid build flag at {line} in {linedesc}"
-msgstr ""
+msgstr "Ungültiges Build-Flag bei {line} in {linedesc}"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "Invalid build format: {value} in {name}"
-msgstr ""
+msgstr "Ungültiges Buildformat: {value} in {name}."
 
 #: ../fdroidserver/lint.py
 msgid "Invalid bulleted list"
