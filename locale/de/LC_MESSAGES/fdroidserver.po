@@ -3,7 +3,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
-msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-04-01 23:34+0000\nLast-Translator: ssantos <ssantos@web.de>\nLanguage-Team: German <https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\nLanguage: de\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n != 1;\nX-Generator: Weblate 2.20-dev\n"
+msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-04-02 08:32+0000\nLast-Translator: ssantos <ssantos@web.de>\nLanguage-Team: German <https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\nLanguage: de\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n != 1;\nX-Generator: Weblate 2.20-dev\n"
 
 #: ../fdroidserver/nightly.py
 msgid ""
@@ -1252,7 +1252,7 @@ msgstr "Setzen des Limits für geöffnete Dateien auf {integer}"
 
 #: ../fdroid
 msgid "Set up an app build for a nightly build repo"
-msgstr ""
+msgstr "Ein App-Build für einen nightly Build-Repo einrichten."
 
 #: ../fdroidserver/build.py
 msgid "Setting open file limit failed: "
@@ -1358,7 +1358,7 @@ msgstr "Zusammenfassung mit der Länge {length} liegt über der {limit} Zeicheng
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "System clock is older than date in {path}!"
-msgstr "Die System-Uhr ist älter als das Datum in {Pfad}!"
+msgstr "Die System-Uhr ist älter als das Datum in {path}!"
 
 #: ../fdroidserver/build.py
 msgid "Test mode - put output in the tmp directory only, and always build, even if the output already exists."
@@ -1368,7 +1368,7 @@ msgstr "Testmodus - Ausgabe nur ins tmp-Verzeichnis einfügen, immer erstellen, 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "The OBB version code must come after \"{name}.\":"
-msgstr ""
+msgstr "Der OBB-Versionscode muss nach \"{name}.\" stehen:"
 
 #: ../fdroidserver/btlog.py
 msgid "The base URL for the repo to log (default: https://f-droid.org)"
@@ -1376,7 +1376,7 @@ msgstr "Basis-Adresse zur Anmeldung am Repository (Standard: https://f-droid.org
 
 #: ../fdroidserver/mirror.py
 msgid "The directory to write the mirror to"
-msgstr ""
+msgstr "Das Verzeichnis, in das der Mirror geschrieben werden soll"
 
 #: ../fdroidserver/server.py
 msgid "The only commands currently supported are 'init' and 'update'"
@@ -1384,16 +1384,16 @@ msgstr "Derzeit werden nur die Befehle „init” und „update” unterstützt"
 
 #: ../fdroidserver/index.py
 msgid "The repository's fingerprint does not match."
-msgstr ""
+msgstr "Der Fingerabdruck des Repositories stimmt nicht."
 
 #: ../fdroidserver/common.py
 msgid "The repository's index could not be verified."
-msgstr ""
+msgstr "Der Index des Repositories konnte nicht verifiziert werden."
 
 #: ../fdroidserver/server.py
 #, python-brace-format
 msgid "The root dir for local_copy_dir \"{path}\" does not exist!"
-msgstr ""
+msgstr "Das Wurzelverzeichnis für local_copy_dir \"{path}\" existiert nicht!"
 
 #: ../fdroidserver/nightly.py
 msgid "The the file to be included in the repo (path or glob)"
