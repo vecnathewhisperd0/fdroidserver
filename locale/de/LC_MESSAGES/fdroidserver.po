@@ -1210,12 +1210,12 @@ msgstr "Metadaten neu schreiben, um Formatierungen zu korrigieren"
 
 #: ../fdroidserver/server.py ../fdroidserver/upload.py
 msgid "Running first pass with MD5 checking disabled"
-msgstr "Erster Durchlauf mit deaktivierter MD5-Prüfung abgeschaltet"
+msgstr "Erster Durchlauf mit MD5-Prüfung abgeschaltet"
 
 #: ../fdroidserver/mirror.py
 #, python-brace-format
 msgid "Running wget in {path}"
-msgstr ""
+msgstr "Ausführen von wget in {Pfad}"
 
 #: ../fdroidserver/dscanner.py
 msgid "Scan only the latest version of each package"
