@@ -3,7 +3,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
-msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-04-01 23:14+0000\nLast-Translator: ssantos <ssantos@web.de>\nLanguage-Team: German <https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\nLanguage: de\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n != 1;\nX-Generator: Weblate 2.20-dev\n"
+msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-04-01 23:21+0000\nLast-Translator: ssantos <ssantos@web.de>\nLanguage-Team: German <https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\nLanguage: de\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n != 1;\nX-Generator: Weblate 2.20-dev\n"
 
 #: ../fdroidserver/nightly.py
 msgid ""
@@ -1077,7 +1077,7 @@ msgstr "Problem mit der Beschreibung von {appid}: {error}"
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "Problem with xml at '{path}'"
-msgstr "Problem mit xml bei '{Pfad}'"
+msgstr "Problem mit xml bei {path}"
 
 #: ../fdroidserver/checkupdates.py
 msgid "Process auto-updates"
@@ -1086,12 +1086,12 @@ msgstr "Aktualisierungen automatisch ausführen"
 #: ../fdroidserver/publish.py ../fdroidserver/update.py
 #, python-brace-format
 msgid "Processing {apkfilename}"
-msgstr ""
+msgstr "Verarbeite {apkfilename}"
 
 #: ../fdroidserver/checkupdates.py ../fdroidserver/scanner.py
 #, python-brace-format
 msgid "Processing {appid}"
-msgstr ""
+msgstr "Verarbeite {appid}"
 
 #: ../fdroidserver/update.py
 msgid "Produce human-readable XML/JSON for index files"
@@ -1107,7 +1107,7 @@ msgstr "Projekt-Adresse, von der importiert werden soll."
 
 #: ../fdroidserver/lint.py
 msgid "Punctuation should be avoided"
-msgstr ""
+msgstr "Interpunktion sollte vermieden werden"
 
 #: ../fdroidserver/btlog.py
 msgid "Push the log to this git remote repository"
@@ -1121,7 +1121,7 @@ msgstr "Binäres Transparenz-Log nach {url} pushen"
 #: ../fdroidserver/server.py ../fdroidserver/upload.py
 #, python-brace-format
 msgid "Pushing to {url}"
-msgstr ""
+msgstr "Pushen auf {url}"
 
 #: ../fdroid
 msgid "Quickly start a new repository"
@@ -1139,19 +1139,19 @@ msgstr "Lese '{config_file}'"
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "Reading minSdkVersion failed: \"{apkfilename}\""
-msgstr ""
+msgstr "Lesen von minSdkVersion fehlgeschlagen: \"{apkfilename}\""
 
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vcode
 #. https://developer.android.com/guide/topics/manifest/manifest-element.html#vname
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "Reading packageName/versionCode/versionName failed, APK invalid: '{apkfilename}'"
-msgstr ""
+msgstr "Lesen von packageName/versionCode/versionName fehlgeschlagen, APK ungültig: '{apkfilename}'"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Reading {apkfilename} from cache"
-msgstr ""
+msgstr "Lese {apkfilename} aus dem Cache"
 
 #: ../fdroidserver/stats.py
 msgid "Recalculate aggregate stats - use when changes have been made that would invalidate old cached data."
@@ -1159,7 +1159,7 @@ msgstr "Sammelstatistik neu berechnen - nach Änderungen anwenden, die alte zwis
 
 #: ../fdroidserver/common.py
 msgid "Removing specified files"
-msgstr ""
+msgstr "Entferne angegebene Dateien"
 
 #: ../fdroidserver/update.py
 msgid "Rename APK files that do not match package.name_123.apk"
@@ -1197,12 +1197,12 @@ msgstr "In ein spezielles Format umschreiben: "
 #: ../fdroidserver/rewritemeta.py
 #, python-brace-format
 msgid "Rewriting '{appid}'"
-msgstr ""
+msgstr "Schreibe '{appid}' neu"
 
 #: ../fdroidserver/rewritemeta.py
 #, python-brace-format
 msgid "Rewriting '{appid}' to '{path}'"
-msgstr ""
+msgstr "Schreibe '{appid}' auf '{path}' neu"
 
 #: ../fdroidserver/lint.py
 msgid "Run rewritemeta to fix formatting"
@@ -1210,7 +1210,7 @@ msgstr "Metadaten neu schreiben, um Formatierungen zu korrigieren"
 
 #: ../fdroidserver/server.py ../fdroidserver/upload.py
 msgid "Running first pass with MD5 checking disabled"
-msgstr ""
+msgstr "Erster Durchlauf mit deaktivierter MD5-Prüfung abgeschaltet"
 
 #: ../fdroidserver/mirror.py
 #, python-brace-format
