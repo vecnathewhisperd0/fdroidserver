@@ -3,7 +3,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
-msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-04-02 21:52+0000\nLast-Translator: Ceeee <marius.romanus@gmx.de>\nLanguage-Team: German <https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\nLanguage: de\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n != 1;\nX-Generator: Weblate 2.20-dev\n"
+msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-04-02 22:13+0000\nLast-Translator: ssantos <ssantos@web.de>\nLanguage-Team: German <https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\nLanguage: de\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n != 1;\nX-Generator: Weblate 2.20-dev\n"
 
 #: ../fdroidserver/nightly.py
 msgid ""
@@ -1904,7 +1904,7 @@ msgstr "optionale Argumente"
 #: ../fdroidserver/nightly.py
 #, python-brace-format
 msgid "overwriting existing {path}"
-msgstr "überschreiben des vorhandenen {Pfad}"
+msgstr "überschreiben des vorhandenen {path}"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 msgid "positional arguments"
@@ -1936,7 +1936,7 @@ msgstr "diese Hilfemeldung anzeigen und beenden"
 
 #: ../fdroidserver/signatures.py
 msgid "signed APK, either a file-path or HTTPS URL."
-msgstr ""
+msgstr "signiertes APK, entweder ein Dateipfad oder eine HTTPS-URL."
 
 #: ../fdroidserver/update.py
 #, python-brace-format
@@ -1945,7 +1945,7 @@ msgstr "Überspringe Quell-Tarball: {path}"
 
 #: ../fdroidserver/lint.py
 msgid "srclibs missing name and/or @"
-msgstr ""
+msgstr "Srclibs-Name fehlt und/oder @"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
@@ -1989,8 +1989,8 @@ msgstr "Verwende Apache libcloud zur Synchronisation mit {url}"
 #, python-brace-format
 msgid "{0} app, {1} key aliases"
 msgid_plural "{0} apps, {1} key aliases"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "{0} app, {1} Schlüsselaliase"
+msgstr[1] "{0} apps, {1} Schlüsselaliase"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
@@ -2000,7 +2000,7 @@ msgstr "{apkfilename} ({appid}) besitzt keine Metadaten!"
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "{apkfilename} has multiple {name} files, looks like Master Key exploit!"
-msgstr ""
+msgstr "{apkfilename} hat mehrere {name} Dateien, sieht aus wie Master Key Exploit!"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
@@ -2015,38 +2015,38 @@ msgstr "{appid} besitzt keinen Namen! Verwende den Paketnamen stattdessen."
 #: ../fdroidserver/mirror.py
 #, python-brace-format
 msgid "{appid} is missing {name}"
-msgstr ""
+msgstr "{appid} fehlt {name}"
 
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vname
 #: ../fdroidserver/lint.py
 #, python-brace-format
 msgid "{appid}: Unknown extlib {path} in build '{versionName}'"
-msgstr ""
+msgstr "{appid}: unbekannte Extlib {path} im Build '{versionName}'"
 
 #: ../fdroidserver/scanner.py
 #, python-brace-format
 msgid "{appid}: no builds specified, running on current source state"
-msgstr ""
+msgstr "{appid}: keine builds angegeben, läuft auf dem aktuellen source-Stand"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "{field} not terminated in {name}"
-msgstr ""
+msgstr "{field} nicht in {name} beendet"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "{name} \"{path}\" does not exist! Correct it in config.py."
-msgstr ""
+msgstr "{name} \"{path}\" existiert nicht! Korrigieren Sie es in der config.py."
 
 #: ../fdroidserver/nightly.py
 #, python-brace-format
 msgid "{path} does not exist!  Create it by running:"
-msgstr ""
+msgstr "{path} existiert nicht!  Erstellen Sie es durch Ausführen von:"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "{path} has bad file signature \"{pattern}\", possible Janus exploit!"
-msgstr ""
+msgstr "{path} hat die schlechte Dateisignatur \"{pattern}\", möglicher Janus-Exploit!"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
@@ -2056,7 +2056,7 @@ msgstr "{path} hat Dateigröße Null!"
 #: ../fdroidserver/mirror.py
 #, python-brace-format
 msgid "{url} does not end with \"fdroid\", check the URL path!"
-msgstr ""
+msgstr "{url} endet nicht mit \"fdroid\", überprüfen Sie den URL-Pfad!"
 
 #: ../fdroidserver/build.py
 msgid "{} build failed"
@@ -2067,8 +2067,8 @@ msgstr[1] "{} Builds fehlgeschlagen"
 #: ../fdroidserver/build.py
 msgid "{} build succeeded"
 msgid_plural "{} builds succeeded"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "Buildvorgang erfolgreich"
+msgstr[1] "Buildvorgang erfolgreich"
 
 #, fuzzy
 #~ msgid "Add PGP signatures for packages in repo using GnuPG"
