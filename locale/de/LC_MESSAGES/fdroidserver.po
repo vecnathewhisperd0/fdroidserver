@@ -3,7 +3,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
-msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-04-02 08:43+0000\nLast-Translator: ssantos <ssantos@web.de>\nLanguage-Team: German <https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\nLanguage: de\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n != 1;\nX-Generator: Weblate 2.20-dev\n"
+msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-04-02 08:47+0000\nLast-Translator: ssantos <ssantos@web.de>\nLanguage-Team: German <https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\nLanguage: de\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n != 1;\nX-Generator: Weblate 2.20-dev\n"
 
 #: ../fdroidserver/nightly.py
 msgid ""
@@ -1442,12 +1442,12 @@ msgstr "Unbekannter Fehler aufgetreten!"
 #: ../fdroidserver/lint.py
 #, python-brace-format
 msgid "Unknown file '{filename}' in build '{versionName}'"
-msgstr "Unbekannte Datei '{Dateiname}' im Build '{versionName}''."
+msgstr "Unbekannte Datei '{filename}' im Build '{versionName}''"
 
 #: ../fdroidserver/metadata.py
 #, python-format
 msgid "Unknown metadata format: %s"
-msgstr ""
+msgstr "Unbekanntes Metadatenformat: %s"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
@@ -1456,11 +1456,11 @@ msgstr "Unbekanntes Metadaten-Format: {path}"
 
 #: ../fdroidserver/common.py
 msgid "Unknown version of aapt, might cause problems: "
-msgstr ""
+msgstr "Unbekannte Version von aapt, könnte Probleme verursachen: "
 
 #: ../fdroidserver/lint.py
 msgid "Unlinkified link - use [http://foo.bar Link title] or [http://foo.bar]"
-msgstr ""
+msgstr "Nicht verlinkter Link - verwenden Sie [http://foo.bar Linktitel] oder [http://foo.bar]."
 
 #: ../fdroidserver/lint.py
 msgid "Unnecessary leading space"
