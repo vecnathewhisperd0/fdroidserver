@@ -3,7 +3,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
 msgid ""
-msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-04-02 19:35+0000\nLast-Translator: Ceeee <marius.romanus@gmx.de>\nLanguage-Team: German <https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\nLanguage: de\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n != 1;\nX-Generator: Weblate 2.20-dev\n"
+msgstr "Project-Id-Version: fdroidserver 0.9\nReport-Msgid-Bugs-To: team@f-droid.org\nPOT-Creation-Date: 2018-02-13 09:01+0100\nPO-Revision-Date: 2018-04-02 19:35+0000\nLast-Translator: ssantos <ssantos@web.de>\nLanguage-Team: German <https://hosted.weblate.org/projects/f-droid/fdroidserver/de/>\nLanguage: de\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit\nPlural-Forms: nplurals=2; plural=n != 1;\nX-Generator: Weblate 2.20-dev\n"
 
 #: ../fdroidserver/nightly.py
 msgid ""
@@ -690,7 +690,7 @@ msgstr "Es wurden keine Signaturzertifikate für das Repository gefunden."
 #: ../fdroidserver/lint.py
 #, python-format
 msgid "Found non-file at %s"
-msgstr ""
+msgstr "Eine Nicht-Datei gefunden bei %s"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
@@ -1472,22 +1472,22 @@ msgstr "Unnötige Leerzeichen an Ende"
 
 #: ../fdroidserver/metadata.py
 msgid "Unrecognised app field: "
-msgstr ""
+msgstr "Nicht erkanntes App-Feld: "
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "Unrecognised field '{field}' in {linedesc}"
-msgstr ""
+msgstr "Nicht erkanntes Feld '{field}' in {linedesc}"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Unsupported file type \"{extension}\" for repo graphic"
-msgstr ""
+msgstr "Nicht unterstützter Dateityp \"{extension}\" für Repo-Grafik"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Unsupported graphics file found: {path}"
-msgstr ""
+msgstr "Nicht unterstützte Grafikdatei gefunden: {path}"
 
 #: ../fdroidserver/rewritemeta.py
 #, python-brace-format
@@ -1496,16 +1496,16 @@ msgstr "Nicht-unterstütztes Metadatenformat, verwenden Sie --to [{supported}]"
 
 #: ../fdroidserver/metadata.py
 msgid "Unterminated ]"
-msgstr ""
+msgstr "Unbeendet ]"
 
 #: ../fdroidserver/metadata.py
 msgid "Unterminated ]]"
-msgstr ""
+msgstr "Unbeendet ]]"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "Unterminated build in {name}"
-msgstr ""
+msgstr "Unbeendeter Build in {name}"
 
 #: ../fdroidserver/metadata.py
 #, python-brace-format
@@ -1524,7 +1524,7 @@ msgstr "Nicht verwendete Datei bei %s"
 
 #: ../fdroidserver/lint.py
 msgid "Update Check Name is set to the known app id - it can be removed"
-msgstr ""
+msgstr "Update Check Name ist auf die bekannte App-ID gesetzt - sie kann entfernt werden"
 
 #: ../fdroid
 msgid "Update repo information for new packages"
@@ -1582,7 +1582,7 @@ msgstr "Von Java jarsigner zur Verifikation von APKs wird abgeraten! Verwenden S
 #: ../fdroidserver/init.py
 #, python-brace-format
 msgid "Using existing keystore \"{path}\""
-msgstr ""
+msgstr "Verwende vorhandenen Schlüsselspeicher \"{path}\""
 
 #: ../fdroidserver/server.py ../fdroidserver/upload.py
 #, python-brace-format
@@ -1599,7 +1599,7 @@ msgstr "Integrität der heruntergeladenen Programmpakete überprüfen"
 
 #: ../fdroidserver/index.py
 msgid "Verifying index signature:"
-msgstr ""
+msgstr "Überprüfe die Index-Signatur:"
 
 #: ../fdroid
 msgid "Warn about possible metadata errors"
@@ -1623,7 +1623,7 @@ msgstr "Sie können ANDROID_HOME verwenden, um den Pfad zu Ihrem SDK zu setzen, 
 #: ../fdroidserver/nightly.py
 #, python-brace-format
 msgid "adding IdentityFile to {path}"
-msgstr ""
+msgstr "Füge IdentityFile zu {Pfad} hinzu"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
