@@ -8,7 +8,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2018-02-13 09:01+0100\n"
 "PO-Revision-Date: 2018-04-16 16:04+0000\n"
-"Last-Translator: Julien Maulny <julien.maulny@protonmail.com>\n"
+"Last-Translator: Anthony Chaput <thonyc4@mailoo.org>\n"
 "Language-Team: French <https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -160,7 +160,7 @@ msgstr "'{path}' n'a pas pu être exécuté !"
 #: ../fdroidserver/metadata.py
 #, python-brace-format
 msgid "'{value}' is not a valid {field} in {appid}. Regex pattern: {pattern}"
-msgstr "{value} n'est pas un {field} valide dans {appid}. Motif : {pattern}"
+msgstr "'{value}' n'est pas un(e) {field} valide dans {appid}. Motif regex : {pattern}"
 
 #: ../fdroidserver/checkupdates.py
 #, python-brace-format
@@ -173,8 +173,7 @@ msgstr ".__call__() n'est pas défini"
 
 #: ../fdroidserver/metadata.py
 msgid ".fdroid.txt is not supported!  Convert to .fdroid.yml or .fdroid.json."
-msgstr ""
-".fdroid.txt n'est pas supporté ! Convertir en .fdroid.yml ou .fdroid.json."
+msgstr ".fdroid.txt n'est pas supporté ! Convertissez en .fdroid.yml ou .fdroid.json."
 
 #: ../fdroidserver/lint.py
 msgid "/issues is missing"
