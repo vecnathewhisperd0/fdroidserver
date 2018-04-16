@@ -7,8 +7,8 @@ msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2018-02-13 09:01+0100\n"
-"PO-Revision-Date: 2018-04-16 16:04+0000\n"
-"Last-Translator: anonymous <>\n"
+"PO-Revision-Date: 2018-04-17 13:03+0000\n"
+"Last-Translator: Julien Maulny <julien.maulny@protonmail.com>\n"
 "Language-Team: French <https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -261,7 +261,7 @@ msgstr "AndroidManifest.xml n'a pas de date"
 #: ../fdroidserver/lint.py
 #, python-brace-format
 msgid "App is in '{repo}' but has a link to {url}"
-msgstr "L'application est dans {repo} mais a un lien vers {url}"
+msgstr "L'application est dans '{repo}' mais a un lien vers {url}"
 
 #: ../fdroidserver/lint.py
 msgid "Appending .git is not necessary"
