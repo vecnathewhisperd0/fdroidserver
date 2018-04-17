@@ -5,9 +5,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: fdroidserver 0.8-135-g16dd6d28\n"
-"Report-Msgid-Bugs-To: https://gitlab.com/fdroid/fdroidserver/issues\n"
+"Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2018-02-13 09:01+0100\n"
-"PO-Revision-Date: 2017-11-03 13:14+0000\n"
+"PO-Revision-Date: 2018-04-17 13:03+0000\n"
 "Last-Translator: Myeongjin Lee <aranet100@gmail.com>\n"
 "Language-Team: Korean <https://hosted.weblate.org/projects/f-droid/fdroidserver/ko/>\n"
 "Language: ko\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 2.18-dev\n"
+"X-Generator: Weblate 3.0-dev\n"
 
 #: ../fdroidserver/nightly.py
 msgid ""
@@ -62,9 +62,9 @@ msgid_plural "%(option)s option requires %(number)d arguments"
 msgstr[0] ""
 
 #: ../fdroidserver/mirror.py
-#, fuzzy, python-format
+#, python-format
 msgid "%(prog)s [options] url"
-msgstr "%prog [옵션]"
+msgstr "%(prog)s [옵션] url"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
@@ -233,9 +233,9 @@ msgstr "Android SDK 경로 '{path}' 디렉터리가 아닙니다!"
 #. Google, it is part of the Android SDK. So it probably shouldn't be
 #. translated or transliterated.
 #: ../fdroidserver/common.py
-#, fuzzy, python-brace-format
+#, python-brace-format
 msgid "Android build-tools path '{path}' does not exist!"
-msgstr "Android SDK 경로 '{path}' 존재하지 않습니다!"
+msgstr "Android 빌드 도구 경로 '{path}' 존재하지 않습니다!"
 
 #: ../fdroidserver/update.py
 msgid "AndroidManifest.xml has no date"
@@ -1102,9 +1102,8 @@ msgid "Processing {appid}"
 msgstr ""
 
 #: ../fdroidserver/update.py
-#, fuzzy
 msgid "Produce human-readable XML/JSON for index files"
-msgstr "사람이 읽을 수 있는 index.xml을 생산합니다"
+msgstr "사람이 읽을 수 있는 색인 파일을 위한 XML/JSON을 생산합니다"
 
 #: ../fdroidserver/update.py
 msgid "Produce human-readable index.xml"
@@ -1748,14 +1747,12 @@ msgid "expected one argument"
 msgstr ""
 
 #: ../fdroid
-#, fuzzy
 msgid "fdroid [-h|--help|--version] <command> [<args>]"
-msgstr "사용법: fdroid [-h|--help|--version] <명령> [<인수>]"
+msgstr "fdroid [-h|--help|--version] <명령> [<인수>]"
 
 #: ../fdroid
-#, fuzzy
 msgid "fdroid [<command>] [-h|--help|--version|<args>]"
-msgstr "사용법: fdroid [-h|--help|--version] <명령> [<인수>]"
+msgstr "fdroid [<명령>] [-h|--help|--version|<인수>]"
 
 #: /usr/lib/python3.5/optparse.py /usr/lib/python3.6/optparse.py
 msgid "floating-point"
