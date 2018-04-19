@@ -5,12 +5,11 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
-"Report-Msgid-Bugs-To: https://gitlab.com/fdroid/fdroidserver/issues\n"
+"Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2018-02-13 09:01+0100\n"
-"PO-Revision-Date: 2018-04-17 13:03+0000\n"
-"Last-Translator: Julien Maulny <julien.maulny@protonmail.com>\n"
-"Language-Team: French <https://hosted.weblate.org/projects/f-droid/"
-"fdroidserver/fr/>\n"
+"PO-Revision-Date: 2018-04-21 06:37+0000\n"
+"Last-Translator: Sébastien SOUALMIA <ssoualmia@gmail.com>\n"
+"Language-Team: French <https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -1629,15 +1628,15 @@ msgstr "Usage : %s\n"
 
 #: ../fdroidserver/lint.py
 msgid "Use /HEAD instead of /master to point at a file in the default branch"
-msgstr ""
+msgstr "Utiliser /HEAD plutôt que /master pour pointer un fichier dans la branche par défaut"
 
 #: ../fdroidserver/update.py
 msgid "Use `fdroid update -c` to create it."
-msgstr ""
+msgstr "Utiliser 'fdroid update -c' pour le créer."
 
 #: ../fdroidserver/build.py
 msgid "Use build server"
-msgstr ""
+msgstr "Utiliser le serveur de build"
 
 #: ../fdroidserver/update.py
 msgid "Use date from APK instead of current time for newly added APKs"
@@ -1653,17 +1652,17 @@ msgstr ""
 #: ../fdroidserver/server.py ../fdroidserver/upload.py
 #, python-brace-format
 msgid "Using \"{path}\" for configuring s3cmd."
-msgstr ""
+msgstr "Utiliser \"{path}\" pour configurer s3cmd."
 
 #: ../fdroidserver/common.py
 msgid ""
 "Using Java's jarsigner, not recommended for verifying APKs! Use apksigner"
-msgstr ""
+msgstr "L'utilisation de l'utilitaire jarsigner de Java n'est pas recommandé pour vérifier les APKs ! Utiliser apksigner"
 
 #: ../fdroidserver/init.py
-#, python-brace-format
+#, fuzzy, python-brace-format
 msgid "Using existing keystore \"{path}\""
-msgstr ""
+msgstr "Utilise le keystore existant \"{path}\""
 
 #: ../fdroidserver/server.py ../fdroidserver/upload.py
 #, python-brace-format
@@ -1680,7 +1679,7 @@ msgstr "Vérifier l'intégrité des paquets téléchargés"
 
 #: ../fdroidserver/index.py
 msgid "Verifying index signature:"
-msgstr ""
+msgstr "Vérification de la signature d'index :"
 
 #: ../fdroid
 msgid "Warn about possible metadata errors"
@@ -1693,25 +1692,25 @@ msgid ""
 msgstr ""
 
 msgid "X.509 'Distiguished Name' used when generating keys"
-msgstr ""
+msgstr "X.509 'Nom distingué' utilisé lors de la génération des clés"
 
 #: ../fdroidserver/init.py
 msgid "X.509 'Distinguished Name' used when generating keys"
-msgstr ""
+msgstr "X.509 'Nom distingué' utilisé lors de la génération des clés"
 
 #: ../fdroidserver/common.py
 msgid "You can use ANDROID_HOME to set the path to your SDK, i.e.:"
-msgstr ""
+msgstr "Vous pouvez utiliser ANDROID_HOME pour définir le chemin de votre SDK, ex. :"
 
 #: ../fdroidserver/nightly.py
 #, python-brace-format
 msgid "adding IdentityFile to {path}"
-msgstr ""
+msgstr "ajoute IdentityFile à {path}"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "adding to {name}: {path}"
-msgstr ""
+msgstr "ajoute à {name} : {path}"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
@@ -1725,27 +1724,27 @@ msgstr "option ambiguë : %s (%s?)"
 
 #: ../fdroidserver/lint.py ../fdroidserver/rewritemeta.py
 msgid "applicationId in the form APPID"
-msgstr ""
+msgstr "applicationId sous la forme de APPID"
 
 #: ../fdroidserver/checkupdates.py
 msgid "applicationId to check for updates"
-msgstr ""
+msgstr "applicationId pour vérifier les mises à jour"
 
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vcode
 #: ../fdroidserver/verify.py ../fdroidserver/publish.py
 #: ../fdroidserver/dscanner.py ../fdroidserver/build.py
 #: ../fdroidserver/scanner.py ../fdroidserver/install.py
 msgid "applicationId with optional versionCode in the form APPID[:VERCODE]"
-msgstr ""
+msgstr "applicationId avec le versionCode optionnel sous la forme APPID[:VERCODE]"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
 msgid "argument \"-\" with mode %r"
-msgstr ""
+msgstr "argument \"-\" avec le mode %r"
 
 #: ../fdroidserver/nightly.py
 msgid "attempting bare ssh connection to test deploy key:"
-msgstr ""
+msgstr "tentative de connexion ssh simple pour tester la clé de déploiement :"
 
 #: /usr/lib/python3.5/argparse.py /usr/lib/python3.6/argparse.py
 #, python-format
