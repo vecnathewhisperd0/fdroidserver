@@ -5,11 +5,12 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
-"Report-Msgid-Bugs-To: team@f-droid.org\n"
+"Report-Msgid-Bugs-To: https://gitlab.com/fdroid/fdroidserver/issues\n"
 "POT-Creation-Date: 2018-02-13 09:01+0100\n"
 "PO-Revision-Date: 2018-04-25 14:38+0000\n"
 "Last-Translator: Étienne Deparis <etienne@depar.is>\n"
-"Language-Team: French <https://hosted.weblate.org/projects/f-droid/fdroidserver/fr/>\n"
+"Language-Team: French <https://hosted.weblate.org/projects/f-droid/"
+"fdroidserver/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -199,7 +200,9 @@ msgstr "Ajout d'une clé de signature de dépôt à un dépôt non signé"
 
 #: ../fdroidserver/update.py
 msgid "Add skeleton metadata files for APKs that are missing them"
-msgstr "Créer les métadonnées de base manquantes pour les APKs qui n'en sont pas pourvus"
+msgstr ""
+"Créer les métadonnées de base manquantes pour les APKs qui n'en sont pas "
+"pourvus"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
@@ -312,7 +315,9 @@ msgstr "Compiler uniquement la dernière version de chaque paquet"
 msgid ""
 "Build should have comma-separated versionName and versionCode, not "
 "\"{value}\", in {linedesc}"
-msgstr "Le build devrait avoir un versionName et  un versionCode séparés par des virgules, et non pas \"{value}\", dans {linedesc}"
+msgstr ""
+"Le build devrait avoir un versionName et  un versionCode séparés par des "
+"virgules, et non pas \"{value}\", dans {linedesc}"
 
 #: ../fdroidserver/init.py
 #, python-format
@@ -388,7 +393,8 @@ msgstr ""
 
 #: ../fdroidserver/update.py
 msgid "Clean update - don't uses caches, reprocess all APKs"
-msgstr "Mise à jour propre - n'utilise pas les caches, traite à nouveau tous les APKs"
+msgstr ""
+"Mise à jour propre - n'utilise pas les caches, traite à nouveau tous les APKs"
 
 #: ../fdroidserver/import.py
 msgid "Comma separated list of categories."
@@ -1385,7 +1391,9 @@ msgstr "Définir l'éditeur à utiliser en mode interactif. Par défaut %s"
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Specify editor to use in interactive mode. Default is {path}"
-msgstr "Définir l'éditeur à utiliser en mode interactif. {path} est utilisé par défaut"
+msgstr ""
+"Définir l'éditeur à utiliser en mode interactif. {path} est utilisé par "
+"défaut"
 
 #: ../fdroidserver/build.py
 msgid "Specify that we're running on the build server"
@@ -1595,7 +1603,8 @@ msgstr "Mettre à jour les données des dépôts pour les nouveaux paquets"
 
 #: ../fdroid
 msgid "Update the binary transparency log for a URL"
-msgstr "Mettre à jour le rapport de transparence des fichiers binaires pour une URL"
+msgstr ""
+"Mettre à jour le rapport de transparence des fichiers binaires pour une URL"
 
 #: ../fdroid
 msgid "Update the stats of the repo"
@@ -1835,7 +1844,9 @@ msgstr "forcer les erreurs en avertissement, ou les ignorer"
 
 #: ../fdroidserver/metadata.py
 msgid "force metadata errors (default) to be warnings, or to be ignored."
-msgstr "forcer les erreurs (par défaut) sur les métadonnées à être des avertissements, ou les ignorer."
+msgstr ""
+"forcer les erreurs (par défaut) sur les métadonnées à être des "
+"avertissements, ou les ignorer."
 
 #: ../fdroidserver/common.py
 msgid "git svn clone failed"
