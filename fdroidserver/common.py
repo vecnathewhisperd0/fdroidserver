@@ -833,6 +833,7 @@ class vcs_git(vcs):
             git_config.append('-c')
             git_config.append('url.https://u:p@' + domain + '.insteadOf=https://' + domain)
         envs.update({
+            'GIT_LFS_SKIP_SMUDGE': '1',
             'GIT_TERMINAL_PROMPT': '0',
             'GIT_ASKPASS': '/bin/true',
             'SSH_ASKPASS': '/bin/true',
