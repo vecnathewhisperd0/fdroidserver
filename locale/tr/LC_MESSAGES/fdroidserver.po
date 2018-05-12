@@ -5,18 +5,17 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
-"Report-Msgid-Bugs-To: https://gitlab.com/fdroid/fdroidserver/issues\n"
+"Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2018-02-13 09:01+0100\n"
-"PO-Revision-Date: 2018-03-19 21:50+0000\n"
+"PO-Revision-Date: 2018-05-13 18:42+0000\n"
 "Last-Translator: Ali Demirtas <alidemirtas94@gmail.com>\n"
-"Language-Team: Turkish <https://hosted.weblate.org/projects/f-droid/"
-"fdroidserver/tr/>\n"
+"Language-Team: Turkish <https://hosted.weblate.org/projects/f-droid/fdroidserver/tr/>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2.20-dev\n"
+"X-Generator: Weblate 3.0-dev\n"
 
 #: ../fdroidserver/nightly.py
 msgid ""
@@ -197,7 +196,7 @@ msgstr "Kaynak kodundan yeni bir uygulama ekle"
 
 #: ../fdroidserver/update.py
 msgid "Add a repo signing key to an unsigned repo"
-msgstr ""
+msgstr "İmzasız bir repo repo imzalama anahtarı ekleyin"
 
 #: ../fdroidserver/update.py
 msgid "Add skeleton metadata files for APKs that are missing them"
@@ -206,7 +205,7 @@ msgstr "İskelet meta veri dosyaları olmayan APKlar için onları yarat"
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Adding new repo for only {name}"
-msgstr ""
+msgstr "Sadece {name} için yeni repo ekleme"
 
 #: ../fdroidserver/init.py
 msgid "Alias of the repo signing key in the keystore"
@@ -257,7 +256,7 @@ msgstr ""
 
 #: ../fdroidserver/update.py
 msgid "AndroidManifest.xml has no date"
-msgstr ""
+msgstr "AndroidManifest.xml herhangi bir tarih yok"
 
 #: ../fdroidserver/lint.py
 #, python-brace-format
@@ -266,7 +265,7 @@ msgstr ""
 
 #: ../fdroidserver/lint.py
 msgid "Appending .git is not necessary"
-msgstr ""
+msgstr "Ekleme .gıt gerekli değildir"
 
 #: ../fdroidserver/update.py
 #, python-brace-format
