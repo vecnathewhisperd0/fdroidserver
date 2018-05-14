@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2018-02-13 09:01+0100\n"
-"PO-Revision-Date: 2018-05-13 18:42+0000\n"
+"PO-Revision-Date: 2018-05-15 09:59+0000\n"
 "Last-Translator: Ali Demirtas <alidemirtas94@gmail.com>\n"
 "Language-Team: Turkish <https://hosted.weblate.org/projects/f-droid/fdroidserver/tr/>\n"
 "Language: tr\n"
@@ -221,7 +221,7 @@ msgstr ""
 
 #: ../fdroidserver/mirror.py
 msgid "Also mirror the full archive section"
-msgstr ""
+msgstr "Tam arşiv bölümünü de yansıt"
 
 #: ../fdroidserver/lint.py
 msgid "Also warn about formatting issues, like rewritemeta -l"
@@ -244,7 +244,7 @@ msgstr "Android SDK konumu '{path}' yok!"
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "Android SDK path '{path}' is not a directory!"
-msgstr ""
+msgstr "Android SDK yolu '{path}' bir dizin değil!"
 
 #. Translators: "build-tools" is the file name of a package from
 #. Google, it is part of the Android SDK. So it probably shouldn't be
@@ -252,7 +252,7 @@ msgstr ""
 #: ../fdroidserver/common.py
 #, python-brace-format
 msgid "Android build-tools path '{path}' does not exist!"
-msgstr ""
+msgstr "Android oluşturma araçları yolu '{path}' mevcut değil!"
 
 #: ../fdroidserver/update.py
 msgid "AndroidManifest.xml has no date"
@@ -270,7 +270,7 @@ msgstr "Ekleme .gıt gerekli değildir"
 #: ../fdroidserver/update.py
 #, python-brace-format
 msgid "Archiving {apkfilename} with invalid signature!"
-msgstr ""
+msgstr "Geçersiz imza ile {apkfilename} arşivleme!"
 
 #: ../fdroidserver/mirror.py
 msgid ""
