@@ -5,11 +5,12 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: fdroidserver 0.9\n"
-"Report-Msgid-Bugs-To: team@f-droid.org\n"
+"Report-Msgid-Bugs-To: https://gitlab.com/fdroid/fdroidserver/issues\n"
 "POT-Creation-Date: 2018-02-13 09:01+0100\n"
 "PO-Revision-Date: 2018-05-17 21:10+0000\n"
 "Last-Translator: monolifed <monolifed@gmail.com>\n"
-"Language-Team: Turkish <https://hosted.weblate.org/projects/f-droid/fdroidserver/tr/>\n"
+"Language-Team: Turkish <https://hosted.weblate.org/projects/f-droid/"
+"fdroidserver/tr/>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -845,11 +846,15 @@ msgstr "Geçersiz madde imli liste"
 #, python-format
 msgid ""
 "Invalid license tag \"%s\"! Use only tags from https://spdx.org/license-list"
-msgstr "Geçersiz lisans etiketi \"%s\"! Yalnızca https://spdx.org/license-list adresindeki etiketleri kullanın"
+msgstr ""
+"Geçersiz lisans etiketi \"%s\"! Yalnızca https://spdx.org/license-list "
+"adresindeki etiketleri kullanın"
 
 #: ../fdroidserver/lint.py
 msgid "Invalid link - use [http://foo.bar Link title] or [http://foo.bar]"
-msgstr "Geçersiz bağlantı -  [http://foo.bar Bağlantı başlığı] veya [http://foo.bar] kullanın"
+msgstr ""
+"Geçersiz bağlantı -  [http://foo.bar Bağlantı başlığı] veya [http://foo.bar] "
+"kullanın"
 
 #: ../fdroidserver/metadata.py
 #, python-format
@@ -888,7 +893,8 @@ msgstr "JAR imzası doğrulandı: {path}"
 #: ../fdroidserver/publish.py ../fdroidserver/update.py
 #: ../fdroidserver/mirror.py
 msgid "Java JDK not found! Install in standard location or set java_paths!"
-msgstr "Java JDK bulunmadı! Standart konumda kurun veya java_paths'i ayarlayın!"
+msgstr ""
+"Java JDK bulunmadı! Standart konumda kurun veya java_paths'i ayarlayın!"
 
 #: ../fdroidserver/signindex.py
 msgid ""
@@ -1872,7 +1878,9 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "local_copy_dir does not end with \"fdroid\", perhaps you meant: \"{path}\""
-msgstr "local_copy_dir \"fdroid\" ile sonlanmıyor, belki de \"{path}\" demek istediniz"
+msgstr ""
+"local_copy_dir \"fdroid\" ile sonlanmıyor, belki de \"{path}\" demek "
+"istediniz"
 
 #: ../fdroidserver/server.py
 msgid "local_copy_dir must be an absolute path!"
