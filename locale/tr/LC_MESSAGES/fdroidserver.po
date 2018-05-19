@@ -8,7 +8,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: team@f-droid.org\n"
 "POT-Creation-Date: 2018-02-13 09:01+0100\n"
 "PO-Revision-Date: 2018-05-20 20:42+0000\n"
-"Last-Translator: monolifed <monolifed@gmail.com>\n"
+"Last-Translator: Ali Demirtas <alidemirtas94@gmail.com>\n"
 "Language-Team: Turkish <https://hosted.weblate.org/projects/f-droid/fdroidserver/tr/>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
@@ -276,7 +276,7 @@ msgstr "Geçersiz imza ile {apkfilename} arşivleme!"
 msgid ""
 "Base URL to mirror, can include the index signing key using the query "
 "string: ?fingerprint="
-msgstr ""
+msgstr "Yansıtılacak temel URL, sorgu dizesini kullanarak dizin imzalama anahtarını içerebilir: ?fingerprint="
 
 #. Translators: https://developer.android.com/guide/topics/manifest/manifest-element.html#vname
 #: ../fdroidserver/lint.py
