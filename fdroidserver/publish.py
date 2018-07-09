@@ -211,7 +211,7 @@ def main():
                           + glob.glob(os.path.join(unsigned_dir, '*.zip'))):
 
         # skip over developer supplied reference binaries for reproducible builds
-        if apkfile.endswith('.binary.apk'):
+        if apkfile.lower().endswith('.binary.apk'):
             continue
 
         appid, vercode = common.publishednameinfo(apkfile)
