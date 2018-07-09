@@ -429,7 +429,7 @@ valuetypes = {
                    ["ArchivePolicy"]),
 
     FieldValidator("Anti-Feature",
-                   r'^(Ads|Tracking|NonFreeNet|NonFreeDep|NonFreeAdd|UpstreamNonFree|NonFreeAssets|KnownVuln|ApplicationDebuggable|SourceGone)$',
+                   r'^(Ads|Tracking|NonFreeNet|NonFreeDep|NonFreeAdd|UpstreamNonFree|NonFreeAssets|KnownVuln|ApplicationDebuggable|NoSourceSince)$',
                    ["AntiFeatures"]),
 
     FieldValidator("Auto Update Mode",
@@ -994,7 +994,7 @@ def parse_metadata(metadatapath, check_vcs=False, refresh=True):
     post_metadata_parse(app)
 
     if app.NoSourceSince:
-        app.AntiFeatures.append('SourceGone')
+        app.AntiFeatures.append('NoSourceSince')
 
     if not app.id:
         if app.builds:
