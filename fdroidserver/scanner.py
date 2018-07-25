@@ -21,6 +21,7 @@ import re
 import traceback
 from argparse import ArgumentParser
 import logging
+import itertools
 
 from . import _
 from . import common
@@ -33,22 +34,23 @@ options = None
 
 def get_gradle_compile_commands(build):
     compileCommands = ['compile',
-                       'provided'
-                       'apk'
-                       'implementation'
-                       'api'
-                       'compileOnly'
+                       'provided',
+                       'apk',
+                       'implementation',
+                       'api',
+                       'compileOnly',
                        'runtimeOnly',
-                       'releaseCompile'
-                       'releaseProvided'
-                       'releaseApk'
-                       'releaseImplementation'
-                       'releaseApi'
-                       'releaseCompileOnly'
+                       'releaseCompile',
+                       'releaseProvided',
+                       'releaseApk',
+                       'releaseImplementation',
+                       'releaseApi',
+                       'releaseCompileOnly',
                        'releaseRuntimeOnly']
     if build.gradle and build.gradle != ['yes']:
-        compileCommands += [flavor + 'Compile' for flavor in build.gradle]
-        compileCommands += [flavor + 'ReleaseCompile' for flavor in build.gradle]
+        compileCommands += itertools.chain.from_iterable(
+            [[flavor + command for flavor in build.gradle] for command in compileCommands]
+        )
 
     return [re.compile(r'\s*' + c, re.IGNORECASE) for c in compileCommands]
 
