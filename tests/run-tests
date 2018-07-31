@@ -622,7 +622,7 @@ echo "local_copy_dir = '$LOCAL_COPY_DIR'" >> config.py
 
 $fdroid checkupdates --allow-dirty
 which gpg && $fdroid gpgsign
-$fdroid lint
+$fdroid lint -n
 $fdroid readmeta
 $fdroid rewritemeta fake
 $fdroid deploy
