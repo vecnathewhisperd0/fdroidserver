@@ -433,7 +433,7 @@ def check_files_dir(app):
 
 
 def check_format(app):
-    if options.format and not rewritemeta.proper_format(app):
+    if not options.notformat and not rewritemeta.proper_format(app):
         yield _("Run rewritemeta to fix formatting")
 
 
@@ -503,8 +503,8 @@ def main():
     # Parse command line...
     parser = ArgumentParser(usage="%(prog)s [options] [APPID [APPID ...]]")
     common.setup_global_opts(parser)
-    parser.add_argument("-f", "--format", action="store_true", default=False,
-                        help=_("Also warn about formatting issues, like rewritemeta -l"))
+    parser.add_argument("-n", "--notformat", action="store_true", default=False,
+                        help=_("Don't warn about formatting issues (unlike rewritemeta -l)"))
     parser.add_argument("appid", nargs='*', help=_("applicationId in the form APPID"))
     metadata.add_metadata_arguments(parser)
     options = parser.parse_args()
