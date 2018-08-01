@@ -75,6 +75,12 @@ archive_description = """
 The repository of older versions of applications from the main demo repository.
 """
 
+# Set this to True if this repo is only serving Android apps, so only .apk and
+# .obb files are considered as "elements of interest". If set to False, all
+# files in the repo/ subdir (except for the index files) will be considered
+# to be "apps".
+apps_only = True
+
 # This allows a specific kind of insecure APK to be included in the
 # 'repo' section.  Since April 2017, APK signatures that use MD5 are
 # no longer considered valid, jarsigner and apksigner will return an

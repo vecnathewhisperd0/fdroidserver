@@ -948,6 +948,8 @@ def scan_repo_files(apkcache, repodir, knownapks, use_date_from_file=False):
 
     cachechanged = False
     repo_files = []
+    if config['apps_only']:
+        return repo_files, cachechanged
     repodir = repodir.encode('utf-8')
     for name in os.listdir(repodir):
         file_extension = common.get_file_extension(name)
