@@ -1897,6 +1897,9 @@ def main():
             and 'keytool' in config):
         raise FDroidException(_('Java JDK not found! Install in standard location or set java_paths!'))
 
+    if not 'apps_only' in config:
+        config['apps_only'] = False
+
     repodirs = ['repo']
     if config['archive_older'] != 0:
         repodirs.append('archive')
