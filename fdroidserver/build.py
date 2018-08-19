@@ -1006,7 +1006,7 @@ def main():
     if options.onserver or not options.server:
         for d in ['build-tools', 'platform-tools', 'tools']:
             if not os.path.isdir(os.path.join(config['sdk_path'], d)):
-                raise FDroidException(_("Android SDK '{path}' does not have '{dirname}' installed!")
+                raise FDroidException(_("Android SDK '{path}' does not have '{dirname}' installed! https://f-droid.org/docs/Installing_the_Server_and_Repo_Tools/#building-apps")
                                       .format(path=config['sdk_path'], dirname=d))
 
     log_dir = 'logs'
