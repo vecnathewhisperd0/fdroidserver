@@ -233,7 +233,7 @@ msgstr "Avvisa anche dei problemi di formattazione, come rewritemeta -l"
 
 #: ../fdroidserver/common.py
 #, python-brace-format
-msgid "Android SDK '{path}' does not have '{dirname}' installed!"
+msgid "Android SDK '{path}' does not have '{dirname}' installed! https://f-droid.org/docs/Installing_the_Server_and_Repo_Tools/#building-apps"
 msgstr "\"{path}\" dell'Android SDK non ha \"{dirname}\" installato!"
 
 #: ../fdroidserver/common.py
