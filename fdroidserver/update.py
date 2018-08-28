@@ -717,6 +717,13 @@ def _strip_and_copy_image(inpath, outpath):
                               .format(extension=extension))
 
 
+def cleanup_graphic_assets():
+    '''Delete any graphic asset previously copied from app source repos'''
+    for asset_dir in GRAPHIC_NAMES + SCREENSHOT_DIRS:
+        for asset in glob.glob(os.path.join('repo', '*', '*', asset_dir, '*')):
+            os.remove(asset)
+
+
 def copy_triple_t_store_metadata(apps):
     """Include store metadata from the app's source repo
 
@@ -1985,6 +1992,7 @@ def main():
                 else:
                     logging.warn(msg + '\n\t' + _("Use `fdroid update -c` to create it."))
 
+    cleanup_graphic_assets()
     copy_triple_t_store_metadata(apps)
     insert_obbs(repodirs[0], apps, apks)
     insert_localized_app_metadata(apps)
