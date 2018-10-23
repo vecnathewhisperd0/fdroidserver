@@ -2,6 +2,8 @@
 
 import os
 import re
+import pwd
+import grp
 import requests
 import stat
 import sys
@@ -16,6 +18,13 @@ from clint.textui import progress
 from optparse import OptionParser
 import fdroidserver.tail
 import fdroidserver.vmtools
+import textwrap
+
+# TODO change to only import defusedxml once its installed everywhere
+try:
+    import defusedxml.ElementTree as XMLElementTree
+except ImportError:
+    import xml.etree.ElementTree as XMLElementTree  # nosec this is a fallback only
 
 
 parser = OptionParser()
@@ -481,6 +490,51 @@ def debug_log_vagrant_vm(vm_dir, config):
             subprocess.call(['virsh', '-c', 'qemu:///system', 'snapshot-list', domain])
 
 
+def init_storage_pool():
+    """Make sure theres a libvirt storage-pool ready for use."""
+    if config['vm_provider'] == 'libvirt':
+        import libvirt
+        uid = pwd.getpwnam('libvirt-qemu').pw_uid
+        gid = grp.getgrnam('libvirt-qemu').gr_gid
+        default_pool_path = "/var/lib/libvirt/fdroid-images"
+        lv = libvirt.open('qemu:///system')
+
+        # create fdroid pool if not yet present
+        pool_defined = any([True for x in lv.listAllStoragePools() if x.name() == 'fdroid'])
+        if not pool_defined:
+            lv.storagePoolDefineXML(textwrap.dedent("""\
+                <pool type='dir'>
+                  <name>fdroid</name>
+                  <target>
+                    <path>{path}</path>
+                    <permissions>
+                      <mode>0770</mode>
+                      <owner>{uid}</owner>
+                      <group>{gid}</group>
+                    </permissions>
+                  </target>
+                </pool>""").format(uid=uid, gid=gid, path=default_pool_path))
+
+        # get pool infos about fdroid pool from libvirt
+        pool = lv.storagePoolLookupByName('fdroid')
+        pool_xml = XMLElementTree.fromstring(pool.XMLDesc())
+        pool_type = pool_xml.get('type')
+
+        if pool_type == 'dir':
+            pool_path = pool_xml.find('.//target//path').text
+
+            # build pool if not built already
+            # (libvirt will create dir for storing images)
+            if not os.path.exists(pool_path):
+                # don't attempt to build the pool if we did not define it.
+                if pool_path == default_pool_path:
+                    pool.build()
+
+        # try activating pool if inactive
+        if pool.isActive() == 0:
+            pool.create()
+
+
 def main():
     global config, tail
 
@@ -602,6 +656,8 @@ def main():
             logging.debug('not updating basebox ...')
     else:
         logging.debug('using unverified basebox ...')
+
+    init_storage_pool()
 
     logging.info("Configuring build server VM")
     debug_log_vagrant_vm(serverdir, config)
