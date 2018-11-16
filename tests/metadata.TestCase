@@ -209,6 +209,24 @@ class MetadataTest(unittest.TestCase):
             UpdateCheckMode: Tags
             """))
 
+    def test_parse_metadata(self):
+        testdir = tempfile.mkdtemp(prefix=inspect.currentframe().f_code.co_name, dir=self.tmpdir)
+        metadatadir = os.path.join(testdir, 'metadata')
+        os.makedirs(metadatadir)
+        fdroidserver.common.config = {'accepted_formats': ['txt', 'yml']}
+
+        app = fdroidserver.metadata.App()
+        app.Categories = ['Internet']
+        app.RepoType = 'git'
+        app.Repo = 'https://gitlab.com/fdroid/ci-test-app.git'
+
+        metadatafile = os.path.join(metadatadir, 'org.fdroid.ci.test.app.yml')
+        with open(metadatafile, 'w') as fp:
+            fdroidserver.metadata.write_yaml(fp, app)
+        parsedApp = fdroidserver.metadata.parse_metadata(metadatafile)
+        self.assertEqual('https://gitlab.com/fdroid/ci-test-app', parsedApp.SourceCode)
+        self.assertEqual('https://gitlab.com/fdroid/ci-test-app/issues', parsedApp.IssueTracker)
+
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(__file__))

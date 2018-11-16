@@ -925,6 +925,13 @@ def post_metadata_parse(app):
 
     _bool_allowed = ('maven', 'buildozer')
 
+    if not app.SourceCode:
+        app.SourceCode = app.Repo.rstrip('/').rstrip('.git')
+    if not app.IssueTracker \
+       and (app.Repo.startswith('https://github.com')
+            or app.Repo.startswith('https://gitlab.com')):
+        app.IssueTracker = app.Repo.rstrip('/').rstrip('.git') + '/issues'
+
     builds = []
     if 'builds' in app:
         for build in app['builds']:
