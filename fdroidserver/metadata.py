@@ -28,6 +28,7 @@ import textwrap
 import io
 import yaml
 from collections import OrderedDict
+from distutils.version import LooseVersion
 
 import fdroidserver.common
 from fdroidserver import _
@@ -343,6 +344,18 @@ class Build(dict):
             del self[name]
         else:
             raise AttributeError("No such attribute: " + name)
+
+    def __lt__(self, build):
+        if self.get('versionCode') and build.get('versionCode'):
+            return int(self.versionCode) < int(build.versionCode)
+        elif self.get('versionName') and build.get('versionName'):
+            return LooseVersion(self.versionName) < LooseVersion(build.versionName)
+
+    def __gt__(self, build):
+        if self.get('versionCode') and build.get('versionCode'):
+            return int(self.versionCode) > int(build.versionCode)
+        elif self.get('versionName') and build.get('versionName'):
+            return LooseVersion(self.versionName) > LooseVersion(build.versionName)
 
     def build_method(self):
         for f in ['maven', 'gradle', 'buildozer']:
@@ -882,10 +895,6 @@ def get_default_app_info(metadatapath=None):
     return app
 
 
-def sorted_builds(builds):
-    return sorted(builds, key=lambda build: int(build.versionCode))
-
-
 esc_newlines = re.compile(r'\\( |\n)')
 
 
@@ -978,7 +987,7 @@ def post_metadata_parse(app):
                                 build[k] = str(v)
             builds.append(build)
 
-    app.builds = sorted_builds(builds)
+    app.builds = sorted(builds)
 
 
 # Parse metadata for a single application.

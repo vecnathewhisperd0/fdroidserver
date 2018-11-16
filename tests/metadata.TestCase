@@ -222,7 +222,6 @@ class MetadataTest(unittest.TestCase):
 
         build = fdroidserver.metadata.Build()
         build.versionName = '0.1'
-        build.versionCode = '0'
         app.builds = [build]
 
         metadatafile = os.path.join(metadatadir, 'org.fdroid.ci.test.app.yml')
@@ -232,6 +231,86 @@ class MetadataTest(unittest.TestCase):
         self.assertEqual('https://gitlab.com/fdroid/ci-test-app', parsedApp.SourceCode)
         self.assertEqual('https://gitlab.com/fdroid/ci-test-app/issues', parsedApp.IssueTracker)
         self.assertEqual(build.versionName, parsedApp.builds[0].commit)
+
+        # sort by versionName if versionCode not available
+        app.builds = []
+        for i in ('3', '1', '4', '2'):
+            build = fdroidserver.metadata.Build()
+            build.versionName = '0.' + i
+            app.builds.append(build)
+        with open(metadatafile, 'w') as fp:
+            fdroidserver.metadata.write_yaml(fp, app)
+        parsedApp = fdroidserver.metadata.parse_metadata(metadatafile)
+        self.assertEqual(4, len(parsedApp.builds))
+        versionNames = []
+        for build in parsedApp.builds:
+            versionNames.append(build.versionName)
+        self.assertEqual(['0.1', '0.2', '0.3', '0.4'], versionNames)
+
+        # prefer versionCode
+        app.builds = []
+        for i in ('3', '1', '4', '2'):
+            build = fdroidserver.metadata.Build()
+            build.versionName = '0.' + i
+            build.versionCode = i
+            app.builds.append(build)
+        with open(metadatafile, 'w') as fp:
+            fdroidserver.metadata.write_yaml(fp, app)
+        parsedApp = fdroidserver.metadata.parse_metadata(metadatafile)
+        self.assertEqual(4, len(parsedApp.builds))
+        versionCodes = []
+        for build in parsedApp.builds:
+            versionCodes.append(build.versionCode)
+        self.assertEqual(['1', '2', '3', '4'], versionCodes)
+
+        # should use versionCode if versionName is not available
+        build = fdroidserver.metadata.Build()
+        build.versionCode = '5'
+        app.builds = [build] + app.builds
+        with open(metadatafile, 'w') as fp:
+            fdroidserver.metadata.write_yaml(fp, app)
+        parsedApp = fdroidserver.metadata.parse_metadata(metadatafile)
+        self.assertEqual(5, len(parsedApp.builds))
+        versionCodes = []
+        for build in parsedApp.builds:
+            versionCodes.append(build.versionCode)
+        self.assertEqual(['1', '2', '3', '4', '5'], versionCodes)
+
+        # should fall back to versionName if versionCode is not available
+        build = fdroidserver.metadata.Build()
+        build.versionName = '0.2.1'
+        app.builds.append(build)
+        with open(metadatafile, 'w') as fp:
+            fdroidserver.metadata.write_yaml(fp, app)
+        parsedApp = fdroidserver.metadata.parse_metadata(metadatafile)
+        self.assertEqual(6, len(parsedApp.builds))
+        versionNames = []
+        for build in parsedApp.builds:
+            versionNames.append(build.get('versionName'))
+        self.assertEqual(['0.1', '0.2', '0.2.1', '0.3', '0.4', None], versionNames)
+
+        # should sort by versionCode over versionName
+        app.builds = []
+        build = fdroidserver.metadata.Build()
+        build.versionName = '0.3'
+        build.versionCode = '1'
+        app.builds.append(build)
+        build = fdroidserver.metadata.Build()
+        build.versionName = '0.1'
+        build.versionCode = '3'
+        app.builds.append(build)
+        build = fdroidserver.metadata.Build()
+        build.versionName = '0.2'
+        build.versionCode = '2'
+        app.builds.append(build)
+        with open(metadatafile, 'w') as fp:
+            fdroidserver.metadata.write_yaml(fp, app)
+        parsedApp = fdroidserver.metadata.parse_metadata(metadatafile)
+        self.assertEqual(3, len(parsedApp.builds))
+        versionCodes = []
+        for build in parsedApp.builds:
+            versionCodes.append(build.versionCode)
+        self.assertEqual(['1', '2', '3'], versionCodes)
 
 
 if __name__ == "__main__":
