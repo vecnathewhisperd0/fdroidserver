@@ -950,6 +950,9 @@ def post_metadata_parse(app):
                                 build.subdir = 'app'
                                 break
 
+            if not build.commit and build.get('versionName'):
+                build.commit = build.versionName
+
             for k, v in build.items():
                 if not (v is None):
                     if flagtype(k) == TYPE_LIST:
