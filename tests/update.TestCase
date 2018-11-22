@@ -415,6 +415,38 @@ class UpdateTest(unittest.TestCase):
             self.assertEqual(apk_info.get('versionName'), '1.0')
             self.assertEqual(apk_info['icons_src'], {})
 
+    def test_scan_apk_no_min_target(self):
+        config = dict()
+        fdroidserver.common.fill_config_defaults(config)
+        fdroidserver.common.config = config
+        fdroidserver.update.config = config
+        apk_info = fdroidserver.update.scan_apk('repo/no.min.target.sdk_987.apk')
+        self.maxDiff = None
+        self.assertDictEqual(apk_info, {
+            'icons': {},
+            'icons_src': {'-1': 'res/drawable/ic_launcher.png',
+                          '160': 'res/drawable/ic_launcher.png'},
+            'name': 'No minSdkVersion or targetSdkVersion',
+            'signer': '32a23624c201b949f085996ba5ed53d40f703aca4989476949cae891022e0ed6',
+            'hashType': 'sha256',
+            'packageName': 'no.min.target.sdk',
+            'features': [],
+            'antiFeatures': set(),
+            'size': 14102,
+            'sig': 'b4964fd759edaa54e65bb476d0276880',
+            'versionName': '1.2-fake',
+            'uses-permission-sdk-23': [],
+            'hash': 'e2e1dc1d550df2b5bc383860139207258645b5540abeccd305ed8b2cb6459d2c',
+            'versionCode': 987,
+            'minSdkVersion': '3',
+            'uses-permission': [
+                fdroidserver.update.UsesPermission(name='android.permission.WRITE_EXTERNAL_STORAGE',
+                                                   maxSdkVersion=None),
+                fdroidserver.update.UsesPermission(name='android.permission.READ_PHONE_STATE',
+                                                   maxSdkVersion=None),
+                fdroidserver.update.UsesPermission(name='android.permission.READ_EXTERNAL_STORAGE',
+                                                   maxSdkVersion=None)]})
+
     def test_scan_apk_no_sig(self):
         config = dict()
         fdroidserver.common.fill_config_defaults(config)

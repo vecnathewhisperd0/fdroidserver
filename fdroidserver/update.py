@@ -1089,7 +1089,9 @@ def scan_apk(apk_file):
 
     if 'minSdkVersion' not in apk:
         logging.warning("No SDK version information found in {0}".format(apk_file))
-        apk['minSdkVersion'] = 3  # aapt defaults to 3 as the min
+        apk['minSdkVersion'] = _sanitize_sdk_version(3)  # aapt defaults to 3 as the min
+    else:
+        apk['minSdkVersion'] = _sanitize_sdk_version(apk['minSdkVersion'])
 
     # Check for known vulnerabilities
     if has_known_vulnerability(apk_file):

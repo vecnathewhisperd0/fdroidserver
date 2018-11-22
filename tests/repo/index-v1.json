@@ -452,7 +452,7 @@
         "apkName": "no.min.target.sdk_987.apk",
         "hash": "e2e1dc1d550df2b5bc383860139207258645b5540abeccd305ed8b2cb6459d2c",
         "hashType": "sha256",
-        "minSdkVersion": 3,
+        "minSdkVersion": "3",
         "packageName": "no.min.target.sdk",
         "sig": "b4964fd759edaa54e65bb476d0276880",
         "signer": "32a23624c201b949f085996ba5ed53d40f703aca4989476949cae891022e0ed6",
