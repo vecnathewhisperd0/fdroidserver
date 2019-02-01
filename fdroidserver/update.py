@@ -1178,7 +1178,7 @@ def scan_apk_aapt(apk, apkfile):
             )
             apk['uses-permission-sdk-23'].append(permission_sdk_23)
 
-        elif line.startswith('uses-feature:'):
+        elif line.startswith('  uses-feature:'):
             feature = re.match(APK_FEATURE_PAT, line).group(1)
             # Filter out this, it's only added with the latest SDK tools and
             # causes problems for lots of apps.
@@ -1186,7 +1186,7 @@ def scan_apk_aapt(apk, apkfile):
                     and feature != "android.hardware.screen.landscape":
                 if feature.startswith("android.feature."):
                     feature = feature[16:]
-                apk['features'].add(feature)
+                apk['features'].append(feature)
     apk['icons_src'] = _get_apk_icons_src(apkfile, icon_name)
 
 

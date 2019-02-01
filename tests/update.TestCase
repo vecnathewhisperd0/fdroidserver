@@ -415,18 +415,24 @@ class UpdateTest(unittest.TestCase):
                 self.assertIsNone(apk_info.get('maxSdkVersion'))
                 self.assertEqual(apk_info.get('versionName'), 'v2-only')
                 self.assertEqual(apk_info.get('versionCode'), 2)
+                self.assertEqual(apk_info['features'], ['android.hardware.faketouch'])
 
             apk_info = fdroidserver.update.scan_apk('repo/v1.v2.sig_1020.apk')
             self.assertIsNone(apk_info.get('maxSdkVersion'))
             self.assertEqual(apk_info.get('versionName'), 'v1+2')
             self.assertEqual(apk_info.get('versionCode'), 1020)
+            self.assertEqual(apk_info['features'], ['android.hardware.faketouch'])
 
             apk_info = fdroidserver.update.scan_apk('repo/souch.smsbypass_9.apk')
+            self.assertEqual(apk_info['features'], [
+                'android.hardware.faketouch',
+                'android.hardware.telephony'])
             self.assertIsNone(apk_info.get('maxSdkVersion'))
             self.assertEqual(apk_info.get('versionName'), '0.9')
 
             apk_info = fdroidserver.update.scan_apk('repo/duplicate.permisssions_9999999.apk')
             self.assertEqual(apk_info.get('versionName'), '')
+            self.assertEqual(apk_info['features'], ['android.hardware.wifi'])
             self.assertEqual(apk_info['icons_src'], {'160': 'res/drawable/ic_launcher.png',
                                                      '-1': 'res/drawable/ic_launcher.png'})
 
@@ -436,7 +442,7 @@ class UpdateTest(unittest.TestCase):
                                                      '160': 'res/drawable-mdpi-v4/icon_launcher.png',
                                                      '-1': 'res/drawable-mdpi-v4/icon_launcher.png'})
             self.assertEqual(apk_info['icons'], {})
-            self.assertEqual(apk_info['features'], [])
+            self.assertEqual(apk_info['features'], ['android.hardware.faketouch'])
             self.assertEqual(apk_info['antiFeatures'], set())
             self.assertEqual(apk_info['versionName'], 'v1.6pre2')
             self.assertEqual(apk_info['hash'],
@@ -450,16 +456,22 @@ class UpdateTest(unittest.TestCase):
             self.assertEqual(apk_info['sig'], '9bf7a6a67f95688daec75eab4b1436ac')
             self.assertEqual(apk_info['hashType'], 'sha256')
             self.assertEqual(apk_info['targetSdkVersion'], 8)
+            self.assertEqual(apk_info['features'], ['android.hardware.faketouch'])
 
             apk_info = fdroidserver.update.scan_apk('org.bitbucket.tickytacky.mirrormirror_4.apk')
             self.assertEqual(apk_info.get('versionName'), '1.0.3')
             self.assertEqual(apk_info['icons_src'], {'160': 'res/drawable-mdpi/mirror.png',
                                                      '-1': 'res/drawable-mdpi/mirror.png'})
+            self.assertEqual(apk_info['features'], [
+                'android.hardware.camera.front',
+                'android.hardware.camera',
+                'android.hardware.faketouch'])
 
             apk_info = fdroidserver.update.scan_apk('repo/info.zwanenburg.caffeinetile_4.apk')
             self.assertEqual(apk_info.get('versionName'), '1.3')
             self.assertEqual(apk_info['icons_src'], {'160': 'res/drawable/ic_coffee_on.xml',
                                                      '-1': 'res/drawable/ic_coffee_on.xml'})
+            self.assertEqual(apk_info['features'], ['android.hardware.faketouch'])
 
             apk_info = fdroidserver.update.scan_apk('repo/com.politedroid_6.apk')
             self.assertEqual(apk_info.get('versionName'), '1.5')
@@ -468,10 +480,16 @@ class UpdateTest(unittest.TestCase):
                                                      '240': 'res/drawable-hdpi-v4/icon.png',
                                                      '320': 'res/drawable-xhdpi-v4/icon.png',
                                                      '-1': 'res/drawable-mdpi-v4/icon.png'})
+            self.assertEqual(apk_info['features'], ['android.hardware.faketouch'])
 
             apk_info = fdroidserver.update.scan_apk('SpeedoMeterApp.main_1.apk')
             self.assertEqual(apk_info.get('versionName'), '1.0')
             self.assertEqual(apk_info['icons_src'], {})
+            self.assertEqual(apk_info['features'], [
+                'android.hardware.faketouch',
+                'android.hardware.location',
+                'android.hardware.location.gps',
+                'android.hardware.location.network'])
 
     def test_scan_apk_no_min_target(self):
         config = dict()
