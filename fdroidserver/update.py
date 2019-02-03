@@ -1297,6 +1297,9 @@ def scan_apk_androguard(apk, apkfile):
             maxSdkVersion
         )
         apk['uses-permission'].append(permission)
+        # "uses-implied-feature" is converted by aapt to uses-feature
+        if name == 'android.permission.CAMERA':
+            apk['uses-feature'].append('android.hardware.camera')
     for name, maxSdkVersion in apkobject.get_uses_implied_permission_list():
         permission = UsesPermission(
             name,

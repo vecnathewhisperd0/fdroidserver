@@ -311,6 +311,9 @@ class UpdateTest(unittest.TestCase):
         self.assertEqual(apk['minSdkVersion'], 4)
         self.assertEqual(apk['targetSdkVersion'], 18)
         self.assertFalse('maxSdkVersion' in apk)
+        self.assertEqual(apk['features'], [
+            'android.hardware.bluetooth',
+        ])
 
         fdroidserver.update.insert_obbs('repo', apps, apks)
         for apk in apks:
