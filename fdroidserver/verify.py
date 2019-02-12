@@ -79,6 +79,9 @@ def write_json_report(url, remote_apk, unsigned_apk, compare_result):
     ensure that there is only one report per file, even when run
     repeatedly.
 
+    This also outputs a JSON report to drive the data display on
+    https://tests.reproducible-builds.org.
+
     """
 
     jsonfile = unsigned_apk + '.json'
@@ -105,6 +108,34 @@ def write_json_report(url, remote_apk, unsigned_apk, compare_result):
     with open(jsonfile, 'w') as fp:
         json.dump(data, fp, sort_keys=True)
 
+    packageName = output['local']['packageName']
+    versionCode = output['local']['versionCode']
+    versionName = output['local']['versionName']
+
+    jsonfile = 'unsigned/reproducible.json'
+    if os.path.exists(jsonfile):
+        with open(jsonfile) as fp:
+            data = json.load(fp, object_pairs_hook=OrderedDict)
+    else:
+        data = []
+    i = 0
+    for item in data:
+        if item.get('packageName') == packageName:
+            break
+        i += 1
+    item = OrderedDict()
+    item['packageName'] = packageName
+    item['timestamp'] = output['local']['timestamp']
+    item['versionCode'] = versionCode
+    item['versionName'] = versionName
+    if output['verified']:
+        item['status'] = 'reproducible'
+    else:
+        item['status'] = 'unreproducible'
+    data.insert(i, item)
+    with open(jsonfile, 'w') as fp:
+        json.dump(data, fp, sort_keys=True)
+
     if output['verified']:
         jsonfile = 'unsigned/verified.json'
         if os.path.exists(jsonfile):
@@ -113,7 +144,6 @@ def write_json_report(url, remote_apk, unsigned_apk, compare_result):
         else:
             data = OrderedDict()
             data['packages'] = OrderedDict()
-        packageName = output['local']['packageName']
         if packageName not in data['packages']:
             data['packages'][packageName] = set()
         data['packages'][packageName].add(output)
