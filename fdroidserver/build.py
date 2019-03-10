@@ -727,7 +727,9 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
     elif omethod == 'gradle':
         src = None
         apk_dirs = [
-            # gradle plugin >= 3.0
+            # gradle plugin >= 4.1
+            os.path.join(root_dir, 'app', 'build', 'outputs', 'apk', 'release'),
+            # gradle plugin < 4.1 and >= 3.0
             os.path.join(root_dir, 'build', 'outputs', 'apk', 'release'),
             # gradle plugin < 3.0 and >= 0.11
             os.path.join(root_dir, 'build', 'outputs', 'apk'),
