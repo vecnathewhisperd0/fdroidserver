@@ -633,28 +633,13 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
         logging.info("ndk_path = %s" % loc_ndk)
 
         p = None
-        # execute buildozer
+        # makes sure buildozer is installed and up to date before running
+        cmd = ['pip', 'install', '--user', '--upgrade', 'https://github.com/kivy/buildozer/archive/master.zip']
+        p = subprocess.Popen(cmd, cwd=root_dir, shell=False)
+        p.wait()
+        # then build in release mode
         cmd = ['buildozer', 'android', 'release']
-        try:
-            p = FDroidPopen(cmd, cwd=root_dir)
-        except Exception:
-            pass
-
-        # buidozer not installed ? clone repo and run
-        if (p is None or p.returncode != 0):
-            cmd = ['git', 'clone', 'https://github.com/kivy/buildozer.git']
-            p = subprocess.Popen(cmd, cwd=root_dir, shell=False)
-            p.wait()
-            if p.returncode != 0:
-                raise BuildException("Distribute build failed")
-
-            cmd = ['python', 'buildozer/buildozer/scripts/client.py', 'android', 'release']
-            p = FDroidPopen(cmd, cwd=root_dir)
-
-        # expected to fail.
-        # Signing will fail if not set by environnment vars (cf. p4a docs).
-        # But the unsigned apk will be ok.
-        p.returncode = 0
+        p = FDroidPopen(cmd, cwd=root_dir)
 
     elif bmethod == 'gradle':
         logging.info("Building Gradle project...")
