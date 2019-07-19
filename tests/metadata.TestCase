@@ -521,6 +521,38 @@ class MetadataTest(unittest.TestCase):
             UpdateCheckMode: None
             """))
 
+    def test_post_metadata_parse_build_maven(self):
+        app = fdroidserver.metadata.App()
+        app.builds = []
+        build = fdroidserver.metadata.Build()
+        build.versionCode = 20200
+        build.versionName = '2.2'
+        build.maven = 'no'
+        app.builds.append(build)
+        fdroidserver.metadata.post_metadata_parse(app)
+        self.assertEqual(1, len(app.builds))
+        self.assertEqual('no', app.builds[0].maven)
+
+        app.builds[0].maven = False
+        fdroidserver.metadata.post_metadata_parse(app)
+        self.assertEqual(1, len(app.builds))
+        self.assertEqual(False, app.builds[0].maven)
+
+        app.builds[0].maven = 'yes'
+        fdroidserver.metadata.post_metadata_parse(app)
+        self.assertEqual(1, len(app.builds))
+        self.assertEqual('yes', app.builds[0].maven)
+
+        app.builds[0].maven = 'yes@..'
+        fdroidserver.metadata.post_metadata_parse(app)
+        self.assertEqual(1, len(app.builds))
+        self.assertEqual('yes@..', app.builds[0].maven)
+
+        app.builds[0].maven = True
+        fdroidserver.metadata.post_metadata_parse(app)
+        self.assertEqual(1, len(app.builds))
+        self.assertEqual(True, app.builds[0].maven)
+
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(__file__))
