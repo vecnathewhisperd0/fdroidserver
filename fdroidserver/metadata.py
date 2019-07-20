@@ -910,21 +910,6 @@ def post_metadata_parse(app):
         elif value is not None:
             app[field] = [str(i) for i in value]
 
-    def _yaml_bool_unmapable(v):
-        return v in (True, False, [True], [False])
-
-    def _yaml_bool_unmap(v):
-        if v is True:
-            return 'yes'
-        elif v is False:
-            return 'no'
-        elif v == [True]:
-            return ['yes']
-        elif v == [False]:
-            return ['no']
-
-    _bool_allowed = ('maven', 'buildozer')
-
     builds = []
     if 'builds' in app:
         for build in app['builds']:
@@ -933,8 +918,8 @@ def post_metadata_parse(app):
             for k, v in build.items():
                 if not (v is None):
                     if flagtype(k) == TYPE_LIST:
-                        if _yaml_bool_unmapable(v):
-                            build[k] = _yaml_bool_unmap(v)
+                        if v in (True, False, [True], [False]):
+                            build[k] = v
 
                         if isinstance(v, str):
                             build[k] = [v]
@@ -946,13 +931,10 @@ def post_metadata_parse(app):
                     elif flagtype(k) is TYPE_INT:
                         build[k] = str(v)
                     elif flagtype(k) is TYPE_STRING:
-                        if isinstance(v, bool) and k in _bool_allowed:
+                        if v in (True, False):
                             build[k] = v
                         else:
-                            if _yaml_bool_unmapable(v):
-                                build[k] = _yaml_bool_unmap(v)
-                            else:
-                                build[k] = str(v)
+                            build[k] = str(v)
             builds.append(build)
 
     app.builds = sorted_builds(builds)
@@ -1210,10 +1192,8 @@ def write_yaml(mf, app):
                     if field == 'gradle' and value == ['off']:
                         value = [ruamel.yaml.scalarstring.SingleQuotedScalarString('off')]
                     if field in ('maven', 'buildozer'):
-                        if value == 'no':
+                        if not value or value == 'no':
                             continue
-                        elif value == 'yes':
-                            value = 'yes'
                     b.update({field: _field_to_yaml(flagtype(field), value)})
             builds.append(b)
 
