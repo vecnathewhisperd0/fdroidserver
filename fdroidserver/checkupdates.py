@@ -508,7 +508,7 @@ def checkupdates_app(app):
                 newbuild.versionCode = app.CurrentVersionCode
                 newbuild.versionName = app.CurrentVersion + suffix
                 logging.info("...auto-generating build for " + newbuild.versionName)
-                commit = pattern.replace('%v', newbuild.versionName)
+                commit = pattern.replace('%v', app.CurrentVersion)
                 commit = commit.replace('%c', newbuild.versionCode)
                 newbuild.commit = commit
                 app.builds.append(newbuild)
