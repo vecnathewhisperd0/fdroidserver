@@ -430,23 +430,40 @@ class LibvirtBuildVm(FDroidBuildVm):
                   end""".format_map({'memory': str(int(domainInfo[1] / 1024)), 'cpus': str(domainInfo[3])}))
             with open('Vagrantfile', 'w') as fp:
                 fp.write(vagrantfile)
-            with tarfile.open(output, 'w:gz') as tar:
-                logging.debug('adding metadata.json to box %s ...', output)
-                tar.add('metadata.json')
-                logging.debug('adding Vagrantfile to box %s ...', output)
-                tar.add('Vagrantfile')
-                logging.debug('adding box.img to box %s ...', output)
-                tar.add('box.img')
-
-            if not keep_box_file:
-                logging.debug('box packaging complete, removing temporary files.')
-                os.remove('metadata.json')
-                os.remove('Vagrantfile')
-                os.remove('box.img')
+            self._assemble_box_file(output, keep_box_file)
 
         else:
             logging.warn("could not connect to storage-pool 'default', "
                          "skip packaging buildserver box")
+
+    def _assemble_box_file(boxfilepath, keep_box_file):
+
+        if shutil.which('pigz'):
+            with tarfile.open(boxfilepath, 'w') as tar:
+                logging.debug('adding metadata.json to box %s ...', boxfilepath)
+                tar.add('metadata.json')
+                logging.debug('adding Vagrantfile to box %s ...', boxfilepath)
+                tar.add('Vagrantfile')
+                logging.debug('adding box.img to box %s ...', boxfilepath)
+                tar.add('box.img')
+                logging.debug('compressing %s', boxfilepath)
+                subprocess.check_call([shutil.which('pigz'), '--fast', boxfilepath], shell=False)
+                os.rename(boxfilepath + '.gz', boxfilepath)
+
+        else:
+            with tarfile.open(boxfilepath, 'w:gz') as tar:
+                logging.debug('adding metadata.json to box %s ...', boxfilepath)
+                tar.add('metadata.json')
+                logging.debug('adding Vagrantfile to box %s ...', boxfilepath)
+                tar.add('Vagrantfile')
+                logging.debug('adding box.img to box %s ...', boxfilepath)
+                tar.add('box.img')
+
+        if not keep_box_file:
+            logging.debug('box packaging complete, removing temporary files.')
+            os.remove('metadata.json')
+            os.remove('Vagrantfile')
+            os.remove('box.img')
 
     def box_add(self, boxname, boxfile, force=True):
         boximg = '%s_vagrant_box_image_0.img' % (boxname)
