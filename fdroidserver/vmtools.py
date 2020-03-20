@@ -436,7 +436,7 @@ class LibvirtBuildVm(FDroidBuildVm):
             logging.warn("could not connect to storage-pool 'default', "
                          "skip packaging buildserver box")
 
-    def _assemble_box_file(boxfilepath, keep_box_file):
+    def _assemble_box_file(self, boxfilepath, keep_box_file):
 
         if shutil.which('pigz'):
             with tarfile.open(boxfilepath, 'w') as tar:
