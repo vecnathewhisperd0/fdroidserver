@@ -20,7 +20,7 @@ from os.path import isdir, isfile, basename, abspath, expanduser
 import os
 import math
 import json
-import libarchive
+import tarfile
 import shutil
 import subprocess
 import textwrap
@@ -430,8 +430,19 @@ class LibvirtBuildVm(FDroidBuildVm):
                   end""".format_map({'memory': str(int(domainInfo[1] / 1024)), 'cpus': str(domainInfo[3])}))
             with open('Vagrantfile', 'w') as fp:
                 fp.write(vagrantfile)
-            with libarchive.file_writer(output, 'ustar', 'gzip') as tar:
-                tar.add_files('metadata.json', 'Vagrantfile', 'box.img')
+            try:
+                import libarchive
+                with libarchive.file_writer(output, 'ustar', 'gzip') as tar:
+                    logging.debug('adding files to box %s ...', output)
+                    tar.add_files('metadata.json', 'Vagrantfile', 'box.img')
+            except (ModuleNotFoundError, AttributeError):
+                with tarfile.open(output, 'w:gz') as tar:
+                    logging.debug('adding metadata.json to box %s ...', output)
+                    tar.add('metadata.json')
+                    logging.debug('adding Vagrantfile to box %s ...', output)
+                    tar.add('Vagrantfile')
+                    logging.debug('adding box.img to box %s ...', output)
+                    tar.add('box.img')
 
             if not keep_box_file:
                 logging.debug('box packaging complete, removing temporary files.')
