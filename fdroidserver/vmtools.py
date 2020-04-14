@@ -432,7 +432,7 @@ class LibvirtBuildVm(FDroidBuildVm):
                 fp.write(vagrantfile)
             try:
                 import libarchive
-                with libarchive.file_writer(output, 'ustar', 'gzip') as tar:
+                with libarchive.file_writer(output, 'gnutar', 'gzip') as tar:
                     logging.debug('adding files to box %s ...', output)
                     tar.add_files('metadata.json', 'Vagrantfile', 'box.img')
             except (ModuleNotFoundError, AttributeError):
