@@ -71,7 +71,6 @@ debian_testing:
         git
         gnupg
         python3-defusedxml
-        python3-libarchive-c
         python3-setuptools
         zipalign
     - python3 -c 'import fdroidserver'
@@ -93,7 +92,7 @@ ubuntu_lts_ppa:
     - echo "deb http://ppa.launchpad.net/fdroid/fdroidserver/ubuntu $RELEASE main" >> /etc/apt/sources.list
     - apt-get update
     - apt-get dist-upgrade
-    - apt-get install --install-recommends binfmt-support fdroidserver git python3-defusedxml python3-setuptools python3-libarchive-c python3-libarchive-c
+    - apt-get install --install-recommends binfmt-support fdroidserver git python3-defusedxml python3-setuptools
     - grep binfmt /proc/modules || apt -qy purge apksigner
     - cd tests
     - ./run-tests
