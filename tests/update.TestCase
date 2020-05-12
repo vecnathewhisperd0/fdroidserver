@@ -62,6 +62,14 @@ class UpdateTest(unittest.TestCase):
         shutil.copytree(os.path.join('source-files', 'com.nextcloud.client.dev'),
                         os.path.join('build', 'com.nextcloud.client.dev'))
 
+        shutil.rmtree(os.path.join('build', 'com.yacgroup.yacguide'), ignore_errors=True)
+        shutil.copytree(os.path.join('source-files', 'com.yacgroup.yacguide'),
+                        os.path.join('build', 'com.yacgroup.yacguide'))
+
+        shutil.rmtree(os.path.join('build', 'com.yacgroup.yacguide.dev'), ignore_errors=True)
+        shutil.copytree(os.path.join('source-files', 'com.yacgroup.yacguide.dev'),
+                        os.path.join('build', 'com.yacgroup.yacguide.dev'))
+
         shutil.rmtree(os.path.join('build', 'eu.siacs.conversations'), ignore_errors=True)
         shutil.copytree(os.path.join('source-files', 'eu.siacs.conversations'),
                         os.path.join('build', 'eu.siacs.conversations'))
@@ -77,6 +85,7 @@ class UpdateTest(unittest.TestCase):
         apps = dict()
         for packageName in ('info.guardianproject.urzip', 'org.videolan.vlc', 'obb.mainpatch.current',
                             'com.nextcloud.client', 'com.nextcloud.client.dev',
+                            'com.yacgroup.yacguide', 'com.yacgroup.yacguide.dev',
                             'eu.siacs.conversations'):
             apps[packageName] = fdroidserver.metadata.App()
             apps[packageName]['id'] = packageName
@@ -92,6 +101,14 @@ class UpdateTest(unittest.TestCase):
         buildnextclouddevclient.gradle = ['versionDev']
         apps['com.nextcloud.client.dev']['builds'] = [buildnextclouddevclient]
 
+        build_yacgroup_yacguide = fdroidserver.metadata.Build()
+        build_yacgroup_yacguide.gradle = ['main']
+        apps['com.yacgroup.yacguide']['builds'] = [build_yacgroup_yacguide]
+
+        build_yacgroup_yacguide_dev = fdroidserver.metadata.Build()
+        build_yacgroup_yacguide_dev.gradle = ['dev']
+        apps['com.yacgroup.yacguide.dev']['builds'] = [build_yacgroup_yacguide_dev]
+
         build_conversations = fdroidserver.metadata.Build()
         build_conversations.gradle = ['free']
         apps['eu.siacs.conversations']['builds'] = [build_conversations]
@@ -106,7 +123,7 @@ class UpdateTest(unittest.TestCase):
             appdir,
             'featureGraphic_GFRT5BovZsENGpJq1HqPODGWBRPWQsx25B95Ol5w_wU=.png')))
 
-        self.assertEqual(6, len(apps))
+        self.assertEqual(8, len(apps))
         for packageName, app in apps.items():
             self.assertTrue('localized' in app)
             self.assertTrue('en-US' in app['localized'])
@@ -141,6 +158,18 @@ class UpdateTest(unittest.TestCase):
                 self.assertEqual('Nextcloud Dev', app['localized']['en-US']['name'])
                 self.assertEqual(586, len(app['localized']['en-US']['description']))
                 self.assertEqual(78, len(app['localized']['en-US']['summary']))
+            elif packageName == 'com.yacgroup.yacguide':
+                self.assertEqual('YacGuide', app['localized']['en-US']['name'])
+                self.assertEqual('This is the full description of the YacGuide app.\n',
+                                 app['localized']['en-US']['description'])
+                self.assertEqual('This is the short description of the YacGuide app.',
+                                 app['localized']['en-US']['summary'])
+            elif packageName == 'com.yacgroup.yacguide.dev':
+                self.assertEqual('YacGuide Dev', app['localized']['en-US']['name'])
+                self.assertEqual('This is the full description of the YacGuide Dev app.\n',
+                                 app['localized']['en-US']['description'])
+                self.assertEqual('This is the short description of the YacGuide Dev app.',
+                                 app['localized']['en-US']['summary'])
             elif packageName == 'eu.siacs.conversations':
                 self.assertEqual('Conversations', app['localized']['en-US']['name'])
 
