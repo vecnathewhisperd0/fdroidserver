@@ -82,8 +82,6 @@ debian_testing:
 ubuntu_lts_ppa:
   image: ubuntu:latest
   <<: *apt-template
-  only:
-    - master@fdroid/fdroidserver
   script:
     - export ANDROID_HOME=/usr/lib/android-sdk
     - apt-get install gnupg
