@@ -998,6 +998,7 @@ def insert_localized_app_metadata(apps):
     """
 
     sourcedirs = glob.glob(os.path.join('build', '[A-Za-z]*', 'src', '[A-Za-z]*', 'fastlane', 'metadata', 'android', '[a-z][a-z]*'))
+    sourcedirs += glob.glob(os.path.join('build', '[A-Za-z]*', 'app', 'src', '[A-Za-z]*', 'fastlane', 'metadata', 'android', '[a-z][a-z]*'))
     sourcedirs += glob.glob(os.path.join('build', '[A-Za-z]*', 'fastlane', 'metadata', 'android', '[a-z][a-z]*'))
     sourcedirs += glob.glob(os.path.join('build', '[A-Za-z]*', 'metadata', '[a-z][a-z]*'))
     sourcedirs += glob.glob(os.path.join('metadata', '[A-Za-z]*', '[a-z][a-z]*'))
@@ -1021,6 +1022,10 @@ def insert_localized_app_metadata(apps):
                 build_flavours = apps[packageName].builds[-1].gradle
 
             if len(segments) >= 5 and segments[4] == "fastlane" and segments[3] not in build_flavours:
+                logging.debug("ignoring due to wrong flavour")
+                continue
+
+            if len(segments) >= 6 and segments[5] == "fastlane" and segments[4] not in build_flavours:
                 logging.debug("ignoring due to wrong flavour")
                 continue
 
