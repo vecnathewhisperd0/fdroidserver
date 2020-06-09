@@ -6,14 +6,13 @@
 # Custom path to the Android SDK, defaults to $ANDROID_HOME
 # sdk_path = "$ANDROID_HOME"
 
-# Custom paths to various versions of the Android NDK, defaults to 'r12b' set
-# to $ANDROID_NDK. Most users will have the latest at $ANDROID_NDK, which is
-# used by default. If a version is missing or assigned to None, it is assumed
-# not installed.
+# Custom paths to various versions of the Android NDK.
+# If a version is missing or assigned None it will be dowloaded if required
+# by a package. If you do not want this behaviour you can disable it below.
 # ndk_paths = {
 #     'r10e': None,
 #     'r11c': None,
-#     'r12b': "$ANDROID_NDK",
+#     'r12b': None,
 #     'r13b': None,
 #     'r14b': None,
 #     'r15c': None,
@@ -25,7 +24,11 @@
 #     'r21d': None,
 # }
 
-# Directory to store downloaded tools in (i.e. gradle versions)
+# Prevent fdroid from downloading missing ndk versions
+# disable_ndk_download = True
+
+# Directory to store downloaded tools in (i.e. gradle versions,
+# ndk versions)
 # By default, these are stored in ~/.cache/fdroidserver
 # cachedir = cache
 

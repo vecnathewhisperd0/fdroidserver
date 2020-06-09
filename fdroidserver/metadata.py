@@ -327,15 +327,6 @@ class Build(dict):
                 return f
         return 'ant'
 
-    def ndk_path(self):
-        version = self.ndk
-        if not version:
-            version = 'r12b'  # falls back to latest
-        paths = fdroidserver.common.config['ndk_paths']
-        if version not in paths:
-            return ''
-        return paths[version]
-
 
 flagtypes = {
     'versionCode': TYPE_INT,

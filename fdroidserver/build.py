@@ -29,6 +29,7 @@ import tarfile
 import threading
 import traceback
 import time
+
 import requests
 import tempfile
 import argparse
@@ -238,7 +239,7 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
         try:
             cmd_stdout = chan.makefile('rb', 1024)
             output = bytes()
-            output += common.get_android_tools_version_log(build.ndk_path()).encode()
+            output += common.get_android_tools_version_log(common.get_ndk_path(build)).encode()
             while not chan.exit_status_ready():
                 line = cmd_stdout.readline()
                 if line:
@@ -358,20 +359,7 @@ def get_metadata_from_apk(app, build, apkfile):
 
 def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, extlib_dir, tmp_dir, force, onserver, refresh):
     """Do a build locally."""
-    ndk_path = build.ndk_path()
-    if build.ndk or (build.buildjni and build.buildjni != ['no']):
-        if not ndk_path:
-            logging.critical("Android NDK version '%s' could not be found!" % build.ndk or 'r12b')
-            logging.critical("Configured versions:")
-            for k, v in config['ndk_paths'].items():
-                if k.endswith("_orig"):
-                    continue
-                logging.critical("  %s: %s" % (k, v))
-            raise FDroidException()
-        elif not os.path.isdir(ndk_path):
-            logging.critical("Android NDK '%s' is not a directory!" % ndk_path)
-            raise FDroidException()
-
+    ndk_path = common.get_ndk_path(build)
     common.set_FDroidPopen_env(build)
 
     # create ..._toolsversion.log when running in builder vm
@@ -399,7 +387,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
         log_path = os.path.join(log_dir,
                                 common.get_toolsversion_logname(app, build))
         with open(log_path, 'w') as f:
-            f.write(common.get_android_tools_version_log(build.ndk_path()))
+            f.write(common.get_android_tools_version_log(ndk_path))
     else:
         if build.sudo:
             logging.warning('%s:%s runs this on the buildserver with sudo:\n\t%s\nThese commands were skipped because fdroid build is not running on a dedicated build server.'
@@ -1075,7 +1063,7 @@ def main():
             build_starttime = common.get_wiki_timestamp()
             tools_version_log = ''
             if not options.onserver:
-                tools_version_log = common.get_android_tools_version_log(build.ndk_path())
+                tools_version_log = common.get_android_tools_version_log(common.get_ndk_path(build))
                 common.write_running_status_json(status_output)
             try:
 

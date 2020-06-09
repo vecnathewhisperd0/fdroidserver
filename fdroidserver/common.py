@@ -44,6 +44,8 @@ import tempfile
 import json
 
 # TODO change to only import defusedxml once its installed everywhere
+import requests
+
 try:
     import defusedxml.ElementTree as XMLElementTree
 except ImportError:
@@ -54,6 +56,7 @@ from datetime import datetime, timedelta, timezone
 from distutils.version import LooseVersion
 from queue import Queue
 from zipfile import ZipFile
+from stat import S_IXUSR
 
 from pyasn1.codec.der import decoder, encoder
 from pyasn1_modules import rfc2315
@@ -104,15 +107,8 @@ orig_path = None
 
 default_config = {
     'sdk_path': "$ANDROID_HOME",
-    'ndk_paths': {
-        'r10e': None,
-        'r11c': None,
-        'r12b': "$ANDROID_NDK",
-        'r13b': None,
-        'r14b': None,
-        'r15c': None,
-        'r16b': None,
-    },
+    'ndk_paths': {},
+    'disable_ndk_download': False,
     'cachedir': os.path.join(os.getenv('HOME'), '.cache', 'fdroidserver'),
     'build_tools': MINIMUM_AAPT_BUILD_TOOLS_VERSION,
     'java_paths': None,
@@ -2046,7 +2042,7 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, onserver=
         else:
             props += "sdk.dir=%s\n" % config['sdk_path']
             props += "sdk-location=%s\n" % config['sdk_path']
-        ndk_path = build.ndk_path()
+        ndk_path = get_ndk_path(build)
         # if for any reason the path isn't valid or the directory
         # doesn't exist, some versions of Gradle will error with a
         # cryptic message (even if the NDK is not even necessary).
@@ -2755,13 +2751,13 @@ def set_FDroidPopen_env(build=None):
         env['LANG'] = 'en_US.UTF-8'
 
     if build is not None:
-        path = build.ndk_path()
+        path = get_ndk_path(build)
         paths = orig_path.split(os.pathsep)
         if path not in paths:
             paths = [path] + paths
             env['PATH'] = os.pathsep.join(paths)
         for n in ['ANDROID_NDK', 'NDK', 'ANDROID_NDK_HOME']:
-            env[n] = build.ndk_path()
+            env[n] = get_ndk_path(build)
 
 
 def replace_build_vars(cmd, build):
@@ -2773,7 +2769,7 @@ def replace_build_vars(cmd, build):
 
 def replace_config_vars(cmd, build):
     cmd = cmd.replace('$$SDK$$', config['sdk_path'])
-    cmd = cmd.replace('$$NDK$$', build.ndk_path())
+    cmd = cmd.replace('$$NDK$$', get_ndk_path(build))
     cmd = cmd.replace('$$MVN3$$', config['mvn3'])
     if build is not None:
         cmd = replace_build_vars(cmd, build)
@@ -3883,3 +3879,102 @@ def run_yamllint(path, indent=0):
     for problem in problems:
         result.append(' ' * indent + path + ':' + str(problem.line) + ': ' + problem.message)
     return '\n'.join(result)
+
+
+def provision_ndk(version):
+    logging.debug("Provisioning ndk version '%s'" % version)
+    cachefile = os.path.join(config['cachedir'], "android-ndk-{version}-linux-x86_64.zip".format(version=version))
+    installdir_ndk_root = os.path.join(config['cachedir'], "ndk")
+    installdir = os.path.join(config['cachedir'], 'ndk', "android-ndk-{version}".format(version=version))
+    if os.path.isdir(installdir) and os.listdir(installdir):
+        logging.debug("Extracted ndk directory exists in %s, using this." % installdir)
+        return installdir
+    if not os.path.isfile(cachefile) and not config['disable_ndk_download']:
+        logging.info("Downloading Android NDK version '%s' to '%s'" % (version, cachefile))
+        url = "https://dl.google.com/android/repository/android-ndk-{version}-linux-x86_64.zip"
+        download_file(url.format(version=version), cachefile)
+    verify_download(cachefile, "ndk")
+    logging.info("Extracting %s to %s" % (cachefile, installdir))
+    with zipfile.ZipFile(cachefile, 'r') as zip_ref:
+        _extract_all_with_permission(zip_ref, installdir_ndk_root)
+    return installdir
+
+
+def get_ndk_path(build):
+    version = build.ndk
+    if not version:
+        logging.debug("No ndk path specified in build, skipping.")
+        return ''
+    paths = fdroidserver.common.config['ndk_paths']
+    if version not in paths:
+        try:
+            ndk_path = provision_ndk(version)
+            logging.debug("Got NDK path: %s" % ndk_path)
+            return ndk_path
+        except Exception as e:
+            logging.critical("Android NDK version '%s' not found in config and couldn't download it!" % version)
+            logging.critical("Locally configured versions:")
+            for k, v in config['ndk_paths'].items():
+                if k.endswith("_orig"):
+                    continue
+                logging.critical("  %s: %s" % (k, v))
+            raise FDroidException(detail=str(e))
+    elif not os.path.isdir(paths[version]):
+        logging.critical("Android NDK '%s' is not a directory!" % paths[version])
+        raise FDroidException()
+    return paths[version]
+
+
+def download_file(url, destfile):
+    with requests.get(url, stream=True) as r:
+        with open(destfile, 'wb') as f:
+            shutil.copyfileobj(r.raw, f)
+
+
+def _extract_all_with_permission(zf, target_dir):
+    """
+    Python's zipfile doesn't extract execute permission, so we need to do it manually:
+    https://stackoverflow.com/a/46837272
+    """
+    ZIP_UNIX_SYSTEM = 3
+    for info in zf.infolist():
+        extracted_path = zf.extract(info, target_dir)
+
+        if info.create_system == ZIP_UNIX_SYSTEM and os.path.isfile(extracted_path):
+            unix_attributes = info.external_attr >> 16
+            if unix_attributes & S_IXUSR:
+                os.chmod(extracted_path, os.stat(extracted_path).st_mode | S_IXUSR)
+
+
+def verify_download(inputfile, type):
+    with open(os.path.join(FDROID_PATH, "known_packages", type)) as checksums:
+        for line in checksums:
+            (hashsum, filename) = line.split()
+            if os.path.basename(inputfile) == filename:
+                verify_file_sha256(filename, hashsum)
+                return 
+    logging.critical("No known checksum for %s" % inputfile)
+    raise FDroidException()
+
+
+def sha256_for_file(path):
+    with open(path, 'rb') as f:
+        s = hashlib.sha256()
+        while True:
+            data = f.read(4096)
+            if not data:
+                break
+            s.update(data)
+        return s.hexdigest()
+
+
+def verify_file_sha256(path, sha256):
+    if sha256_for_file(path) != sha256:
+        logging.critical("File verification for '{path}' failed! "
+                         "expected sha256 checksum: {checksum}"
+                         .format(path=path, checksum=sha256))
+        raise FDroidException()
+    else:
+        logging.debug("successfully verified file '{path}' "
+                      "('{checksum}')".format(path=path,
+                                              checksum=sha256))
