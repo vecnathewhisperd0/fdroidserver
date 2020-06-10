@@ -65,7 +65,7 @@ from pyasn1.error import PyAsn1Error
 
 import fdroidserver.metadata
 import fdroidserver.lint
-from fdroidserver import _
+from fdroidserver import _, net
 from fdroidserver.exception import FDroidException, VCSException, NoSubmodulesException,\
     BuildException, VerificationException, MetaDataException
 from .asynchronousfilereader import AsynchronousFileReader
@@ -108,7 +108,7 @@ orig_path = None
 
 default_config = {
     'sdk_path': "$ANDROID_HOME",
-    'ndk_paths': {},
+    'auto_download_ndk': False,
     'cachedir': os.path.join(os.getenv('HOME'), '.cache', 'fdroidserver'),
     'build_tools': MINIMUM_AAPT_BUILD_TOOLS_VERSION,
     'java_paths': None,
@@ -262,7 +262,7 @@ def fill_config_defaults(thisconfig):
     if 'keytool' not in thisconfig and shutil.which('keytool'):
         thisconfig['keytool'] = shutil.which('keytool')
 
-    for k in ['ndk_paths', 'java_paths']:
+    for k in ['java_paths']:
         d = thisconfig[k]
         for k2 in d.copy():
             v = d[k2]
@@ -3887,10 +3887,12 @@ def provision_ndk(version):
     if os.path.isdir(installdir) and os.listdir(installdir):
         logging.debug("Extracted ndk directory exists in %s, using this." % installdir)
         return installdir
-    if not os.path.isfile(cachefile) and not config['disable_ndk_download']:
+    if not os.path.isfile(cachefile) and config.get('auto_download_ndk') or options.auto_download_ndk:
         logging.info("Downloading Android NDK version '%s' to '%s'" % (version, cachefile))
         url = "https://dl.google.com/android/repository/android-ndk-{version}-linux-x86_64.zip"
-        download_file(url.format(version=version), cachefile)
+        net.download_file(url.format(version=version), local_filename=cachefile, chunk_size=1048576, show_progress=True)
+    else:
+        logging.critical("Couldn't find NDK '%s' and --auto-download-ndk not enabled.")
     verify_download(cachefile, "ndk")
     logging.info("Extracting %s to %s" % (cachefile, installdir))
     with zipfile.ZipFile(cachefile, 'r') as zip_ref:
@@ -3910,17 +3912,6 @@ def get_ndk_path(build):
     except Exception as e:
         logging.critical("Couldn't provision Android NDK version '%s'" % version)
         raise FDroidException(detail=str(e)) from None
-
-
-def download_file(url, destfile):
-    CHUNK_SIZE = 1048576
-    with requests.get(url, stream=True) as r:
-        content_length = int(r.headers.get('content-length'))
-        with open(destfile, 'wb') as f:
-            for chunk in progress.bar(r.iter_content(chunk_size=CHUNK_SIZE),
-                                      expected_size=(content_length / CHUNK_SIZE) + 1):
-                if chunk:  # filter out keep-alive new chunks
-                    f.write(chunk)
 
 
 def _extract_all_with_permission(zf, target_dir):

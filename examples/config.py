@@ -6,8 +6,8 @@
 # Custom path to the Android SDK, defaults to $ANDROID_HOME
 # sdk_path = "$ANDROID_HOME"
 
-# Prevent fdroid from downloading missing ndk versions
-# disable_ndk_download = True
+# Should fdroid auto-download missing ndk versions?
+# auto_download_ndk = False
 
 # Directory to store downloaded tools in (i.e. gradle versions,
 # ndk versions)

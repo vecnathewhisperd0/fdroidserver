@@ -890,6 +890,8 @@ def parse_commandline():
                         help=_("Build all applications available"))
     parser.add_argument("-w", "--wiki", default=False, action="store_true",
                         help=_("Update the wiki"))
+    parser.add_argument("--auto-download-ndk", default=False, action="store_true",
+                        help=_("Automatically download missing NDK versions"))
     metadata.add_metadata_arguments(parser)
     options = parser.parse_args()
     metadata.warnings_action = options.W

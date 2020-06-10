@@ -22,15 +22,25 @@ import requests
 HEADERS = {'User-Agent': 'F-Droid'}
 
 
-def download_file(url, local_filename=None, dldir='tmp'):
+def download_file(url, local_filename=None, dldir='tmp', chunk_size=1024, show_progress=False):
+    def dummy_progress(iterable, expected_size):
+        return iterable
+
+    if not show_progress:
+        progressbar = dummy_progress
+    else:
+        from clint.textui import progress
+        progressbar = progress.bar
     filename = url.split('/')[-1]
     if local_filename is None:
         local_filename = os.path.join(dldir, filename)
     # the stream=True parameter keeps memory usage low
     r = requests.get(url, stream=True, allow_redirects=True, headers=HEADERS)
     r.raise_for_status()
+    content_length = int(r.headers.get('content-length'))
     with open(local_filename, 'wb') as f:
-        for chunk in r.iter_content(chunk_size=1024):
+        for chunk in progressbar(r.iter_content(chunk_size=chunk_size),
+                                 expected_size=(content_length / chunk_size) + 1):
             if chunk:  # filter out keep-alive new chunks
                 f.write(chunk)
                 f.flush()
