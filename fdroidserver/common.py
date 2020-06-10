@@ -65,7 +65,7 @@ from pyasn1.error import PyAsn1Error
 
 import fdroidserver.metadata
 import fdroidserver.lint
-from fdroidserver import _, net
+from fdroidserver import _, net, known_packages
 from fdroidserver.exception import FDroidException, VCSException, NoSubmodulesException,\
     BuildException, VerificationException, MetaDataException
 from .asynchronousfilereader import AsynchronousFileReader
@@ -3893,7 +3893,7 @@ def provision_ndk(version):
         net.download_file(url.format(version=version), local_filename=cachefile, chunk_size=1048576, show_progress=True)
     else:
         logging.critical("Couldn't find NDK '%s' and --auto-download-ndk not enabled.")
-    verify_download(cachefile, "ndk")
+    verify_download(cachefile, known_packages.ndk)
     logging.info("Extracting %s to %s" % (cachefile, installdir))
     with zipfile.ZipFile(cachefile, 'r') as zip_ref:
         _extract_all_with_permission(zip_ref, installdir_ndk_root)
@@ -3930,12 +3930,10 @@ def _extract_all_with_permission(zf, target_dir):
 
 
 def verify_download(inputfile, type):
-    with open(os.path.join(FDROID_PATH, "known_packages", type)) as checksums:
-        for line in checksums:
-            (hashsum, filename) = line.split()
-            if os.path.basename(inputfile) == filename:
-                verify_file_sha256(inputfile, hashsum)
-                return
+    for (hashsum, filename) in type:
+        if os.path.basename(inputfile) == filename:
+            verify_file_sha256(inputfile, hashsum)
+            return
     logging.critical("No known checksum for %s" % inputfile)
     raise FDroidException()
 

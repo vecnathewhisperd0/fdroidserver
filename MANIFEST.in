@@ -16,7 +16,6 @@ include examples/public-read-only-s3-bucket-policy.json
 include examples/template.yml
 include fdroid
 include gradlew-fdroid
-include known_packages/ndk
 include LICENSE
 include locale/bo/LC_MESSAGES/fdroidserver.mo
 include locale/de/LC_MESSAGES/fdroidserver.mo
