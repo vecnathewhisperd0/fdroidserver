@@ -45,6 +45,7 @@ import json
 
 # TODO change to only import defusedxml once its installed everywhere
 import requests
+from clint.textui import progress
 
 try:
     import defusedxml.ElementTree as XMLElementTree
@@ -108,7 +109,6 @@ orig_path = None
 default_config = {
     'sdk_path': "$ANDROID_HOME",
     'ndk_paths': {},
-    'disable_ndk_download': False,
     'cachedir': os.path.join(os.getenv('HOME'), '.cache', 'fdroidserver'),
     'build_tools': MINIMUM_AAPT_BUILD_TOOLS_VERSION,
     'java_paths': None,
@@ -1349,7 +1349,6 @@ def unescape_string(string):
 
 
 def retrieve_string(app_dir, string, xmlfiles=None):
-
     if not string.startswith('@string/'):
         return unescape_string(string)
 
@@ -3866,7 +3865,6 @@ YAML_LINT_CONFIG = {'extends': 'default',
 
 
 def run_yamllint(path, indent=0):
-
     try:
         import yamllint.config
         import yamllint.linter
@@ -3905,30 +3903,24 @@ def get_ndk_path(build):
     if not version:
         logging.debug("No ndk path specified in build, skipping.")
         return ''
-    paths = fdroidserver.common.config['ndk_paths']
-    if version not in paths:
-        try:
-            ndk_path = provision_ndk(version)
-            logging.debug("Got NDK path: %s" % ndk_path)
-            return ndk_path
-        except Exception as e:
-            logging.critical("Android NDK version '%s' not found in config and couldn't download it!" % version)
-            logging.critical("Locally configured versions:")
-            for k, v in config['ndk_paths'].items():
-                if k.endswith("_orig"):
-                    continue
-                logging.critical("  %s: %s" % (k, v))
-            raise FDroidException(detail=str(e))
-    elif not os.path.isdir(paths[version]):
-        logging.critical("Android NDK '%s' is not a directory!" % paths[version])
-        raise FDroidException()
-    return paths[version]
+    try:
+        ndk_path = provision_ndk(version)
+        logging.debug("Got NDK path: %s" % ndk_path)
+        return ndk_path
+    except Exception as e:
+        logging.critical("Couldn't provision Android NDK version '%s'" % version)
+        raise FDroidException(detail=str(e)) from None
 
 
 def download_file(url, destfile):
+    CHUNK_SIZE = 1048576
     with requests.get(url, stream=True) as r:
+        content_length = int(r.headers.get('content-length'))
         with open(destfile, 'wb') as f:
-            shutil.copyfileobj(r.raw, f)
+            for chunk in progress.bar(r.iter_content(chunk_size=CHUNK_SIZE),
+                                      expected_size=(content_length / CHUNK_SIZE) + 1):
+                if chunk:  # filter out keep-alive new chunks
+                    f.write(chunk)
 
 
 def _extract_all_with_permission(zf, target_dir):
@@ -3951,8 +3943,8 @@ def verify_download(inputfile, type):
         for line in checksums:
             (hashsum, filename) = line.split()
             if os.path.basename(inputfile) == filename:
-                verify_file_sha256(filename, hashsum)
-                return 
+                verify_file_sha256(inputfile, hashsum)
+                return
     logging.critical("No known checksum for %s" % inputfile)
     raise FDroidException()
 
@@ -3973,6 +3965,7 @@ def verify_file_sha256(path, sha256):
         logging.critical("File verification for '{path}' failed! "
                          "expected sha256 checksum: {checksum}"
                          .format(path=path, checksum=sha256))
+        logging.critical("Try deleting the file.")
         raise FDroidException()
     else:
         logging.debug("successfully verified file '{path}' "

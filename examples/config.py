@@ -6,24 +6,6 @@
 # Custom path to the Android SDK, defaults to $ANDROID_HOME
 # sdk_path = "$ANDROID_HOME"
 
-# Custom paths to various versions of the Android NDK.
-# If a version is missing or assigned None it will be dowloaded if required
-# by a package. If you do not want this behaviour you can disable it below.
-# ndk_paths = {
-#     'r10e': None,
-#     'r11c': None,
-#     'r12b': None,
-#     'r13b': None,
-#     'r14b': None,
-#     'r15c': None,
-#     'r16b': None,
-#     'r17c': None,
-#     'r18b': None,
-#     'r19c': None,
-#     'r20b': None,
-#     'r21d': None,
-# }
-
 # Prevent fdroid from downloading missing ndk versions
 # disable_ndk_download = True
 
