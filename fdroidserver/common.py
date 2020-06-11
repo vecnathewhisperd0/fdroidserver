@@ -432,6 +432,7 @@ def find_sdk_tools_cmd(cmd):
         sdk_tools = os.path.join(config['sdk_path'], 'tools')
         if os.path.exists(sdk_tools):
             tooldirs.append(sdk_tools)
+            tooldirs.append(os.path.join(sdk_tools, 'bin'))
         sdk_platform_tools = os.path.join(config['sdk_path'], 'platform-tools')
         if os.path.exists(sdk_platform_tools):
             tooldirs.append(sdk_platform_tools)
