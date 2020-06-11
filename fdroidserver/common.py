@@ -523,6 +523,9 @@ def test_sdk_exists(thisconfig):
         return False
     return True
 
+def get_ndk_versions_from_sdkdir():
+    pass
+
 
 def ensure_build_tools_exists(thisconfig):
     if not test_sdk_exists(thisconfig):
@@ -3887,12 +3890,13 @@ def provision_ndk(version):
     if os.path.isdir(installdir) and os.listdir(installdir):
         logging.debug("Extracted ndk directory exists in %s, using this." % installdir)
         return installdir
-    if not os.path.isfile(cachefile) and config.get('auto_download_ndk') or options.auto_download_ndk:
-        logging.info("Downloading Android NDK version '%s' to '%s'" % (version, cachefile))
-        url = "https://dl.google.com/android/repository/android-ndk-{version}-linux-x86_64.zip"
-        net.download_file(url.format(version=version), local_filename=cachefile, chunk_size=1048576, show_progress=True)
-    else:
-        logging.critical("Couldn't find NDK '%s' and --auto-download-ndk not enabled.")
+    if not os.path.isfile(cachefile):
+        if config.get('auto_download_ndk') or options.auto_download_ndk:
+            logging.info("Downloading Android NDK version '%s' to '%s'" % (version, cachefile))
+            url = "https://dl.google.com/android/repository/android-ndk-{version}-linux-x86_64.zip"
+            net.download_file(url.format(version=version), local_filename=cachefile, chunk_size=1048576, show_progress=True)
+        else:
+            logging.critical("Couldn't find NDK '%s' and --auto-download-ndk not enabled.")
     verify_download(cachefile, known_packages.ndk)
     logging.info("Extracting %s to %s" % (cachefile, installdir))
     with zipfile.ZipFile(cachefile, 'r') as zip_ref:
@@ -3930,7 +3934,7 @@ def _extract_all_with_permission(zf, target_dir):
 
 
 def verify_download(inputfile, type):
-    for (hashsum, filename) in type:
+    for (hashsum, filename, ignore) in type:
         if os.path.basename(inputfile) == filename:
             verify_file_sha256(inputfile, hashsum)
             return
