@@ -71,6 +71,7 @@ def scan_binary(apkfile):
             r'(com\.google\.android\.gms[^\s]*)',
             r'(com\.google\.tagmanager[^\s]*)',
             r'(com\.google\.analytics[^\s]*)',
+            r'(com\.android\.billing[^\s]*)',
         ]
     }
     logging.info("Scanning APK for known nonfree classes.")
