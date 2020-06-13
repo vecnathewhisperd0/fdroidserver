@@ -806,7 +806,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
                                   " Expected: '%s' / '%s'")
                                  % (version, str(vercode), build.versionName,
                                     str(build.versionCode)))
-        if options.scan_binary or config.get('scan_binary') and not options.skipscan:
+        if (options.scan_binary or config.get('scan_binary')) and not options.skipscan:
             if scanner.scan_binary(src):
                 raise BuildException("Found blacklisted packages in final apk!")
 
