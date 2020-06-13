@@ -114,6 +114,7 @@ default_config = {
     'build_tools': MINIMUM_AAPT_VERSION,
     'force_build_tools': False,
     'java_paths': None,
+    'scan_binary': False,
     'ant': "ant",
     'mvn3': "mvn",
     'gradle': os.path.join(FDROID_PATH, 'gradlew-fdroid'),
