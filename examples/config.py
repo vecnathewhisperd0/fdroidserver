@@ -51,7 +51,7 @@
 # gradle = "gradle"
 
 # Always scan the produced apks for known nonfree classes
-# scan_binary = False
+# scan_binary = True
 
 # Set the maximum age (in days) of an index that a client should accept from
 # this repo. Setting it to 0 or not setting it at all disables this
