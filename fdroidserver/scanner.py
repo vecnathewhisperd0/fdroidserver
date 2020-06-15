@@ -74,7 +74,7 @@ def scan_binary(apkfile):
             r'(com\.android\.billing[^\s]*)',
         ]
     }
-    logging.info("Scanning APK for known nonfree classes.")
+    logging.info("Scanning APK for known non-free classes.")
     result = common.SdkToolsPopen(["apkanalyzer", "dex", "packages", "--defined-only", apkfile], output=False)
     problems = 0
     for suspect, regexp in usual_suspects.items():
