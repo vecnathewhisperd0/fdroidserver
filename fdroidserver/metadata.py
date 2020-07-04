@@ -802,12 +802,29 @@ def read_metadata(xref=True, check_vcs=[], refresh=True, sort_by_time=False):
         if not os.path.exists(basedir):
             os.makedirs(basedir)
 
-    metadatafiles = (glob.glob(os.path.join('metadata', '*.txt'))
-                     + glob.glob(os.path.join('metadata', '*.json'))
-                     + glob.glob(os.path.join('metadata', '*.yml'))
-                     + glob.glob('.fdroid.txt')
-                     + glob.glob('.fdroid.json')
-                     + glob.glob('.fdroid.yml'))
+    metadata_txt = glob.glob(os.path.join('metadata', '*.txt'))
+    metadata_json = glob.glob(os.path.join('metadata', '*.json'))
+    metadata_yml = glob.glob(os.path.join('metadata', '*.yml'))
+    metadata_fdroid_txt = glob.glob('.fdroid.txt')
+    metadata_fdroid_json = glob.glob('.fdroid.json')
+    metadata_fdroid_yml = glob.glob('.fdroid.yml')
+
+    if metadata_txt or metadata_json or metadata_fdroid_txt or metadata_fdroid_json:
+        print(textwrap.dedent("""\
+
+            WARNING: Some of your metadata files are stored in a deprecated format.
+                     Future version of fdroid will exclusively support YAML metadata.
+
+                     You can convert all your metadata to YAML by running:
+                         `fdroid rewritemeta --to yml`
+            """))
+
+    metadatafiles = (metadata_txt
+                     + metadata_json
+                     + metadata_yml
+                     + metadata_fdroid_txt
+                     + metadata_fdroid_json
+                     + metadata_fdroid_yml)
 
     if sort_by_time:
         entries = ((os.stat(path).st_mtime, path) for path in metadatafiles)
