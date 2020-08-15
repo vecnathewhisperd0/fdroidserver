@@ -134,6 +134,10 @@ default_config = {
     'repo_maxage': 0,
     'build_server_always': False,
     'keystore': 'keystore.jks',
+    'wrappedkeysdir': None,
+    'wrapcommand': None,
+    'keyrefcommand': None,
+    'unwrapcommand': None,
     'smartcardoptions': [],
     'char_limits': {
         'author': 256,

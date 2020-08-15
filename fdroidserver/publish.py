@@ -21,6 +21,7 @@ import sys
 import os
 import re
 import shutil
+import shlex
 import glob
 import hashlib
 from argparse import ArgumentParser
@@ -74,7 +75,7 @@ def key_alias(appid):
 
 def read_fingerprints_from_keystore():
     """Obtain a dictionary containing all singning-key fingerprints which
-    are managed by F-Droid, grouped by appid.
+    are stored in the configured keystore, grouped by keyalias.
     """
     env_vars = {'LC_ALL': 'C.UTF-8',
                 'FDROID_KEY_STORE_PASS': config['keystorepass']}
@@ -96,6 +97,20 @@ def read_fingerprints_from_keystore():
         if s_alias and s_sha256:
             sigfp = s_sha256.group('sha256').replace(':', '').lower()
             fps[s_alias.group('alias')] = sigfp
+    return fps
+
+
+def read_fingerprints_from_wrapped_keys_dir():
+    """Reads key fingerprints from keys in wrappedkeysdir
+    :returns a dictonary which maps keyalias:fingerprint
+    """
+    filepaths = glob.glob(config['wrappedkeysdir'] + "/*.fingerprint")
+    fps = {}
+    for path in filepaths:
+        with open(path) as f:
+            alias = os.path.basename(path)[:-12]
+            fingerprint = f.read().strip()
+            fps[alias] = fingerprint
     return fps
 
 
@@ -130,6 +145,8 @@ def store_stats_fdroid_signing_key_fingerprints(appids, indent=None):
         os.makedirs('stats')
     data = OrderedDict()
     fps = read_fingerprints_from_keystore()
+    if config['keystore'] == "NONE" and config['wrappedkeysdir']:
+        fps.update(read_fingerprints_from_wrapped_keys_dir())
     for appid in sorted(appids):
         alias = key_alias(appid)
         if alias in fps:
@@ -153,6 +170,85 @@ def status_update_json(newKeyAliases, generatedKeys, signedApks):
     if signedApks:
         output['signedApks'] = signedApks
     common.write_status_json(output)
+
+
+def check_if_key_exists(keyalias):
+    """
+    :returns PopenResult of keytool call
+    """
+    # if we use a hsm and wrapped keys are enabled, we look up the encrypted key
+    # blob in the filesystem and load it
+    if config['keystore'] == "NONE" and config['wrappedkeysdir']:
+        if os.path.isfile(os.path.join(config['wrappedkeysdir'], keyalias + ".bin")):
+            p = unwrap_key(keyalias)
+            if p.returncode != 0:
+                raise BuildException("Failed to load wrapped key", p.output)
+    # check with keytool that the key is loaded now
+    env_vars = {'LC_ALL': 'C.UTF-8',
+                'FDROID_KEY_STORE_PASS': config['keystorepass']}
+    cmd = [config['keytool'], '-list',
+           '-alias', keyalias, '-keystore', config['keystore'],
+           '-storepass:env', 'FDROID_KEY_STORE_PASS']
+    if config['keystore'] == 'NONE':
+        cmd += config['smartcardoptions']
+    return FDroidPopen(cmd, envs=env_vars)
+
+
+def delete_key(keyalias):
+    """
+    Delete a key form the keystore.
+    :returns PopenResult of keytool call
+    """
+    logging.info("Deleting %s from keystore.", keyalias)
+    env_vars = {'LC_ALL': 'C.UTF-8',
+                'FDROID_KEY_STORE_PASS': config['keystorepass']}
+    cmd = [config['keytool'], '-delete',
+           '-keystore', config['keystore'],
+           '-alias', keyalias,
+           '-storepass:env', 'FDROID_KEY_STORE_PASS']
+    if config['keystore'] == 'NONE':
+        cmd += config['smartcardoptions']
+    return FDroidPopen(cmd, envs=env_vars)
+
+
+def wrap_key(keyalias):
+    """
+    Export a wrapped key from a HSM, also stores the key fingerprint next to it for use in
+    load_stats_fdroid_signing_key_fingerprints()
+    :returns CompletedProcess of 'wrapcommand' call
+    """
+    os.makedirs(config['wrappedkeysdir'], exist_ok=True)
+    keyfile = os.path.join(config['wrappedkeysdir'], keyalias + ".bin")
+    fingerprint_file = os.path.join(config['wrappedkeysdir'], keyalias + ".fingerprint")
+    logging.info("Exporting wrapped key %s to %s.", keyalias, keyfile)
+    env_vars = {'FDROID_KEY_STORE_PASS': config['keystorepass']}
+    # get the key fingerprint
+    fingerprint = read_fingerprints_from_keystore()[keyalias]
+    with open(fingerprint_file, "w") as f:
+        f.write(fingerprint + "\n")
+    # figure out the internal key ref of the key we want to export
+    keyref = None
+    if config['keyrefcommand']:
+        cmd = shlex.split(config['keyrefcommand'].format(alias=keyalias))
+        p = FDroidPopen(cmd, envs=env_vars, stderr_to_stdout=False)
+        if p.returncode != 0:
+            raise BuildException("Failed to get key ref!", p.output)
+        else:
+            keyref = p.output.strip()
+    cmd = shlex.split(config['wrapcommand'].format(keyref=keyref, filename=keyfile))
+    return FDroidPopen(cmd, envs=env_vars)
+
+
+def unwrap_key(keyalias):
+    """
+    Import a wrapped key into a HSM
+    :returns CompletedProcess of 'unwrapcommand' call
+    """
+    keyfile = os.path.join(config['wrappedkeysdir'], keyalias + ".bin")
+    env_vars = {'FDROID_KEY_STORE_PASS': config['keystorepass']}
+    logging.info("Importing wrapped key %s as %s.", keyfile, keyalias)
+    cmd = shlex.split(config['unwrapcommand'].format(filename=keyfile))
+    return FDroidPopen(cmd, envs=env_vars)
 
 
 def main():
@@ -339,17 +435,12 @@ def main():
 
                 # See if we already have a key for this application, and
                 # if not generate one...
-                env_vars = {'LC_ALL': 'C.UTF-8',
-                            'FDROID_KEY_STORE_PASS': config['keystorepass'],
-                            'FDROID_KEY_PASS': config.get('keypass', "")}
-                cmd = [config['keytool'], '-list',
-                       '-alias', keyalias, '-keystore', config['keystore'],
-                       '-storepass:env', 'FDROID_KEY_STORE_PASS']
-                if config['keystore'] == 'NONE':
-                    cmd += config['smartcardoptions']
-                p = FDroidPopen(cmd, envs=env_vars)
+                p = check_if_key_exists(keyalias)
                 if p.returncode != 0:
                     logging.info("Key does not exist - generating...")
+                    env_vars = {'LC_ALL': 'C.UTF-8',
+                                'FDROID_KEY_STORE_PASS': config['keystorepass'],
+                                'FDROID_KEY_PASS': config.get('keypass', "")}
                     cmd = [config['keytool'], '-genkey',
                            '-keystore', config['keystore'],
                            '-alias', keyalias,
@@ -383,6 +474,20 @@ def main():
 
                 publish_source_tarball(apkfilename, unsigned_dir, output_dir)
                 logging.info('Published ' + apkfilename)
+
+                # If we are using a HSM with key wrapping enabled, export the wrapped
+                # key and delete it from the HSM
+                if config['keystore'] == "NONE" and config['wrappedkeysdir']:
+                    exported_key_path = os.path.join(config['wrappedkeysdir'], keyalias + ".bin")
+                    if not os.path.isfile(exported_key_path) or os.path.getsize(exported_key_path) == 0:
+                        p = wrap_key(keyalias)
+                        if p.returncode != 0:
+                            raise BuildException("Exporting wrapped key failed! ", p.output)
+                        if os.path.getsize(exported_key_path) == 0:
+                            raise BuildException("Exported an empty keyfile! Aborting!", p.output)
+                    p = delete_key(keyalias)
+                    if p.returncode != 0:
+                        raise BuildException("Deleting key failed! ", p.output)
 
     store_stats_fdroid_signing_key_fingerprints(allapps.keys())
     status_update_json(new_key_aliases, generated_keys, signed_apks)

@@ -139,6 +139,29 @@ The repository of older versions of applications from the main demo repository.
 #    -providerClass sun.security.pkcs11.SunPKCS11 \
 #    -providerArg opensc-fdroid.cfg"
 
+# Export keys from an HSM in wrapped form instead of storing them only on
+# the HSM. This allows using any number of keys instead of being limited by
+# the HSM storage capacity. These keys can only be imported into an HSM
+# initialized with the same key warpping key. You'll need to set wrapcommand,
+# keyrefcommand and unwrapcommand below.
+# wrappedkeysdir = "wrapped_keys"
+
+# Command to wrap (export) a key from an HSM. This example works for NitroKey
+# HSM2. {keyref} and {filename} variables will be replaced before command execution.
+# FDROID_KEY_STORE_PASS env var will contain 'keystorepass' from this config.
+# wrapcommand = "sc-hsm-tool --key-reference {keyref} --wrap-key {filename} --pin env:FDROID_KEY_STORE_PASS"
+
+# Command to figure out the internal key ref of the key we want to wrap.
+# {alias} will be replaced before command execution.
+# FDROID_KEY_STORE_PASS env var will contain 'keystorepass' from this config.
+# We run this example command explicitly through a shell so we get access to pipelines.
+# keyrefcommand = "bash -c \"printf '%d\' $(pkcs15-tool --list-keys -s | grep {alias} -B1 | grep 'Ref:' | awk -F '  ' '{{print substr($3,length($3)-3,4)}}')\""
+
+# Command to unwrap (import) a key into an HSM. This example works for NitroKey
+# HSM2. {filename} will be replaced before execution
+# FDROID_KEY_STORE_PASS env var will contain 'keystorepass' from this config.
+# unwrapcommand = "sc-hsm-tool --key-reference 200 --force --unwrap-key {filename} --pin env:FDROID_KEY_STORE_PASS"
+
 # The password for the keystore (at least 6 characters). If this password is
 # different than the keypass below, it can be OK to store the password in this
 # file for real use. But in general, sensitive passwords should not be stored
