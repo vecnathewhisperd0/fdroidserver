@@ -357,6 +357,8 @@ def get_metadata_from_apk(app, build, apkfile):
 
 def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, extlib_dir, tmp_dir, force, onserver, refresh):
     """Do a build locally."""
+    # do an early src checkout, required for figuring out the ndk version
+    vcs.gotorevision(build.commit, refresh)
     ndk_path = common.get_ndk_path(build)
     common.set_FDroidPopen_env(build)
 
@@ -391,10 +393,10 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
             logging.warning('%s:%s runs this on the buildserver with sudo:\n\t%s\nThese commands were skipped because fdroid build is not running on a dedicated build server.'
                             % (app.id, build.versionName, build.sudo))
 
-    # Prepare the source code...
+    # Prepare the source code, don't refresh, we already did so earlier if requested
     root_dir, srclibpaths = common.prepare_source(vcs, app, build,
                                                   build_dir, srclib_dir,
-                                                  extlib_dir, onserver, refresh)
+                                                  extlib_dir, onserver, refresh=False)
 
     # We need to clean via the build tool in case the binary dirs are
     # different from the default ones

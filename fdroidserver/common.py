@@ -3921,10 +3921,24 @@ def provision_ndk(version):
 
 
 def get_ndk_path(build):
+    """
+    Get the ndk path to use for :build, this will download and extract the ndk if
+    that's enabled via config or options.
+    When the src repo is present it will attempt to read ndk.version from build.gradle
+    :param build: metadata.Build() entru
+    :return: path to the ndk to use for this build, '' if non is required
+    :raises FDroidException if an ndk is requested/required but could not be found
+            or provisioned
+    """
+    # TODO: we should probably cache this somehow but this seems hard to do without
+    # having config objects (let's not introduce any more globals).
     version = build.ndk
     if not version:
         logging.debug("No ndk path specified in build, skipping.")
         return ''
+    if version == 'gradle':
+        # get the version from build.gradle file
+        #manifest_paths()
     try:
         ndk_path = provision_ndk(version)
         logging.debug("Got NDK path: %s" % ndk_path)
