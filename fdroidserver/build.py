@@ -21,7 +21,6 @@ import os
 import shutil
 import glob
 import subprocess
-import pkg_resources
 import posixpath
 import re
 import resource
@@ -136,9 +135,7 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
         ftp.mkdir('fdroidserver')
         ftp.chdir('fdroidserver')
         ftp.put(os.path.join(serverpath, '..', 'fdroid'), 'fdroid')
-        ftp.put(common.get_extra_file_location('gradlew-fdroid'), 'gradlew-fdroid')
         ftp.chmod('fdroid', 0o755)  # nosec B103 permissions are appropriate
-        ftp.chmod('gradlew-fdroid', 0o755)  # nosec B103 permissions are appropriate
         send_dir(os.path.join(serverpath))
         ftp.chdir(homedir)
 
