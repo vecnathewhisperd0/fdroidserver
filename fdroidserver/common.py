@@ -42,6 +42,7 @@ import urllib.request
 import zipfile
 import tempfile
 import json
+import pkg_resources
 
 # TODO change to only import defusedxml once its installed everywhere
 import requests
@@ -69,9 +70,6 @@ from fdroidserver import _, net, known_packages
 from fdroidserver.exception import FDroidException, VCSException, NoSubmodulesException,\
     BuildException, VerificationException, MetaDataException
 from .asynchronousfilereader import AsynchronousFileReader
-
-# The path to this fdroidserver distribution
-FDROID_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 
 # this is the build-tools version, aapt has a separate version that
 # has to be manually set in test_aapt_version()
@@ -106,6 +104,24 @@ env = None
 orig_path = None
 
 
+def get_extra_file_location(filename):
+    """
+    Abstracts finding extra files from either a git checkout or from a packaged
+    version (using pkg_resources).
+    :param filename: filename to look up
+    :return: full path to requested file
+    """
+    FDROIDSERVER_PATH = os.path.realpath(os.path.dirname(__file__))
+    # try the raw path from the git repo
+    if os.path.isfile(os.path.join(FDROIDSERVER_PATH, filename)):
+        return os.path.join(FDROIDSERVER_PATH, filename)
+    # Otherwise it should be available from the packaged install
+    elif pkg_resources.resource_exists('gradlew-fdroid'):
+        return pkg_resources.resource_filename('gradlew-fdroid')
+    else:
+        raise FDroidException("Couldn't find %s" % filename)
+
+
 default_config = {
     'sdk_path': "$ANDROID_HOME",
     'auto_download_ndk': False,
@@ -115,7 +131,7 @@ default_config = {
     'scan_binary': False,
     'ant': "ant",
     'mvn3': "mvn",
-    'gradle': os.path.join(FDROID_PATH, 'gradlew-fdroid'),
+    'gradle': get_extra_file_location('gradlew-fdroid'),
     'gradle_version_dir': os.path.join(os.path.join(os.getenv('HOME'), '.cache', 'fdroidserver'), 'gradle'),
     'sync_from_local_copy_dir': False,
     'allow_disabled_algorithms': False,

@@ -3,7 +3,7 @@
 set -ex
 
 mkdir -p /home/vagrant/bin
-ln -s /home/vagrant/fdroidserver/gradlew-fdroid /home/vagrant/bin/gradle
+ln -s /home/vagrant/fdroidserver/fdroidserver/gradlew-fdroid /home/vagrant/bin/gradle
 
 GRADLE_HOME=/home/vagrant/.gradle
 test -d $GRADLE_HOME/ || mkdir $GRADLE_HOME/

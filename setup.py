@@ -90,6 +90,10 @@ setup(name='fdroidserver',
       extras_require={
           'test': ['pyjks'],
       },
+      package_data={'fdroidserver': [
+          './gradlew-fdroid'
+          ],
+      },
       classifiers=[
           'Development Status :: 4 - Beta',
           'Intended Audience :: Developers',
