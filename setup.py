@@ -91,7 +91,9 @@ setup(name='fdroidserver',
           'test': ['pyjks'],
       },
       package_data={'fdroidserver': [
-          './gradlew-fdroid'
+          './gradlew-fdroid',
+          'android-sdk-checksums.json',
+          'gradle-checksums.json',
           ],
       },
       classifiers=[

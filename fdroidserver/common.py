@@ -3899,6 +3899,7 @@ def run_yamllint(path, indent=0):
 
 
 def provision_ndk(version):
+    NDK_URL_PATTERN = "https://dl.google.com/android/repository/android-ndk-{version}-linux-x86_64.zip"
     logging.debug("Provisioning ndk version '%s'" % version)
     cachefile = os.path.join(config['cachedir'], "android-ndk-{version}-linux-x86_64.zip".format(version=version))
     installdir_ndk_root = os.path.join(config['cachedir'], "ndk")
@@ -3909,11 +3910,10 @@ def provision_ndk(version):
     if not os.path.isfile(cachefile):
         if config.get('auto_download_ndk') or options.auto_download_ndk:
             logging.info("Downloading Android NDK version '%s' to '%s'" % (version, cachefile))
-            url = "https://dl.google.com/android/repository/android-ndk-{version}-linux-x86_64.zip"
-            net.download_file(url.format(version=version), local_filename=cachefile, chunk_size=1048576, show_progress=True)
+            net.download_file(NDK_URL_PATTERN.format(version=version), local_filename=cachefile, chunk_size=1048576, show_progress=True)
         else:
             logging.critical("Couldn't find NDK '%s' and --auto-download-ndk not enabled.")
-    verify_download(cachefile, known_packages.ndk)
+    verify_download(NDK_URL_PATTERN.format(version=version), cachefile)
     logging.info("Extracting %s to %s" % (cachefile, installdir))
     with zipfile.ZipFile(cachefile, 'r') as zip_ref:
         _extract_all_with_permission(zip_ref, installdir_ndk_root)
@@ -3949,12 +3949,25 @@ def _extract_all_with_permission(zf, target_dir):
                 os.chmod(extracted_path, os.stat(extracted_path).st_mode | S_IXUSR)
 
 
-def verify_download(inputfile, type):
-    for (hashsum, filename, ignore) in type:
-        if os.path.basename(inputfile) == filename:
-            verify_file_sha256(inputfile, hashsum)
+def verify_download(url, inputfile):
+    """
+    Verifies file's checksum against the hash the file downloaded from url should have
+    :param url: download url (used to lookup the stored checksum)
+    :param inputfile: path to the file to verify
+    :raises FDroidException when the verification fails
+    """
+    CHECKSUM_FILES = ['android-sdk-checksums.json', 'gradle-checksums.json']
+    checksums = {}
+    for checksum_filename in CHECKSUM_FILES:
+        with open(get_extra_file_location(checksum_filename)) as f:
+            checksums.update(json.load(f))
+
+    # There could be multiple possible checksums for a given url
+    # This has happened before so we have possibly multiple tries here.
+    for checksum in checksums[url]:
+        if verify_file_sha256(inputfile, checksum['sha256']):
             return
-    logging.critical("No known checksum for %s" % inputfile)
+    logging.critical("No known checksum for %s" % url)
     raise FDroidException()
 
 
@@ -3970,13 +3983,17 @@ def sha256_for_file(path):
 
 
 def verify_file_sha256(path, sha256):
+    """
+    :return: True if the the sha256sum of :path matches :sha256, False otherwise
+    """
     if sha256_for_file(path) != sha256:
         logging.critical("File verification for '{path}' failed! "
                          "expected sha256 checksum: {checksum}"
                          .format(path=path, checksum=sha256))
         logging.critical("Try deleting the file.")
-        raise FDroidException()
+        return False
     else:
         logging.debug("successfully verified file '{path}' "
                       "('{checksum}')".format(path=path,
                                               checksum=sha256))
+        return True
