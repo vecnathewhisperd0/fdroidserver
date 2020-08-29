@@ -6,7 +6,7 @@ run_test() {
     nocolor='\033[0m'
     cd $source_files/$1
     printf "\n${1}:\n"
-    if ($basedir/gradlew-fdroid 2>/dev/null || true) | grep -Fo "$2"; then
+    if ($basedir/fdroidserver/gradlew-fdroid 2>/dev/null || true) | grep -Fo "$2"; then
 	printf "${green}passed: $1\n"
     else
 	printf "${red}ERROR: $2 not found in $1\n"
