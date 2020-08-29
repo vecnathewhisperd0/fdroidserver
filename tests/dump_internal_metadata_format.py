@@ -94,6 +94,11 @@ for appid, app in apps.items():
         del(app._modified)
         frommeta = dict(app.__dict__)
     else:
+        for build in app['builds']:
+            # app is just a back reference to the app object from a build.
+            # It never gets written to or read from any metadata.
+            if hasattr(build, 'app'):
+                del (build['app'])
         frommeta = dict(app)
 
     with open(savepath, 'w') as f:

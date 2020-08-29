@@ -1708,6 +1708,13 @@ def get_all_gradle_and_manifests(build_dir):
     return paths
 
 
+def get_gradle_paths(build_dir):
+    return filter(
+        lambda x: x.endswith('.gradle') or x.endswith('.gradle.kts'),
+        get_all_gradle_and_manifests(build_dir)
+    )
+
+
 def get_gradle_subdir(build_dir, paths):
     """get the subdir where the gradle build is based"""
     first_gradle_dir = None
@@ -3887,8 +3894,30 @@ def run_yamllint(path, indent=0):
     return '\n'.join(result)
 
 
+def get_url_from_ndk_version(version):
+    with open(get_extra_file_location('android-sdk-checksums.json')) as f:
+        checksums = json.load(f)
+    for url, entries in checksums.items():
+        for entry in entries:
+            urlmatch = re.search('android-ndk-(.*)-linux-x86_64.zip', url)
+            if urlmatch:
+                versionmatch = re.search(r'Pkg\.Revision = (.*)', entry.get('source.properties', ''))
+                if versionmatch and versionmatch.group(1) == version:
+                    return url, urlmatch.group(1)
+
+
 def provision_ndk(version):
+    """
+    :param version: version to provision, either in rXX human readable format or
+      xx.y.zzzzzzz internal version string form
+    :return: location of the extracted NDK
+    :raises FDroidException when ndk could not be provisioned
+    """
     NDK_URL_PATTERN = "https://dl.google.com/android/repository/android-ndk-{version}-linux-x86_64.zip"
+    if version.startswith('r'):
+        url = NDK_URL_PATTERN.format(version=version)
+    else:
+        url, version = get_url_from_ndk_version(version)
     logging.debug("Provisioning ndk version '%s'" % version)
     cachefile = os.path.join(config['cachedir'], "android-ndk-{version}-linux-x86_64.zip".format(version=version))
     installdir_ndk_root = os.path.join(config['cachedir'], "ndk")
@@ -3899,14 +3928,29 @@ def provision_ndk(version):
     if not os.path.isfile(cachefile):
         if config.get('auto_download_ndk') or options.auto_download_ndk:
             logging.info("Downloading Android NDK version '%s' to '%s'" % (version, cachefile))
-            net.download_file(NDK_URL_PATTERN.format(version=version), local_filename=cachefile, chunk_size=1048576, show_progress=True)
+            net.download_file(url, local_filename=cachefile, chunk_size=1048576, show_progress=True)
         else:
-            logging.critical("Couldn't find NDK '%s' and --auto-download-ndk not enabled.")
-    verify_download(NDK_URL_PATTERN.format(version=version), cachefile)
+            raise FDroidException("Couldn't find NDK '%s' and --auto-download-ndk not enabled." % version)
+    verify_download(url, cachefile)
     logging.info("Extracting %s to %s" % (cachefile, installdir))
     with zipfile.ZipFile(cachefile, 'r') as zip_ref:
         _extract_all_with_permission(zip_ref, installdir_ndk_root)
     return installdir
+
+
+def get_ndk_version_from_gradle(gradle_paths):
+    NDK_VERSION_REGEX = re.compile(r"""ndkVersion\s*[= ]\s*['"]([1-9][0-9]*\.[0-9]+\.[0-9]{7}(?:-[a-z0-9]+)?)["']""")
+    matches = []
+    for gradlefile in gradle_paths:
+        with open(gradlefile) as f:
+            matches += re.findall(NDK_VERSION_REGEX, f.read())
+    if len(matches) == 1:
+        return matches[0]
+    elif len(matches) == 0:
+        return None
+    elif len(matches) > 1:
+        # TODO: Take the biggest version we got maybe?
+        return None
 
 
 def get_ndk_path(build):
@@ -3914,7 +3958,7 @@ def get_ndk_path(build):
     Get the ndk path to use for :build, this will download and extract the ndk if
     that's enabled via config or options.
     When the src repo is present it will attempt to read ndk.version from build.gradle
-    :param build: metadata.Build() entru
+    :param build: metadata.Build() object
     :return: path to the ndk to use for this build, '' if non is required
     :raises FDroidException if an ndk is requested/required but could not be found
             or provisioned
@@ -3927,14 +3971,13 @@ def get_ndk_path(build):
         return ''
     if version == 'gradle':
         # get the version from build.gradle file
-        #manifest_paths()
-    try:
-        ndk_path = provision_ndk(version)
-        logging.debug("Got NDK path: %s" % ndk_path)
-        return ndk_path
-    except Exception as e:
-        logging.critical("Couldn't provision Android NDK version '%s'" % version)
-        raise FDroidException(detail=str(e)) from None
+        build_dir = build.app.get_build_dir()
+        version = get_ndk_version_from_gradle(get_gradle_paths(build_dir))
+        if not version:
+            raise FDroidException("Could not determine ndk version from gradle files.")
+    ndk_path = provision_ndk(version)
+    logging.debug("Got NDK path: %s" % ndk_path)
+    return ndk_path
 
 
 def _extract_all_with_permission(zf, target_dir):

@@ -23,7 +23,7 @@ HEADERS = {'User-Agent': 'F-Droid'}
 
 
 def download_file(url, local_filename=None, dldir='tmp', chunk_size=1024, show_progress=False):
-    def dummy_progress(iterable, expected_size):
+    def dummy_progress(iterable, _):
         return iterable
 
     if not show_progress:
