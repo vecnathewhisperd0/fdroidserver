@@ -45,9 +45,6 @@ import json
 import pkg_resources
 
 # TODO change to only import defusedxml once its installed everywhere
-import requests
-from clint.textui import progress
-
 try:
     import defusedxml.ElementTree as XMLElementTree
 except ImportError:
@@ -66,7 +63,7 @@ from pyasn1.error import PyAsn1Error
 
 import fdroidserver.metadata
 import fdroidserver.lint
-from fdroidserver import _, net, known_packages
+from fdroidserver import _, net
 from fdroidserver.exception import FDroidException, VCSException, NoSubmodulesException,\
     BuildException, VerificationException, MetaDataException
 from .asynchronousfilereader import AsynchronousFileReader
@@ -538,6 +535,7 @@ def test_sdk_exists(thisconfig):
                          .format(path=thisconfig['sdk_path']))
         return False
     return True
+
 
 def get_ndk_versions_from_sdkdir():
     pass
