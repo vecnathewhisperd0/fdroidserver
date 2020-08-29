@@ -80,7 +80,7 @@ def main():
 
         newbuilds = []
         for build in app.builds:
-            new = metadata.Build()
+            new = metadata.Build(app=app)
             for k in metadata.build_flags:
                 v = build[k]
                 if v is None or v is False or v == [] or v == '':

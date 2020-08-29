@@ -123,7 +123,6 @@ def main():
     config = common.read_config(options)
 
     apps = metadata.read_metadata()
-    app = None
 
     tmp_importer_dir = None
 
@@ -238,6 +237,7 @@ def main():
 
     metadata.post_metadata_parse(app)
 
+    build.app = app
     app.builds.append(build)
 
     if write_local_file:

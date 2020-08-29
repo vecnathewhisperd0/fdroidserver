@@ -715,15 +715,6 @@ def getsrcname(app, build):
     return "%s_%s_src.tar.gz" % (app.id, build.versionCode)
 
 
-def get_build_dir(app):
-    '''get the dir that this app will be built in'''
-
-    if app.RepoType == 'srclib':
-        return os.path.join('build', 'srclib', app.Repo)
-
-    return os.path.join('build', app.id)
-
-
 class Encoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, set):
@@ -786,7 +777,7 @@ def get_head_commit_id(git_repo):
 
 def setup_vcs(app):
     '''checkout code from VCS and return instance of vcs and the build dir'''
-    build_dir = get_build_dir(app)
+    build_dir = app.get_build_dir()
 
     # Set up vcs interface and make sure we have the latest code...
     logging.debug("Getting {0} vcs interface for {1}"

@@ -220,7 +220,7 @@ def check_repomanifest(app, branch=None):
         elif repotype == 'bzr':
             vcs.gotorevision(None)
 
-        last_build = metadata.Build()
+        last_build = metadata.Build(app=app)
         if len(app.builds) > 0:
             last_build = app.builds[-1]
 

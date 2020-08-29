@@ -138,6 +138,10 @@ class MetadataTest(unittest.TestCase):
                       'org.videolan.vlc', 'com.politedroid'):
             savepath = os.path.join('metadata', 'dump', appid + '.yaml')
             frommeta = dict(apps[appid])
+            # remove the app 'pointer' from any Build object, it'll never be
+            # written to yaml format.
+            for build in frommeta['builds']:
+                del(build['app'])
             self.assertTrue(appid in apps)
             with open(savepath, 'r') as f:
                 from_yaml = yaml.load(f, Loader=SafeLoader)

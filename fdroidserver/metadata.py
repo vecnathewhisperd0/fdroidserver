@@ -185,7 +185,15 @@ class App(dict):
         if len(self.builds) > 0:
             return self.builds[-1]
         else:
-            return Build()
+            return Build(app=self)
+
+    def get_build_dir(self):
+        """get the dir that this app will be built in"""
+
+        if self.RepoType == 'srclib':
+            return os.path.join('build', 'srclib', self.Repo)
+
+        return os.path.join('build', self.id)
 
 
 TYPE_UNKNOWN = 0
@@ -197,6 +205,7 @@ TYPE_SCRIPT = 5
 TYPE_MULTILINE = 6
 TYPE_BUILD = 7
 TYPE_INT = 8
+TYPE_APP = 9
 
 fieldtypes = {
     'Description': TYPE_MULTILINE,
@@ -257,8 +266,9 @@ build_flags = [
 
 class Build(dict):
 
-    def __init__(self, copydict=None):
+    def __init__(self, copydict=None, app=None):
         super().__init__()
+        self.app = app
         self.disable = ''
         self.commit = None
         self.timeout = None
@@ -329,6 +339,7 @@ class Build(dict):
 
 
 flagtypes = {
+    'app': TYPE_APP,
     'versionCode': TYPE_INT,
     'extlibs': TYPE_LIST,
     'srclibs': TYPE_LIST,
@@ -847,7 +858,7 @@ def post_metadata_parse(app):
     if 'builds' in app:
         for build in app['builds']:
             if not isinstance(build, Build):
-                build = Build(build)
+                build = Build(build, app=app)
             for k, v in build.items():
                 if not (v is None):
                     if flagtype(k) == TYPE_LIST:
@@ -934,7 +945,7 @@ def parse_metadata(metadatapath, check_vcs=False, refresh=True):
                            .format(path=metadatapath))
 
     if check_vcs and app.Repo:
-        build_dir = fdroidserver.common.get_build_dir(app)
+        build_dir = app.get_build_dir()
         metadata_in_repo = os.path.join(build_dir, '.fdroid.yml')
         if not os.path.isfile(metadata_in_repo):
             vcs, build_dir = fdroidserver.common.setup_vcs(app)
@@ -1064,10 +1075,6 @@ def write_yaml(mf, app):
     _yaml_bools_plus_lists.extend([[x] for x in _yaml_bools_true])
     _yaml_bools_plus_lists.extend(_yaml_bools_false)
     _yaml_bools_plus_lists.extend([[x] for x in _yaml_bools_false])
-
-    def _class_as_dict_representer(dumper, data):
-        '''Creates a YAML representation of a App/Build instance'''
-        return dumper.represent_dict(data)
 
     def _field_to_yaml(typ, value):
         if typ is TYPE_STRING:
