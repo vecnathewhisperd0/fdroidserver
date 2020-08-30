@@ -537,10 +537,6 @@ def test_sdk_exists(thisconfig):
     return True
 
 
-def get_ndk_versions_from_sdkdir():
-    pass
-
-
 def ensure_build_tools_exists(thisconfig):
     if not test_sdk_exists(thisconfig):
         raise FDroidException(_("Android SDK not found!"))
@@ -3372,6 +3368,19 @@ def get_url_from_ndk_version(version):
                     return url, urlmatch.group(1)
 
 
+def get_ndk_longversion(version):
+    """converts an ndk revision number (rXX) into the long form version number (xx.y.zzzzzzz)"""
+    with open(get_extra_file_location('android-sdk-checksums.json')) as f:
+        checksums = json.load(f)
+    for url, entries in checksums.items():
+        for entry in entries:
+            urlmatch = re.search('android-ndk-(.*)-linux-x86_64.zip', url)
+            if urlmatch and urlmatch.group(1) == version:
+                versionmatch = re.search(r'Pkg\.Revision = (.*)', entry.get('source.properties', ''))
+                if versionmatch:
+                    return versionmatch.group(1)
+
+
 def provision_ndk(version):
     """
     :param version: version to provision, either in rXX human readable format or
@@ -3381,10 +3390,18 @@ def provision_ndk(version):
     """
     NDK_URL_PATTERN = "https://dl.google.com/android/repository/android-ndk-{version}-linux-x86_64.zip"
     if version.startswith('r'):
+        longversion = get_ndk_longversion(version)
         url = NDK_URL_PATTERN.format(version=version)
     else:
-        url, version = get_url_from_ndk_version(version)
-    logging.debug("Provisioning ndk version '%s'" % version)
+        longversion = version
+        url, version = get_url_from_ndk_version(longversion)
+    logging.debug("Provisioning ndk version '%s (%s)'" % (version, longversion))
+
+    # Try the Android SDK dir, maybe it's installed via sdkmanager/AS
+    if config['sdk_path']:
+        installdir = os.path.join(config['sdk_path'], 'ndk', longversion)
+        if os.path.isdir(installdir) and os.listdir(installdir):
+            return installdir
     cachefile = os.path.join(config['cachedir'], "android-ndk-{version}-linux-x86_64.zip".format(version=version))
     installdir_ndk_root = os.path.join(config['cachedir'], "ndk")
     installdir = os.path.join(config['cachedir'], 'ndk', "android-ndk-{version}".format(version=version))
