@@ -328,7 +328,8 @@ def transform_first_char(string, method):
 
 
 def add_failed_builds_entry(failed_builds, appid, build, entry):
-    failed_builds.append([appid, int(build.versionCode), str(entry)])
+    build_entry = {'appid': appid, 'versionCode': int(build.versionCode), 'log': str(entry)}
+    failed_builds.append(build_entry)
 
 
 def get_metadata_from_apk(app, build, apkfile):
@@ -1148,7 +1149,7 @@ def main():
                                              'supplied reference binary '
                                              'successfully')
 
-                    build_succeeded.append(app)
+                    build_succeeded.append({'appid': app.id, 'versionCode': str(build.versionCode)})
                     wikilog = "Build succeeded"
 
             except VCSException as vcse:
@@ -1218,7 +1219,7 @@ def main():
             break
 
     for app in build_succeeded:
-        logging.info("success: %s" % (app.id))
+        logging.info("success: %s" % (app['appid']))
 
     if not options.verbose:
         for fb in failed_builds:
