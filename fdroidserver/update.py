@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 #
 # update.py - part of the FDroid server tools
+# Copyright (C) 2020, Marcus Hoffmann <bubu@bubu1.eu>
 # Copyright (C) 2016, Blue Jay Wireless
 # Copyright (C) 2014-2016, Hans-Christoph Steiner <hans@eds.org>
 # Copyright (C) 2010-2015, Ciaran Gultnieks <ciaran@ciarang.com>

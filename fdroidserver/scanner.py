@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 #
 # scanner.py - part of the FDroid server tools
+# Copyright (C) 2020, Marcus Hoffmann <bubu@bubu1.eu>
 # Copyright (C) 2010-13, Ciaran Gultnieks, ciaran@ciarang.com
 #
 # This program is free software: you can redistribute it and/or modify
