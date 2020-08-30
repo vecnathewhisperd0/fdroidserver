@@ -20,6 +20,7 @@ if localmodule not in sys.path:
     sys.path.insert(0, localmodule)
 
 import fdroidserver.common
+import fdroidserver.vcs
 import fdroidserver.metadata
 # work around the syntax error from: import fdroidserver.import
 import import_proxy
@@ -71,8 +72,8 @@ class ImportTest(unittest.TestCase):
 
             app = fdroidserver.common.get_app_from_url(url)
             with mock.patch('fdroidserver.common.getvcs',
-                            lambda a, b, c: fdroidserver.common.vcs(url, testdir)):
-                with mock.patch('fdroidserver.common.vcs.gotorevision',
+                            lambda a, b, c: fdroidserver.vcs.vcs(url, testdir)):
+                with mock.patch('fdroidserver.vcs.vcs.gotorevision',
                                 lambda s, rev: None):
                     with mock.patch('shutil.rmtree', lambda a: None):
                         build_dir = import_proxy.clone_to_tmp_dir(app)
