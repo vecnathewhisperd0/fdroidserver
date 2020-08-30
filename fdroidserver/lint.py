@@ -407,6 +407,8 @@ def check_builds(app):
                 else:
                     yield _('srclibs missing name and/or @') + ' (srclibs: ' + srclib + ')'
         for key in build.keys():
+            if metadata.flagtype(key) == metadata.TYPE_APP:
+                continue
             if key not in supported_flags:
                 yield _('%s is not an accepted build field') % key
 
