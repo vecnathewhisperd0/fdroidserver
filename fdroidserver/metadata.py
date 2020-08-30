@@ -34,6 +34,7 @@ import importlib
 from collections import OrderedDict
 
 import fdroidserver.common
+import fdroidserver.vcs
 from fdroidserver import _
 from fdroidserver.exception import MetaDataException, FDroidException
 
@@ -949,7 +950,7 @@ def parse_metadata(metadatapath, check_vcs=False, refresh=True):
         metadata_in_repo = os.path.join(build_dir, '.fdroid.yml')
         if not os.path.isfile(metadata_in_repo):
             vcs, build_dir = fdroidserver.common.setup_vcs(app)
-            if isinstance(vcs, fdroidserver.common.vcs_git):
+            if isinstance(vcs, fdroidserver.vcs.vcs_git):
                 vcs.gotorevision('HEAD', refresh)  # HEAD since we can't know where else to go
         if os.path.isfile(metadata_in_repo):
             logging.debug('Including metadata from ' + metadata_in_repo)
