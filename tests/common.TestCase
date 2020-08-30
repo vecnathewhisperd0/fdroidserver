@@ -252,7 +252,6 @@ class CommonTest(unittest.TestCase):
 
         config = dict()
         config['sdk_path'] = os.getenv('ANDROID_HOME')
-        config['ndk_paths'] = {'r10d': os.getenv('ANDROID_NDK_HOME')}
         config['build_tools'] = 'FAKE_BUILD_TOOLS_VERSION'
         fdroidserver.common.config = config
         app = fdroidserver.metadata.App()
