@@ -3569,6 +3569,8 @@ def gpg_verify(file, sigfile, keys):
 def update_checksums():
     """
     Tries to update the checksum files from a remote source
+    :raises FDroidException when verification of the download fails
+    :raises RequestException when the download fails
     """
     try:
         import gnupg

@@ -881,6 +881,8 @@ def parse_commandline():
                         help=_("Skip scanning the source code for binaries and other problems"))
     parser.add_argument("--scan-binary", action="store_true", default=False,
                         help=_("Scan the resulting APK(s) for known non-free classes."))
+    parser.add_argument("--update-checksums", action="store_true", default=False,
+                        help=_("Update the gradle and ndk checksum files"))
     parser.add_argument("--no-tarball", dest="notarball", action="store_true", default=False,
                         help=_("Don't create a source tarball, useful when testing a build"))
     parser.add_argument("--no-refresh", dest="refresh", action="store_false", default=True,
@@ -943,6 +945,16 @@ def main():
             parser.error("option %s: If you really want to build all the apps, use --all" % "all")
 
     config = common.read_config(options)
+
+    # We use --all as a trigger for updating the android/gradle checksum data
+    if options.all or options.update_checksums:
+        if options.update_checksums:
+            common.config['checksum_update'] = True
+        try:
+            common.update_checksums()
+        except (IOError, FDroidException):
+            logging.warning("Could not update checksum files!", exc_info=True)
+            common.config['checksum_update'] = False
 
     if config['build_server_always']:
         options.server = True
