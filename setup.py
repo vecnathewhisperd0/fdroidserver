@@ -95,6 +95,7 @@ setup(name='fdroidserver',
           './gradlew-fdroid',
           'android-sdk-checksums.json',
           'gradle-checksums.json',
+          'checksum_signers.gpg',
           ],
       },
       classifiers=[
