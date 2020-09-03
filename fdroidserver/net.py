@@ -23,7 +23,15 @@ HEADERS = {'User-Agent': 'F-Droid'}
 
 
 def download_file(url, local_filename=None, dldir='tmp', chunk_size=1024, show_progress=False):
-    def dummy_progress(iterable, _):
+    """
+    :param url: url to download
+    :param local_filename: optional path to save the file to
+    :param dldir: if local_filename is not given, path to a directory to save the file in
+    :param chunk_size: progress chunk_size bytes at a time (affects the progress steps as well)
+    :param show_progress: if true shows a clint.textui progress bar on the terminal
+    :return: path to saved file
+    """
+    def dummy_progress(iterable, **_):
         return iterable
 
     if not show_progress:
@@ -37,7 +45,7 @@ def download_file(url, local_filename=None, dldir='tmp', chunk_size=1024, show_p
     # the stream=True parameter keeps memory usage low
     r = requests.get(url, stream=True, allow_redirects=True, headers=HEADERS)
     r.raise_for_status()
-    content_length = int(r.headers.get('content-length'))
+    content_length = int(r.headers.get('content-length', 0))
     with open(local_filename, 'wb') as f:
         for chunk in progressbar(r.iter_content(chunk_size=chunk_size),
                                  expected_size=(content_length / chunk_size) + 1):

@@ -102,7 +102,7 @@ env = None
 orig_path = None
 
 
-def get_extra_file_location(filename):
+def get_package_data_location(filename):
     """
     Abstracts finding extra files from either a git checkout or from a packaged
     version (using pkg_resources).
@@ -114,8 +114,8 @@ def get_extra_file_location(filename):
     if os.path.isfile(os.path.join(FDROIDSERVER_PATH, filename)):
         return os.path.join(FDROIDSERVER_PATH, filename)
     # Otherwise it should be available from the packaged install
-    elif pkg_resources.resource_exists('gradlew-fdroid'):
-        return pkg_resources.resource_filename('gradlew-fdroid')
+    elif pkg_resources.resource_exists('fdroidserver', filename):
+        return pkg_resources.resource_filename(filename)
     else:
         raise FDroidException("Couldn't find %s" % filename)
 
@@ -123,13 +123,20 @@ def get_extra_file_location(filename):
 default_config = {
     'sdk_path': "$ANDROID_HOME",
     'auto_download_ndk': False,
+    'checksum_files': {
+        'gradle': 'https://gitlab.com/fdroid/gradle-transparency-log/-/raw/master/singed/checksums.json',
+        'android-sdk': 'https://gitlab.com/fdroid/android-sdk-transparency-log/-/raw/master/signed/checksums.json'
+    },
+    'checksums_valid_gpgkeys': get_package_data_location('checksum_signers.gpg'),
+    'checksum_update': False,
+    'checksum_maxage': 7 * 24,  # 7 days
     'cachedir': os.path.join(os.getenv('HOME'), '.cache', 'fdroidserver'),
     'build_tools': MINIMUM_AAPT_BUILD_TOOLS_VERSION,
     'java_paths': None,
     'scan_binary': False,
     'ant': "ant",
     'mvn3': "mvn",
-    'gradle': get_extra_file_location('gradlew-fdroid'),
+    'gradle': get_package_data_location('gradlew-fdroid'),
     'gradle_version_dir': os.path.join(os.path.join(os.getenv('HOME'), '.cache', 'fdroidserver'), 'gradle'),
     'sync_from_local_copy_dir': False,
     'allow_disabled_algorithms': False,
@@ -3357,9 +3364,12 @@ def run_yamllint(path, indent=0):
     return '\n'.join(result)
 
 
-def get_url_from_ndk_version(version):
-    with open(get_extra_file_location('android-sdk-checksums.json')) as f:
-        checksums = json.load(f)
+def get_url_and_short_version_from_ndk_version(version):
+    """
+    :param version: in the form of xx.y.zzzzzzz
+    :return: None if the version wasn't found, a tuple of (url, shortversion) otherwise
+    """
+    checksums = read_checksum_files()
     for url, entries in checksums.items():
         for entry in entries:
             urlmatch = re.search('android-ndk-(.*)-linux-x86_64.zip', url)
@@ -3370,9 +3380,10 @@ def get_url_from_ndk_version(version):
 
 
 def get_ndk_longversion(version):
-    """converts an ndk revision number (rXX) into the long form version number (xx.y.zzzzzzz)"""
-    with open(get_extra_file_location('android-sdk-checksums.json')) as f:
-        checksums = json.load(f)
+    """converts an ndk revision number (rXX) into the long form version number (xx.y.zzzzzzz)
+    :returns None if no corresponding version could be found
+    """
+    checksums = read_checksum_files()
     for url, entries in checksums.items():
         for entry in entries:
             urlmatch = re.search('android-ndk-(.*)-linux-x86_64.zip', url)
@@ -3395,7 +3406,7 @@ def provision_ndk(version):
         url = NDK_URL_PATTERN.format(version=version)
     else:
         longversion = version
-        url, version = get_url_from_ndk_version(longversion)
+        url, version = get_url_and_short_version_from_ndk_version(longversion)
     logging.debug("Provisioning ndk version '%s (%s)'" % (version, longversion))
 
     # Try the Android SDK dir, maybe it's installed via sdkmanager/AS
@@ -3422,17 +3433,27 @@ def provision_ndk(version):
     return installdir
 
 
-def get_ndk_version_from_gradle(gradle_paths):
+def get_ndk_version_from_gradle(build_dir):
+    """
+    Scans an app's gradle files for ndkVersion numbers and returns the version.
+    :param build_dir: path to app dir
+    :return: None if no ndkversion was found, the version in the form x.y.zzzzzzz otherwise
+    Currently also returns None if there are multiple different possible matches.
+    :raises NotADirectoryError when build_dir is not a directory
+    """
+    if not os.path.isdir(build_dir):
+        raise NotADirectoryError
+    gradle_paths = get_gradle_paths(build_dir)
     NDK_VERSION_REGEX = re.compile(r"""ndkVersion\s*[= ]\s*['"]([1-9][0-9]*\.[0-9]+\.[0-9]{7}(?:-[a-z0-9]+)?)["']""")
     matches = []
     for gradlefile in gradle_paths:
         with open(gradlefile) as f:
             matches += re.findall(NDK_VERSION_REGEX, f.read())
-    if len(matches) == 1:
+    if len(set(matches)) == 1:
         return matches[0]
     elif len(matches) == 0:
         return None
-    elif len(matches) > 1:
+    elif len(set(matches)) > 1:
         # TODO: Take the biggest version we got maybe?
         return None
 
@@ -3456,7 +3477,7 @@ def get_ndk_path(build):
     if version == 'gradle':
         # get the version from build.gradle file
         build_dir = build.app.get_build_dir()
-        version = get_ndk_version_from_gradle(get_gradle_paths(build_dir))
+        version = get_ndk_version_from_gradle(build_dir)
         if not version:
             raise FDroidException("Could not determine ndk version from gradle files.")
     ndk_path = provision_ndk(version)
@@ -3486,19 +3507,14 @@ def verify_download(url, inputfile):
     :param inputfile: path to the file to verify
     :raises FDroidException when the verification fails
     """
-    CHECKSUM_FILES = ['android-sdk-checksums.json', 'gradle-checksums.json']
-    checksums = {}
-    for checksum_filename in CHECKSUM_FILES:
-        with open(get_extra_file_location(checksum_filename)) as f:
-            checksums.update(json.load(f))
-
+    checksums = read_checksum_files()
     # There could be multiple possible checksums for a given url
     # This has happened before so we have possibly multiple tries here.
-    for checksum in checksums[url]:
-        if verify_file_sha256(inputfile, checksum['sha256']):
-            return
-    logging.critical("No known checksum for %s" % url)
-    raise FDroidException()
+    if url in checksums:
+        for checksum in checksums[url]:
+            if verify_file_sha256(inputfile, checksum['sha256']):
+                return
+    raise FDroidException("No known checksum for %s" % url)
 
 
 def sha256_for_file(path):
@@ -3514,16 +3530,101 @@ def sha256_for_file(path):
 
 def verify_file_sha256(path, sha256):
     """
-    :return: True if the the sha256sum of :path matches :sha256, False otherwise
+    :return: True if the the sha256sum of :param path matches :param sha256, False otherwise
     """
-    if sha256_for_file(path) != sha256:
-        logging.critical("File verification for '{path}' failed! "
-                         "expected sha256 checksum: {checksum}"
-                         .format(path=path, checksum=sha256))
-        logging.critical("Try deleting the file.")
+    file_sha = sha256_for_file(path)
+    if file_sha != sha256:
+        logging.warning("File verification for '{path}' failed! "
+                        "expected sha256 checksum: {checksum}, got {filechecksum}"
+                        .format(path=path, checksum=sha256, filechecksum=file_sha))
         return False
     else:
         logging.debug("successfully verified file '{path}' "
                       "('{checksum}')".format(path=path,
                                               checksum=sha256))
         return True
+
+
+def gpg_verify(file, sigfile, keys):
+    """
+    :param file: path to the file to verify the signature of
+    :param sigfile: path to detached signature file
+    :param keys: path to gpg public keyring file against which to verify
+    :raises FDroidException when the verification fails
+    :raises FileNotFoundException if any one of the input files is not present
+    """
+    if not os.path.isfile(file) or not os.path.isfile(sigfile) or not os.path.isfile(keys):
+        raise FileNotFoundError
+    import gnupg
+    gpg = gnupg.GPG(gnupghome=tempfile.mkdtemp())
+    logging.debug("Importing %s into gpg keyring" % keys)
+    with open(keys, 'rb') as f:
+        gpg.import_keys(f.read())
+    with open(sigfile, 'rb') as f:
+        verified = gpg.verify_file(f, file)
+    if not verified:
+        raise FDroidException("Signature could not be verified!")
+
+
+def update_checksums():
+    """
+    Tries to update the checksum files from a remote source
+    """
+    try:
+        import gnupg
+        gnupg.GPG()
+    except ImportError:
+        logging.warning("python-gnupg module not available, cannot update checksums")
+        return
+    except OSError:
+        logging.warning("gpg could not be found, cannot update checksums")
+        return
+    for checksum_file_name, checksum_file_url in config['checksum_files'].items():
+        dlpath = os.path.join(tempfile.mkdtemp(), checksum_file_name + '_checksums.json')
+        sigfile = dlpath + '.asc'
+        net.download_file(checksum_file_url, dlpath)
+        net.download_file(checksum_file_url + '.asc', sigfile)
+        gpg_verify(dlpath, sigfile, config['checksums_valid_gpgkeys'])
+        shutil.move(dlpath, config['cachedir'])
+
+
+def is_newer_than(file, hours):
+    """returns true if :param file is newer than :param minutes minutes"""
+    d = datetime.today() - timedelta(hours=hours)
+    return os.path.getmtime(file) > d.timestamp()
+
+
+def get_checksum_file(filename):
+    """
+    Returns the path to a checksum file, either from the cachedir,
+    if it's available there, or from package_resources.
+    If the checksum file is older than a week, we try to update it,
+    if enabled via config.
+    """
+    cached_file = os.path.join(config['cachedir'], filename)
+    if os.path.isfile(cached_file) and is_newer_than(cached_file, config['checksum_maxage']):
+        return os.path.join(cached_file)
+    elif config['checksum_update']:
+        try:
+            update_checksums()
+        except (IOError, FDroidException):
+            logging.warning("Could not update checksum files!", exc_info=True)
+            # Disable checksum updates for this run.
+            config['checksum_update'] = False
+    # Try returning the cached file, whether we just updated it or not.
+    if os.path.isfile(cached_file):
+        return os.path.join(cached_file)
+    # fall back to checksum file shipped with fdroidserver
+    return get_package_data_location(filename)
+
+
+def read_checksum_files():
+    """
+    Reads all configured checksum files and returns a checksums dict which maps
+    url -> list of checksum entries
+    """
+    checksums = {}
+    for checksum_filename in config['checksum_files']:
+        with open(get_checksum_file(checksum_filename + '_checksums.json')) as f:
+            checksums.update(json.load(f))
+    return checksums

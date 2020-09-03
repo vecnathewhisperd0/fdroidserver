@@ -19,9 +19,10 @@ import unittest
 import textwrap
 import yaml
 import gzip
+import gnupg
 from zipfile import ZipFile
 from unittest import mock
-
+from datetime import datetime
 
 localmodule = os.path.realpath(
     os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())), '..'))
@@ -924,17 +925,22 @@ class CommonTest(unittest.TestCase):
         app = fdroidserver.metadata.App()
         app.Repo = 'https://github.com/Integreight/1Sheeld-Android-App'
         paths = [
-            os.path.join('source-files', 'com.integreight.onesheeld', 'pagerIndicator', 'src', 'main', 'AndroidManifest.xml'),
+            os.path.join('source-files', 'com.integreight.onesheeld', 'pagerIndicator', 'src', 'main',
+                         'AndroidManifest.xml'),
             os.path.join('source-files', 'com.integreight.onesheeld', 'pagerIndicator', 'build.gradle'),
-            os.path.join('source-files', 'com.integreight.onesheeld', 'oneSheeld', 'src', 'main', 'AndroidManifest.xml'),
+            os.path.join('source-files', 'com.integreight.onesheeld', 'oneSheeld', 'src', 'main',
+                         'AndroidManifest.xml'),
             os.path.join('source-files', 'com.integreight.onesheeld', 'oneSheeld', 'build.gradle'),
-            os.path.join('source-files', 'com.integreight.onesheeld', 'localeapi', 'src', 'main', 'AndroidManifest.xml'),
+            os.path.join('source-files', 'com.integreight.onesheeld', 'localeapi', 'src', 'main',
+                         'AndroidManifest.xml'),
             os.path.join('source-files', 'com.integreight.onesheeld', 'localeapi', 'build.gradle'),
             os.path.join('source-files', 'com.integreight.onesheeld', 'build.gradle'),
             os.path.join('source-files', 'com.integreight.onesheeld', 'settings.gradle'),
-            os.path.join('source-files', 'com.integreight.onesheeld', 'quickReturnHeader', 'src', 'main', 'AndroidManifest.xml'),
+            os.path.join('source-files', 'com.integreight.onesheeld', 'quickReturnHeader', 'src', 'main',
+                         'AndroidManifest.xml'),
             os.path.join('source-files', 'com.integreight.onesheeld', 'quickReturnHeader', 'build.gradle'),
-            os.path.join('source-files', 'com.integreight.onesheeld', 'pullToRefreshlibrary', 'src', 'main', 'AndroidManifest.xml'),
+            os.path.join('source-files', 'com.integreight.onesheeld', 'pullToRefreshlibrary', 'src', 'main',
+                         'AndroidManifest.xml'),
             os.path.join('source-files', 'com.integreight.onesheeld', 'pullToRefreshlibrary', 'build.gradle'),
         ]
         for path in paths:
@@ -1427,6 +1433,232 @@ class CommonTest(unittest.TestCase):
             result = fdroidserver.common.run_yamllint('malformed.yml')
             self.assertIsNotNone(result)
             self.assertNotEqual(result, '')
+
+    def test_gpg_verify(self):
+        testdir = tempfile.mkdtemp(prefix=inspect.currentframe().f_code.co_name, dir=self.tmpdir)
+        os.chdir(testdir)
+        # Set up a few keys and sign a few test messages
+        gpghome = tempfile.mkdtemp()
+        gpg = gnupg.GPG(gnupghome=gpghome)
+        input_data = gpg.gen_key_input(name_real='key1', passphrase="foo", key_length=1024)
+        key1 = gpg.gen_key(input_data)
+        input_data = gpg.gen_key_input(name_real='key2', passphrase="foo", key_length=1024)
+        key2 = gpg.gen_key(input_data)
+        input_data = gpg.gen_key_input(name_real='evilkey', passphrase="foo", key_length=1024)
+        evilkey = gpg.gen_key(input_data)
+        self.assertEqual(3, len(gpg.list_keys()))
+        with open('keyring', 'w') as f:
+            f.write(gpg.export_keys([key1.fingerprint, key2.fingerprint]))
+        with open('message1', 'w') as f:
+            f.write('message1')
+        with open('message2', 'w') as f:
+            f.write('message2')
+        with open('message3', 'w') as f:
+            f.write('message3')
+
+        with open('message1', 'rb') as f:
+            gpg.sign_file(f, keyid=key1.fingerprint, passphrase='foo',
+                          detach=True, output='message1.sig')
+        with open('message2', 'rb') as f:
+            gpg.sign_file(f, keyid=key2.fingerprint, passphrase='foo',
+                          detach=True, output='message2.sig')
+        with open('message3', 'rb') as f:
+            gpg.sign_file(f, keyid=evilkey.fingerprint, passphrase='foo',
+                          detach=True, output='message3.sig')
+
+        # Now we test the verification
+        fdroidserver.common.gpg_verify('message1', 'message1.sig', 'keyring')
+        fdroidserver.common.gpg_verify('message2', 'message2.sig', 'keyring')
+        # the third ones signig key isn't in the keyring
+        self.assertRaises(FDroidException, fdroidserver.common.gpg_verify, 'message3', 'message3.sig', 'keyring')
+        # let's tamper with a message
+        with open('message2', 'w') as f:
+            f.write('tampered')
+        self.assertRaises(FDroidException, fdroidserver.common.gpg_verify, 'message2', 'message2.sig', 'keyring')
+        # let's try a bogus keyring
+        with open('bogus_keyring', 'wb') as f:
+            f.write(b'thisisnotakeyring')
+        self.assertRaises(FDroidException, fdroidserver.common.gpg_verify, 'message1', 'message1.sig', 'bogus_keyring')
+        # and bogus signature file
+        with open('bogussig', 'wb') as f:
+            f.write(b'thisisnotasignature')
+        self.assertRaises(FDroidException, fdroidserver.common.gpg_verify, 'message1', 'bogussig', 'keyring')
+        # and some nonexisting files
+        self.assertRaises(FileNotFoundError, fdroidserver.common.gpg_verify, 'message1', 'NOTHERE.sig', 'keyring')
+        self.assertRaises(FileNotFoundError, fdroidserver.common.gpg_verify, 'message1', 'message1.sig', 'NOKEYS')
+        self.assertRaises(FileNotFoundError, fdroidserver.common.gpg_verify, 'NOMESSAGE', 'message1.sig', 'keyring')
+
+    def test_is_newer_than(self):
+        testdir = tempfile.mkdtemp(prefix=inspect.currentframe().f_code.co_name, dir=self.tmpdir)
+        os.chdir(testdir)
+        with open('oldfile', 'w') as f:
+            f.write('test')
+        mtime = datetime(2020, 1, 1, 2, 3, 4)
+        os.utime('oldfile', (datetime.today().timestamp(), mtime.timestamp()))
+        self.assertFalse(fdroidserver.common.is_newer_than('oldfile', 48))
+
+        with open('newfile', 'w') as f:
+            f.write('test')
+        self.assertTrue(fdroidserver.common.is_newer_than('newfile', 1))
+
+    def test_verify_file_sha256(self):
+        testdir = tempfile.mkdtemp(prefix=inspect.currentframe().f_code.co_name, dir=self.tmpdir)
+        os.chdir(testdir)
+
+        with open('testfile', 'w') as f:
+            f.write('test\n')
+        self.assertEqual("f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2",
+                         fdroidserver.common.sha256_for_file('testfile'))
+        self.assertTrue(fdroidserver.common.verify_file_sha256(
+            'testfile',
+            "f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2"
+        ))
+        # no linebreak makes all the difference
+        with open('testfile', 'w') as f:
+            f.write('test')
+        self.assertFalse(fdroidserver.common.verify_file_sha256(
+            'testfile',
+            "f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2"
+        ))
+
+    def test_get_ndk_longversion(self):
+        config = dict()
+        fdroidserver.common.fill_config_defaults(config)
+        fdroidserver.common.config = config
+        fdroidserver.common.config['checksum_update'] = False
+        self.assertEqual('12.0.2931149', fdroidserver.common.get_ndk_longversion('r12'))
+        self.assertEqual('12.1.2977051', fdroidserver.common.get_ndk_longversion('r12b'))
+        self.assertEqual('15.1.4119039', fdroidserver.common.get_ndk_longversion('r15b'))
+        self.assertEqual('21.3.6528147', fdroidserver.common.get_ndk_longversion('r21d'))
+        self.assertEqual(None, fdroidserver.common.get_ndk_longversion('r999999'))
+        self.assertEqual(None, fdroidserver.common.get_ndk_longversion('XXXXX'))
+        # r10e doesn't have a longversion
+        self.assertEqual(None, fdroidserver.common.get_ndk_longversion('r10e'))
+
+    def test_get_url_and_short_version_from_ndk_version(self):
+        config = dict()
+        fdroidserver.common.fill_config_defaults(config)
+        fdroidserver.common.config = config
+        fdroidserver.common.config['checksum_update'] = False
+        self.assertEqual(("https://dl.google.com/android/repository/android-ndk-r11b-linux-x86_64.zip", 'r11b'),
+                         fdroidserver.common.get_url_and_short_version_from_ndk_version('11.1.2683735'))
+        # We should be able to round-trip this.
+        self.assertEqual('11.1.2683735',
+                         fdroidserver.common.get_ndk_longversion(
+                             fdroidserver.common.get_url_and_short_version_from_ndk_version(
+                                 '11.1.2683735'
+                             )[1]))
+        self.assertEqual(None, fdroidserver.common.get_url_and_short_version_from_ndk_version('XYZ'))
+
+    def test_get_ndk_version_from_gradle(self):
+        apps = {
+            'at.bitfire.davdroid': None,
+            'de.spiritcroc.riotx': '21.3.6528147',
+            'org.telegram.messenger': '21.3.6528147',
+            'com.github.axet.filemanager': '16.1.4479499',
+        }
+
+        for appid, version in apps.items():
+            self.assertEqual(
+                version,
+                fdroidserver.common.get_ndk_version_from_gradle(os.path.join('source-files', appid))
+            )
+        self.assertRaises(NotADirectoryError, fdroidserver.common.get_ndk_version_from_gradle, 'BOO!')
+
+    def test_verify_download(self):
+        testdir = tempfile.mkdtemp(prefix=inspect.currentframe().f_code.co_name, dir=self.tmpdir)
+        os.chdir(testdir)
+        with open('testfile', 'w') as f:
+            f.write("test\n")
+        checksums = {"TESTURL": [
+            {"sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"},
+            {"sha256": "f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2"}
+        ]}
+        with mock.patch('fdroidserver.common.read_checksum_files', return_value=checksums):
+            fdroidserver.common.verify_download("TESTURL", "testfile")
+        checksums = {"WRONGURL": [
+            {"sha256": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08"}
+        ]}
+        with mock.patch('fdroidserver.common.read_checksum_files', return_value=checksums):
+            self.assertRaises(FDroidException, fdroidserver.common.verify_download, "TESTURL", "testfile")
+        checksums = {"TESTURL": [{"sha256": "notahash"}]}
+        with mock.patch('fdroidserver.common.read_checksum_files', return_value=checksums):
+            self.assertRaises(FDroidException, fdroidserver.common.verify_download, "TESTURL", "testfile")
+
+    def test_update_checksums(self):
+        testdir = tempfile.mkdtemp(prefix=inspect.currentframe().f_code.co_name, dir=self.tmpdir)
+        os.chdir(testdir)
+        gpg = gnupg.GPG(gnupghome=tempfile.mkdtemp())
+        input_data = gpg.gen_key_input(name_real='key1', passphrase="foo", key_length=1024)
+        key1 = gpg.gen_key(input_data)
+        with open('keyring', 'w') as f:
+            f.write(gpg.export_keys([key1.fingerprint]))
+        with open('checksum_file', 'w') as f:
+            json.dump({'url': [{'sha256': '12345'}]}, f)
+
+        with open('checksum_file', 'rb') as f:
+            gpg.sign_file(f, keyid=key1.fingerprint, passphrase='foo',
+                          detach=True, output='checksum_file.asc')
+        config = dict()
+        fdroidserver.common.fill_config_defaults(config)
+        fdroidserver.common.config = config
+        fdroidserver.common.config['checksum_update'] = True
+        fdroidserver.common.config['checksums_valid_gpgkeys'] = 'keyring'
+        fdroidserver.common.config['checksum_files'] = {'test': 'checksum_file'}
+        cachedir = tempfile.mkdtemp()
+        fdroidserver.common.config['cachedir'] = cachedir
+
+        def local_file_download(url, local_filename=None, **_):
+            if local_filename:
+                shutil.copy(url, local_filename)
+                return local_filename
+            return local_filename
+
+        with mock.patch('fdroidserver.net.download_file', local_file_download):
+            fdroidserver.common.update_checksums()
+            self.assertTrue(os.path.exists(os.path.join(cachedir, 'test_checksums.json')))
+            with open(os.path.join(cachedir, 'test_checksums.json')) as f:
+                self.assertEqual('12345', json.load(f)['url'][0]['sha256'])
+
+            # modify the checksum file
+            with open('checksum_file', 'w') as f:
+                json.dump({'url': [{'sha256': 'XXXXXX'}]}, f)
+            self.assertRaises(FDroidException, fdroidserver.common.update_checksums)
+            self.assertTrue(os.path.exists(os.path.join(cachedir, 'test_checksums.json')))
+            # Check that the checksum file did *not* update
+            with open(os.path.join(cachedir, 'test_checksums.json')) as f:
+                self.assertEqual('12345', json.load(f)['url'][0]['sha256'])
+
+    def test_get_checksum_file(self):
+        testdir = tempfile.mkdtemp(prefix=inspect.currentframe().f_code.co_name, dir=self.tmpdir)
+        os.chdir(testdir)
+        config = dict()
+        fdroidserver.common.fill_config_defaults(config)
+        fdroidserver.common.config = config
+        fdroidserver.common.config['checksum_update'] = False
+        cachedir = tempfile.mkdtemp()
+        fdroidserver.common.config['cachedir'] = cachedir
+        self.assertRaises(FDroidException, fdroidserver.common.get_checksum_file, 'testfile')
+        with open(os.path.join(cachedir, 'testfile'), 'w') as f:
+            f.write('TEST')
+        checksumfile = fdroidserver.common.get_checksum_file('testfile')
+        self.assertTrue(os.path.isfile(checksumfile))
+        with open(checksumfile) as f:
+            self.assertEqual('TEST', f.read())
+
+        # Test we don't hit the network even when update is enabled, the file is new enough
+        def download_error(*_, **__):
+            raise Exception("This shouldn't be caught")
+
+        fdroidserver.common.config['checksum_update'] = True
+        with mock.patch('fdroidserver.net.download_file', download_error):
+            self.assertTrue(os.path.isfile(fdroidserver.common.get_checksum_file('testfile')))
+
+            # After backdating the file, we'll try to download it and trigger the Exception
+            os.utime(os.path.join(cachedir, 'testfile'),
+                     (datetime.today().timestamp(), datetime(2019, 1, 1).timestamp()))
+            with self.assertRaises(Exception):
+                fdroidserver.common.get_checksum_file('testfile')
 
 
 if __name__ == "__main__":
