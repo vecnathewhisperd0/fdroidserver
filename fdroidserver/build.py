@@ -75,7 +75,7 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
     else:
         logging.getLogger("paramiko").setLevel(logging.WARN)
 
-    sshinfo = vmtools.get_clean_builder('builder', options.reset_server)
+    sshinfo = vmtools.get_clean_builder('builder', cachedir=config['cachedir'], reset=options.reset_server)
 
     output = None
     try:

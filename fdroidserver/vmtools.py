@@ -25,6 +25,9 @@ import shutil
 import subprocess
 import textwrap
 import logging
+
+from hashlib import md5
+
 from .common import FDroidException
 
 from fdroidserver import _
@@ -33,23 +36,37 @@ import threading
 lock = threading.Lock()
 
 
-def get_clean_builder(serverdir, reset=False):
+def write_vagrantfile(vagrantfile, cachedir, share_type):
+    with open(vagrantfile, 'w') as f:
+        f.write(textwrap.dedent("""\
+            # generated file, do not change.
+
+            Vagrant.configure("2") do |config|
+                config.vm.box = "buildserver"
+                config.vm.synced_folder ".", "/vagrant", disabled: true
+                config.vm.synced_folder "{0}", '/vagrant/cache', create: true, mount: false, readonly: true, type: "{1}"
+            end
+            """.format(cachedir, share_type)))
+
+
+def mount_cachedir(cachedir, share_type, sshinfo):
+    pass
+
+
+def get_clean_builder(serverdir, cachedir, reset=False):
     if not os.path.isdir(serverdir):
         if os.path.islink(serverdir):
             os.unlink(serverdir)
         logging.info("buildserver path does not exists, creating %s", serverdir)
         os.makedirs(serverdir)
+    provider = get_vagrant_provider(serverdir)
     vagrantfile = os.path.join(serverdir, 'Vagrantfile')
-    if not os.path.isfile(vagrantfile):
-        with open(os.path.join('builder', 'Vagrantfile'), 'w') as f:
-            f.write(textwrap.dedent("""\
-                # generated file, do not change.
+    if provider == 'libvirt':
+        share_type = '9p'
+    else:
+        share_type = 'virtualbox'
+    write_vagrantfile(vagrantfile, cachedir, share_type)
 
-                Vagrant.configure("2") do |config|
-                    config.vm.box = "buildserver"
-                    config.vm.synced_folder ".", "/vagrant", disabled: true
-                end
-                """))
     vm = get_build_vm(serverdir)
     if reset:
         logging.info('resetting buildserver by request')
@@ -77,10 +94,12 @@ def get_clean_builder(serverdir, reset=False):
         sshinfo = vm.sshinfo()
     except FDroidBuildVmException:
         # workaround because libvirt sometimes likes to forget
-        # about ssh connection info even thou the vm is running
+        # about ssh connection info even though the vm is running
         vm.halt()
         vm.up()
         sshinfo = vm.sshinfo()
+
+    vm.mount_cachedir(cachedir)
 
     return sshinfo
 
@@ -95,29 +114,9 @@ def _check_output(cmd, cwd=None):
     return subprocess.check_output(cmd, shell=False, cwd=cwd)
 
 
-def get_build_vm(srvdir, provider=None):
-    """Factory function for getting FDroidBuildVm instances.
-
-    This function tries to figure out what hypervisor should be used
-    and creates an object for controlling a build VM.
-
-    :param srvdir: path to a directory which contains a Vagrantfile
-    :param provider: optionally this parameter allows specifiying an
-        specific vagrant provider.
-    :returns: FDroidBuildVm instance.
-    """
+def get_vagrant_provider(srvdir):
+    """Try guessing the vagrant provider from various system characteristics"""
     abssrvdir = abspath(srvdir)
-
-    # use supplied provider
-    if provider:
-        if provider == 'libvirt':
-            logging.debug('build vm provider \'libvirt\' selected')
-            return LibvirtBuildVm(abssrvdir)
-        elif provider == 'virtualbox':
-            logging.debug('build vm provider \'virtualbox\' selected')
-            return VirtualboxBuildVm(abssrvdir)
-        else:
-            logging.warning('build vm provider not supported: \'%s\'', provider)
 
     # try guessing provider from installed software
     kvm_installed = shutil.which('kvm') is not None
@@ -128,10 +127,10 @@ def get_build_vm(srvdir, provider=None):
         logging.debug('both kvm and vbox are installed.')
     elif kvm_installed:
         logging.debug('libvirt is the sole installed and supported vagrant provider, selecting \'libvirt\'')
-        return LibvirtBuildVm(abssrvdir)
+        return 'libvrt'
     elif vbox_installed:
         logging.debug('virtualbox is the sole installed and supported vagrant provider, selecting \'virtualbox\'')
-        return VirtualboxBuildVm(abssrvdir)
+        return 'virtualbox'
     else:
         logging.debug('could not confirm that either virtualbox or kvm/libvirt are installed')
 
@@ -139,20 +138,20 @@ def get_build_vm(srvdir, provider=None):
     vagrant_libvirt_path = os.path.join(abssrvdir, '.vagrant', 'machines',
                                         'default', 'libvirt')
     has_libvirt_machine = isdir(vagrant_libvirt_path) \
-        and len(os.listdir(vagrant_libvirt_path)) > 0
+                          and len(os.listdir(vagrant_libvirt_path)) > 0
     vagrant_virtualbox_path = os.path.join(abssrvdir, '.vagrant', 'machines',
                                            'default', 'virtualbox')
     has_vbox_machine = isdir(vagrant_virtualbox_path) \
-        and len(os.listdir(vagrant_virtualbox_path)) > 0
+                       and len(os.listdir(vagrant_virtualbox_path)) > 0
     if has_libvirt_machine and has_vbox_machine:
         logging.info('build vm provider lookup found virtualbox and libvirt, defaulting to \'virtualbox\'')
-        return VirtualboxBuildVm(abssrvdir)
+        return 'virtualbox'
     elif has_libvirt_machine:
         logging.debug('build vm provider lookup found \'libvirt\'')
-        return LibvirtBuildVm(abssrvdir)
+        return 'libvirt'
     elif has_vbox_machine:
         logging.debug('build vm provider lookup found \'virtualbox\'')
-        return VirtualboxBuildVm(abssrvdir)
+        return 'virtualbox'
 
     # try guessing provider from available buildserver boxes
     available_boxes = []
@@ -163,16 +162,45 @@ def get_build_vm(srvdir, provider=None):
             available_boxes.append(box.provider)
     if "libvirt" in available_boxes and "virtualbox" in available_boxes:
         logging.info('basebox lookup found virtualbox and libvirt boxes, defaulting to \'virtualbox\'')
-        return VirtualboxBuildVm(abssrvdir)
+        return 'virtualbox'
     elif "libvirt" in available_boxes:
         logging.info('\'libvirt\' buildserver box available, using that')
-        return LibvirtBuildVm(abssrvdir)
+        return 'libvirt'
     elif "virtualbox" in available_boxes:
         logging.info('\'virtualbox\' buildserver box available, using that')
+        return 'virtualbox'
+    else:
+        logging.debug('No available \'buildserver\' box.')
+        return None
+
+
+def get_build_vm(srvdir, provider=None):
+    """Factory function for getting FDroidBuildVm instances.
+
+    This function tries to figure out what hypervisor should be used
+    and creates an object for controlling a build VM.
+
+    :param srvdir: path to a directory which contains a Vagrantfile
+    :param provider: optionally this parameter allows specifying an
+        specific vagrant provider.
+    :returns: FDroidBuildVm instance.
+    """
+    abssrvdir = abspath(srvdir)
+
+    # use supplied provider
+    if not provider:
+        provider = get_vagrant_provider(srvdir)
+    if not provider:
+        logging.error('Cannot determine vm provider. Exiting...')
+        os._exit(1)
+    if provider == 'libvirt':
+        logging.debug('build vm provider \'libvirt\' selected')
+        return LibvirtBuildVm(abssrvdir)
+    elif provider == 'virtualbox':
+        logging.debug('build vm provider \'virtualbox\' selected')
         return VirtualboxBuildVm(abssrvdir)
     else:
-        logging.error('No available \'buildserver\' box. Cannot proceed')
-        os._exit(1)
+        logging.warning('build vm provider not supported: \'%s\'', provider)
 
 
 class FDroidBuildVmException(FDroidException):
@@ -334,6 +362,9 @@ class FDroidBuildVm():
         except subprocess.CalledProcessError as e:
             raise FDroidBuildVmException("Error getting ssh config") from e
 
+    def mount_cachedir(self, cachedir):
+        raise NotImplementedError('not implemented, please use a sub-type instance')
+
     def snapshot_create(self, snapshot_name):
         raise NotImplementedError('not implemented, please use a sub-type instance')
 
@@ -473,6 +504,17 @@ class LibvirtBuildVm(FDroidBuildVm):
             _check_call(['virsh', '-c', 'qemu:///system', 'vol-delete', '--pool', 'default', '%s_vagrant_box_image_0.img' % (boxname)])
         except subprocess.CalledProcessError as e:
             logging.debug("tried removing '%s', file was not present in first place", boxname, exc_info=e)
+
+    def mount_cachedir(self, cachedir):
+        from fabric import Connection
+
+        ssh = self.sshinfo()
+        con = Connection(ssh['hostname'], user=ssh['user'], port=ssh['port'],
+                         connect_kwargs={"key_filename": ssh['idfile']})
+        con.sudo('mkdir -p /vagrant/cache')
+        mount_tag = md5(cachedir.encode('UTF-8')).hexdigest()[:31]
+        mount_cmd = 'mount -t 9p -o trans=virtio,version=9p2000.L {0} /vagrant/cache'
+        con.sudo(mount_cmd.format(mount_tag))
 
     def snapshot_create(self, snapshot_name):
         logging.info("creating snapshot '%s' for vm '%s'", snapshot_name, self.srvname)
