@@ -3157,10 +3157,11 @@ def verify_apks(signed_apk, unsigned_apk, tmp_dir):
         return 'can not verify: file does not exists: {}'.format(unsigned_apk)
 
     with ZipFile(signed_apk, 'r') as signed:
-        meta_inf_files = ['META-INF/MANIFEST.MF']
+        meta_inf_files = []
         for f in signed.namelist():
             if APK_SIGNATURE_FILES.match(f):
                 meta_inf_files.append(f)
+        meta_inf_files.append('META-INF/MANIFEST.MF')
         if len(meta_inf_files) < 3:
             return "Signature files missing from {0}".format(signed_apk)
 
@@ -3168,8 +3169,6 @@ def verify_apks(signed_apk, unsigned_apk, tmp_dir):
         with ZipFile(unsigned_apk, 'r') as unsigned:
             # only read the signature from the signed APK, everything else from unsigned
             with ZipFile(tmp_apk, 'w') as tmp:
-                for filename in meta_inf_files:
-                    tmp.writestr(signed.getinfo(filename), signed.read(filename))
                 for info in unsigned.infolist():
                     if info.filename in meta_inf_files:
                         logging.warning('Ignoring %s from %s', info.filename, unsigned_apk)
@@ -3177,6 +3176,48 @@ def verify_apks(signed_apk, unsigned_apk, tmp_dir):
                     if info.filename in tmp.namelist():
                         return "duplicate filename found: " + info.filename
                     tmp.writestr(info, unsigned.read(info.filename))
+                for filename in meta_inf_files:
+                    tmp.writestr(signed.getinfo(filename), signed.read(filename))
+
+    with open(signed_apk, 'rb') as signed:
+        signed.seek(-6, 2)  # From file end, 2 byte comment length, 4 byte offset of CD
+        cd_start = int.from_bytes(signed.read(4), 'little')
+        print('cd_start:', cd_start)
+        signed.seek(cd_start - 16 - 8, 0)  # 16 byte magic, uint64 size
+        sb_size = int.from_bytes(signed.read(8), 'little')
+        print('sb_size:', sb_size)
+        sb_start = cd_start - sb_size - 8  # sb_size excludes first sb_size field
+        print('sb_start:', sb_start)
+        signed.seek(sb_start, 0)
+        sb_data = signed.read(sb_size + 8)
+        print('sb_data', sb_data)
+
+    tmp_apk_sig1 = os.path.join(tmp_dir, 'sigcp1_' + os.path.basename(unsigned_apk))
+
+    subprocess.run(['zipalign', '4', tmp_apk, tmp_apk_sig1])
+
+    with open(tmp_apk_sig1, 'rb') as temp:
+        temp.seek(-6, 2)  # From file end, 2 byte comment length, 4 byte offset of CD
+        tmp_cd_start = int.from_bytes(temp.read(4), 'little')
+        print('tmp_cd_start:', tmp_cd_start)
+
+    subprocess.run(['dd', 'if={}'.format(tmp_apk_sig1), 'of={}'.format(tmp_apk),
+                    'bs=4096', 'count={}'.format(tmp_cd_start), 'iflag=count_bytes'])
+
+    with open(tmp_apk, 'ab') as temp:
+        temp.write(sb_data)
+
+    subprocess.run(['dd', 'if={}'.format(tmp_apk_sig1), 'of={}'.format(tmp_apk),
+                    'bs=4096', 'skip={}'.format(tmp_cd_start), 'iflag=skip_bytes', 'oflag=append', 'conv=notrunc'])
+
+    tmp_cd_start += sb_size + 8
+    print('tmp_cd_start:', tmp_cd_start)
+
+    with open(tmp_apk, 'rb+') as temp:
+        temp.seek(-6, 2)  # From file end, 2 byte comment length, 4 byte offset of CD
+        temp.write(int.to_bytes(tmp_cd_start, 4, 'little'))
+
+    shutil.copyfile(tmp_apk, '/dev/shm/test.apk')
 
     verified = verify_apk_signature(tmp_apk)
 
