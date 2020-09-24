@@ -1628,7 +1628,8 @@ def scan_apk_androguard(apk, apkfile):
 
 
 def process_apk(apkcache, apkfilename, repodir, knownapks, use_date_from_apk=False,
-                allow_disabled_algorithms=False, archive_bad_sig=False):
+                allow_disabled_algorithms=False, archive_bad_sig=False,
+                skip_checksum_if_unmodified=False):
     """Processes the apk with the given filename in the given repo directory.
 
     This also extracts the icons.
@@ -1642,6 +1643,8 @@ def process_apk(apkcache, apkfilename, repodir, knownapks, use_date_from_apk=Fal
     :param allow_disabled_algorithms: allow APKs with valid signatures that include
                                       disabled algorithms in the signature (e.g. MD5)
     :param archive_bad_sig: move APKs with a bad signature to the archive
+    :param skip_checksum_if_unmodified: Skip checksum verification for APKs that have a file
+                                        modification timestamp lower than the added timestamp
     :returns: (skip, apk, cachechanged) where skip is a boolean indicating whether to skip this apk,
      apk is the scanned apk information, and cachechanged is True if the apkcache got changed.
     """
@@ -1653,7 +1656,9 @@ def process_apk(apkcache, apkfilename, repodir, knownapks, use_date_from_apk=Fal
     usecache = False
     if apkfilename in apkcache:
         apk = apkcache[apkfilename]
-        if apk.get('hash') == sha256sum(apkfile):
+        apkfile_mtime = datetime.fromtimestamp(os.path.getmtime(apkfile))
+        if skip_checksum_if_unmodified and apk['added'] > apkfile_mtime or \
+           apk.get('hash') == sha256sum(apkfile):
             logging.debug(_("Reading {apkfilename} from cache")
                           .format(apkfilename=apkfilename))
             usecache = True
@@ -1763,7 +1768,8 @@ def process_apk(apkcache, apkfilename, repodir, knownapks, use_date_from_apk=Fal
     return False, apk, cachechanged
 
 
-def process_apks(apkcache, repodir, knownapks, use_date_from_apk=False):
+def process_apks(apkcache, repodir, knownapks, use_date_from_apk=False,
+                 skip_checksum_if_unmodified=False):
     """Processes the apks in the given repo directory.
 
     This also extracts the icons.
@@ -1773,6 +1779,8 @@ def process_apks(apkcache, repodir, knownapks, use_date_from_apk=False):
     :param knownapks: known apks info
     :param use_date_from_apk: use date from APK (instead of current date)
                               for newly added APKs
+    :param skip_checksum_if_unmodified: Skip checksum verification for APKs that have a file
+                                        modification timestamp lower than the added timestamp
     :returns: (apks, cachechanged) where apks is a list of apk information,
               and cachechanged is True if the apkcache got changed.
     """
@@ -1792,7 +1800,8 @@ def process_apks(apkcache, repodir, knownapks, use_date_from_apk=False):
         apkfilename = apkfile[len(repodir) + 1:]
         ada = disabled_algorithms_allowed()
         (skip, apk, cachethis) = process_apk(apkcache, apkfilename, repodir, knownapks,
-                                             use_date_from_apk, ada, True)
+                                             use_date_from_apk, ada, True,
+                                             skip_checksum_if_unmodified)
         if skip:
             continue
         apks.append(apk)
@@ -2283,6 +2292,8 @@ def main():
                         help=_("When configured for signed indexes, create only unsigned indexes at this stage"))
     parser.add_argument("--use-date-from-apk", action="store_true", default=False,
                         help=_("Use date from APK instead of current time for newly added APKs"))
+    parser.add_argument("--skip-checksum-if-unmodified", action="store_true", default=False,
+                        help=_("Skip checksum verification if modify timestamp is lower than added timestamp"))
     parser.add_argument("--rename-apks", action="store_true", default=False,
                         help=_("Rename APK files that do not match package.name_123.apk"))
     parser.add_argument("--allow-disabled-algorithms", action="store_true", default=False,
@@ -2362,7 +2373,8 @@ def main():
     delete_disabled_builds(apps, apkcache, repodirs)
 
     # Scan all apks in the main repo
-    apks, cachechanged = process_apks(apkcache, repodirs[0], knownapks, options.use_date_from_apk)
+    apks, cachechanged = process_apks(apkcache, repodirs[0], knownapks, options.use_date_from_apk,
+                                      options.skip_checksum_if_unmodified)
 
     files, fcachechanged = scan_repo_files(apkcache, repodirs[0], knownapks,
                                            options.use_date_from_apk)
@@ -2389,7 +2401,8 @@ def main():
 
     # Scan the archive repo for apks as well
     if len(repodirs) > 1:
-        archapks, cc = process_apks(apkcache, repodirs[1], knownapks, options.use_date_from_apk)
+        archapks, cc = process_apks(apkcache, repodirs[1], knownapks, options.use_date_from_apk,
+                                    options.skip_checksum_if_unmodified)
         if cc:
             cachechanged = True
     else:
