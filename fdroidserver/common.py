@@ -3582,12 +3582,13 @@ def update_checksums():
         logging.warning("gpg could not be found, cannot update checksums")
         return
     for checksum_file_name, checksum_file_url in config['checksum_files'].items():
-        dlpath = os.path.join(tempfile.mkdtemp(), checksum_file_name + '_checksums.json')
+        checksum_file_realname = checksum_file_name + '_checksums.json'
+        dlpath = os.path.join(tempfile.mkdtemp(), checksum_file_realname)
         sigfile = dlpath + '.asc'
         net.download_file(checksum_file_url, dlpath)
         net.download_file(checksum_file_url + '.asc', sigfile)
         gpg_verify(dlpath, sigfile, config['checksums_valid_gpgkeys'])
-        shutil.move(dlpath, config['cachedir'])
+        shutil.move(dlpath, os.path.join(config['cachedir'], checksum_file_realname))
 
 
 def is_newer_than(file, hours):
