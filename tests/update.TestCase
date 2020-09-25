@@ -557,6 +557,10 @@ class UpdateTest(unittest.TestCase):
         fdroidserver.common.config = config
         fdroidserver.update.config = config
         apk_info = fdroidserver.update.scan_apk('repo/no.min.target.sdk_987.apk')
+
+        # Don't care about the file modification time
+        del apk['mtime']
+
         self.maxDiff = None
         self.assertDictEqual(apk_info, {
             'icons': {},
@@ -626,6 +630,7 @@ class UpdateTest(unittest.TestCase):
                                                                    False)
             # Don't care about the date added to the repo and relative apkName
             del apk['added']
+            del apk['mtime']
             del apk['apkName']
             # avoid AAPT application name bug
             del apk['name']
