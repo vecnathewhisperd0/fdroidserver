@@ -559,7 +559,7 @@ class UpdateTest(unittest.TestCase):
         apk_info = fdroidserver.update.scan_apk('repo/no.min.target.sdk_987.apk')
 
         # Don't care about the file modification time
-        del apk['mtime']
+        del apk_info['mtime']
 
         self.maxDiff = None
         self.assertDictEqual(apk_info, {
