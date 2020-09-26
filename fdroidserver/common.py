@@ -44,6 +44,7 @@ import zipfile
 import tempfile
 import json
 import pkg_resources
+import errno
 
 # TODO change to only import defusedxml once its installed everywhere
 try:
@@ -3393,6 +3394,18 @@ def get_ndk_longversion(version):
                     return versionmatch.group(1)
 
 
+def _is_writable(path):
+    try:
+        testfile = tempfile.TemporaryFile(dir=path)
+        testfile.close()
+    except OSError as e:
+        if e.errno == errno.EACCES or e.errno == errno.EROFS:  # 13 or 30
+            return False
+        e.filename = path
+        raise
+    return True
+
+
 def provision_ndk(version):
     """
     :param version: version to provision, either in rXX human readable format or
@@ -3416,7 +3429,9 @@ def provision_ndk(version):
             return installdir
     cachefile = os.path.join(config['cachedir'], "android-ndk-{version}-linux-x86_64.zip".format(version=version))
     installdir_ndk_root = os.path.join(config['cachedir'], "ndk")
-    installdir = os.path.join(config['cachedir'], 'ndk', "android-ndk-{version}".format(version=version))
+    if not _is_writable(installdir_ndk_root):
+        installdir_ndk_root = tempfile.gettempdir()
+    installdir = os.path.join(installdir_ndk_root, "android-ndk-{version}".format(version=version))
     if os.path.isdir(installdir) and os.listdir(installdir):
         logging.debug("Extracted ndk directory exists in %s, using this." % installdir)
         return installdir
