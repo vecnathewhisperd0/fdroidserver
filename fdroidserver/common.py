@@ -3429,12 +3429,13 @@ def provision_ndk(version):
             return installdir
     cachefile = os.path.join(config['cachedir'], "android-ndk-{version}-linux-x86_64.zip".format(version=version))
     installdir_ndk_root = os.path.join(config['cachedir'], "ndk")
-    if not _is_writable(installdir_ndk_root):
-        installdir_ndk_root = tempfile.gettempdir()
     installdir = os.path.join(installdir_ndk_root, "android-ndk-{version}".format(version=version))
     if os.path.isdir(installdir) and os.listdir(installdir):
         logging.debug("Extracted ndk directory exists in %s, using this." % installdir)
         return installdir
+    if not _is_writable(installdir_ndk_root):
+        installdir_ndk_root = tempfile.gettempdir()
+        installdir = os.path.join(installdir_ndk_root, "android-ndk-{version}".format(version=version))
     if not os.path.isfile(cachefile):
         if config.get('auto_download_ndk') or options.auto_download_ndk:
             logging.info("Downloading Android NDK version '%s' to '%s'" % (version, cachefile))
