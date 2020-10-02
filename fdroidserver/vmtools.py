@@ -49,10 +49,6 @@ def write_vagrantfile(vagrantfile, cachedir, share_type):
             """.format(cachedir, share_type)))
 
 
-def mount_cachedir(cachedir, share_type, sshinfo):
-    pass
-
-
 def get_clean_builder(serverdir, cachedir, reset=False):
     if not os.path.isdir(serverdir):
         if os.path.islink(serverdir):
@@ -137,12 +133,10 @@ def get_vagrant_provider(srvdir):
     # try guessing provider from .../srvdir/.vagrant internals
     vagrant_libvirt_path = os.path.join(abssrvdir, '.vagrant', 'machines',
                                         'default', 'libvirt')
-    has_libvirt_machine = isdir(vagrant_libvirt_path) \
-                          and len(os.listdir(vagrant_libvirt_path)) > 0
+    has_libvirt_machine = isdir(vagrant_libvirt_path) and len(os.listdir(vagrant_libvirt_path)) > 0
     vagrant_virtualbox_path = os.path.join(abssrvdir, '.vagrant', 'machines',
                                            'default', 'virtualbox')
-    has_vbox_machine = isdir(vagrant_virtualbox_path) \
-                       and len(os.listdir(vagrant_virtualbox_path)) > 0
+    has_vbox_machine = isdir(vagrant_virtualbox_path) and len(os.listdir(vagrant_virtualbox_path)) > 0
     if has_libvirt_machine and has_vbox_machine:
         logging.info('build vm provider lookup found virtualbox and libvirt, defaulting to \'virtualbox\'')
         return 'virtualbox'
@@ -512,7 +506,8 @@ class LibvirtBuildVm(FDroidBuildVm):
         con = Connection(ssh['hostname'], user=ssh['user'], port=ssh['port'],
                          connect_kwargs={"key_filename": ssh['idfile']})
         con.sudo('mkdir -p /vagrant/cache')
-        mount_tag = md5(cachedir.encode('UTF-8')).hexdigest()[:31]
+        # See https://github.com/vagrant-libvirt/vagrant-libvirt/blob/e7cb0fe00f16b82e866a11162fa5cbf46998d520/lib/vagrant-libvirt/cap/synced_folder.rb#L44
+        mount_tag = md5(cachedir.encode('UTF-8')).hexdigest()[:31]  # nosec this is how vagrant-libvirt calculates the folder mount_tag
         mount_cmd = 'mount -t 9p -o trans=virtio,version=9p2000.L {0} /vagrant/cache'
         con.sudo(mount_cmd.format(mount_tag))
 
@@ -595,3 +590,16 @@ class VirtualboxBuildVm(FDroidBuildVm):
             raise FDroidBuildVmException("could not load snapshot "
                                          "'fdroidclean' for vm '%s'"
                                          % (self.srvname)) from e
+
+    def mount_cachedir(self, cachedir):
+        from fabric import Connection
+
+        ssh = self.sshinfo()
+        con = Connection(ssh['hostname'], user=ssh['user'], port=ssh['port'],
+                         connect_kwargs={"key_filename": ssh['idfile']})
+        con.sudo('mkdir -p /vagrant/cache')
+        import re
+        # See https://github.com/hashicorp/vagrant/blob/c34fcc5a5491bccc0d4589a4352ea64baeb7d9c0/plugins/providers/virtualbox/synced_folder.rb#L90
+        mount_tag = re.sub(r'^_', '', re.sub(r'[\s/\\]', '_', cachedir))
+        mount_cmd = 'mount -t  vboxsf {0} /vagrant/cache'
+        con.sudo(mount_cmd.format(mount_tag))
