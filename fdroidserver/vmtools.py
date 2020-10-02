@@ -118,6 +118,7 @@ def get_vagrant_provider(srvdir):
     kvm_installed = shutil.which('kvm') is not None
     kvm_installed |= shutil.which('qemu') is not None
     kvm_installed |= shutil.which('qemu-kvm') is not None
+    kvm_installed |= shutil.which('qemu-system-x86_64') is not None
     vbox_installed = shutil.which('VBoxHeadless') is not None
     if kvm_installed and vbox_installed:
         logging.debug('both kvm and vbox are installed.')
