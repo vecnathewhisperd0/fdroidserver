@@ -25,28 +25,69 @@ import shutil
 import subprocess
 import textwrap
 import logging
+import threading
 
 from hashlib import md5
+from pathlib import Path
 
 from .common import FDroidException
 
 from fdroidserver import _
-import threading
 
 lock = threading.Lock()
+
+VM_CACHE_LOCATION = '/vagrant/cache'
 
 
 def write_vagrantfile(vagrantfile, cachedir, share_type):
     with open(vagrantfile, 'w') as f:
+        if share_type == 'virtualbox':
+            from invoke import run, UnexpectedExit
+            # All of this is a workaround for virtualbox not supporting read-only shared folders
+            # ro share in virtbualbox means root inside the VM has still write access, which isn't good enough for us
+            # So we create a ro bind mount of the cache folder and share that inside the VM instead
+            ro_cachedir = os.path.join(cachedir, 'buildserver')
+            os.makedirs(ro_cachedir, exist_ok=True)
+            # Test if we are mounted ro already
+            if os.path.isfile(os.path.join(cachedir, 'MOUNT_TEST')):
+                os.remove(os.path.join(cachedir, 'MOUNT_TEST'))
+            Path(os.path.join(cachedir, 'MOUNT_TEST')).touch()
+            if os.path.isfile(os.path.join(ro_cachedir, 'MOUNT_TEST')):
+                try:
+                    os.remove(os.path.join(ro_cachedir, 'MOUNT_TEST'))
+                    logging.error("Cachedir is bind mounted to {0} but still writable. Aborting!".format(ro_cachedir))
+                except OSError:
+                    # Read-only filesystem expected, all good.
+                    # Cleanup the original file.
+                    os.remove(os.path.join(cachedir, 'MOUNT_TEST'))
+                    pass
+            else:
+                cmd = "mount --bind -o ro {0} {1}"
+                try:
+                    run(cmd.format(cachedir, ro_cachedir))
+                except UnexpectedExit:
+                    logging.warning("Need sudo access for mounting cache read-only for virtualbox")
+                    logging.warning("Add the following to /etc/fstab to prevent that:\n\t {0} {1} none bind,ro".format(cachedir, ro_cachedir))
+                    cmd = "sudo " + cmd
+                    run(cmd.format(cachedir, ro_cachedir))
+            cachedir = ro_cachedir
+
+        # libvirt cannot create snapshots with a mounted shared folder, so we disable auto-mounting
+        # and manually mount it befor each build
+        # virtulabox vms on the other hand seem to ignore the automount flag, so we let
+        if share_type == 'virtualbox':
+            automount = 'true'
+        else:
+            automount = 'false'
         f.write(textwrap.dedent("""\
             # generated file, do not change.
 
             Vagrant.configure("2") do |config|
                 config.vm.box = "buildserver"
                 config.vm.synced_folder ".", "/vagrant", disabled: true
-                config.vm.synced_folder "{0}", '/vagrant/cache', create: true, mount: false, readonly: true, type: "{1}"
+                config.vm.synced_folder "{0}", '/vagrant/cache', create: true, mount: {1}, readonly: true, type: "{2}"
             end
-            """.format(cachedir, share_type)))
+            """.format(cachedir, automount, share_type)))
 
 
 def get_clean_builder(serverdir, cachedir, reset=False):
@@ -502,15 +543,14 @@ class LibvirtBuildVm(FDroidBuildVm):
 
     def mount_cachedir(self, cachedir):
         from fabric import Connection
-
         ssh = self.sshinfo()
         con = Connection(ssh['hostname'], user=ssh['user'], port=ssh['port'],
                          connect_kwargs={"key_filename": ssh['idfile']})
-        con.sudo('mkdir -p /vagrant/cache')
+        con.sudo('mkdir -p ' + VM_CACHE_LOCATION)
         # See https://github.com/vagrant-libvirt/vagrant-libvirt/blob/e7cb0fe00f16b82e866a11162fa5cbf46998d520/lib/vagrant-libvirt/cap/synced_folder.rb#L44
         mount_tag = md5(cachedir.encode('UTF-8')).hexdigest()[:31]  # nosec this is how vagrant-libvirt calculates the folder mount_tag
-        mount_cmd = 'mount -t 9p -o trans=virtio,version=9p2000.L {0} /vagrant/cache'
-        con.sudo(mount_cmd.format(mount_tag))
+        mount_cmd = 'mount -t 9p -o trans=virtio,version=9p2000.L {0} {1}'
+        con.sudo(mount_cmd.format(mount_tag, VM_CACHE_LOCATION))
 
     def snapshot_create(self, snapshot_name):
         logging.info("creating snapshot '%s' for vm '%s'", snapshot_name, self.srvname)
@@ -593,14 +633,5 @@ class VirtualboxBuildVm(FDroidBuildVm):
                                          % (self.srvname)) from e
 
     def mount_cachedir(self, cachedir):
-        from fabric import Connection
-
-        ssh = self.sshinfo()
-        con = Connection(ssh['hostname'], user=ssh['user'], port=ssh['port'],
-                         connect_kwargs={"key_filename": ssh['idfile']})
-        con.sudo('mkdir -p /vagrant/cache')
-        import re
-        # See https://github.com/hashicorp/vagrant/blob/c34fcc5a5491bccc0d4589a4352ea64baeb7d9c0/plugins/providers/virtualbox/synced_folder.rb#L90
-        mount_tag = re.sub(r'^_', '', re.sub(r'[\s/\\]', '_', cachedir))
-        mount_cmd = 'mount -t  vboxsf {0} /vagrant/cache'
-        con.sudo(mount_cmd.format(mount_tag))
+        # vagrant virtualbox always mounts the cachedir when bringing up the VM, so no need to do it here
+        pass

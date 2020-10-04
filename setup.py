@@ -87,6 +87,8 @@ setup(name='fdroidserver',
           'requests >= 2.5.2, != 2.11.0, != 2.12.2, != 2.18.0',
           'yamllint',
           'python-gnupg',
+          'fabric',
+          'invoke',
       ],
       extras_require={
           'test': ['pyjks'],
