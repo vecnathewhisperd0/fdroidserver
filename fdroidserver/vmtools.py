@@ -62,13 +62,14 @@ def write_vagrantfile(vagrantfile, cachedir, share_type):
                     os.remove(os.path.join(cachedir, 'MOUNT_TEST'))
                     pass
             else:
-                cmd = "mount --bind -o ro {0} {1}"
                 try:
-                    run(cmd.format(cachedir, ro_cachedir))
+                    # Try mounting via fstab entry
+                    run("mount " + ro_cachedir)
                 except UnexpectedExit:
                     logging.warning("Need sudo access for mounting cache read-only for virtualbox")
-                    logging.warning("Add the following to /etc/fstab to prevent that:\n\t {0} {1} none bind,ro".format(cachedir, ro_cachedir))
-                    cmd = "sudo " + cmd
+                    logging.warning("Add the following to /etc/fstab to prevent that:\n\t {0} {1} none bind,ro,user"
+                                    .format(cachedir, ro_cachedir))
+                    cmd = "sudo mount --bind -o ro {0} {1}"
                     run(cmd.format(cachedir, ro_cachedir))
             cachedir = ro_cachedir
 
