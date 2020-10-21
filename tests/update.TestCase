@@ -17,6 +17,7 @@ import unittest
 import yaml
 import zipfile
 import textwrap
+import datetime
 from binascii import unhexlify
 from distutils.version import LooseVersion
 from testcommon import TmpCwd
@@ -557,10 +558,6 @@ class UpdateTest(unittest.TestCase):
         fdroidserver.common.config = config
         fdroidserver.update.config = config
         apk_info = fdroidserver.update.scan_apk('repo/no.min.target.sdk_987.apk')
-
-        # Don't care about the file modification time
-        del apk_info['mtime']
-
         self.maxDiff = None
         self.assertDictEqual(apk_info, {
             'icons': {},
@@ -630,7 +627,6 @@ class UpdateTest(unittest.TestCase):
                                                                    False)
             # Don't care about the date added to the repo and relative apkName
             del apk['added']
-            del apk['mtime']
             del apk['apkName']
             # avoid AAPT application name bug
             del apk['name']
@@ -773,6 +769,97 @@ class UpdateTest(unittest.TestCase):
         self.assertTrue(skip)
         self.assertIsNone(apk)
         self.assertFalse(cachechanged)
+
+    def test_process_apk_caching_with_checksum(self):
+        config = dict()
+        fdroidserver.common.fill_config_defaults(config)
+        fdroidserver.update.config = config
+        os.chdir(os.path.join(localmodule, 'tests'))
+
+        config['ndk_paths'] = dict()
+        fdroidserver.common.config = config
+        fdroidserver.update.config = config
+        fdroidserver.update.options = type('', (), {})()
+        fdroidserver.update.options.clean = True
+        fdroidserver.update.options.rename_apks = False
+        fdroidserver.update.options.delete_unknown = True
+        fdroidserver.update.options.allow_disabled_algorithms = False
+        fdroidserver.update.options.cache_by_mtime = True
+
+        for icon_dir in fdroidserver.update.get_all_icon_dirs('repo'):
+            if not os.path.exists(icon_dir):
+                os.makedirs(icon_dir)
+
+        apkcache = {}
+        filename = '../urzip.apk'
+
+        # Get initial cache data
+        _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
+                                                               use_date_from_apk=False, cache_by_mtime=False)
+        self.assertTrue(cachechanged)
+
+        # Verify that the cache is used if nothing has changed
+        _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
+                                                               use_date_from_apk=False, cache_by_mtime=False)
+        self.assertFalse(cachechanged)
+
+        # Verify that the cache is stale if 'hash' is different
+        apkcache[filename]['hash'] = "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
+        _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
+                                                               use_date_from_apk=False, cache_by_mtime=False)
+        self.assertTrue(cachechanged)
+
+    def test_process_apk_caching_with_etag(self):
+        config = dict()
+        fdroidserver.common.fill_config_defaults(config)
+        fdroidserver.update.config = config
+        os.chdir(os.path.join(localmodule, 'tests'))
+
+        config['ndk_paths'] = dict()
+        fdroidserver.common.config = config
+        fdroidserver.update.config = config
+        fdroidserver.update.options = type('', (), {})()
+        fdroidserver.update.options.clean = True
+        fdroidserver.update.options.rename_apks = False
+        fdroidserver.update.options.delete_unknown = True
+        fdroidserver.update.options.allow_disabled_algorithms = False
+        fdroidserver.update.options.cache_by_mtime = True
+
+        for icon_dir in fdroidserver.update.get_all_icon_dirs('repo'):
+            if not os.path.exists(icon_dir):
+                os.makedirs(icon_dir)
+
+        apkcache = {}
+        filename = '../urzip.apk'
+
+        # Get initial cache data
+        _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
+                                                               use_date_from_apk=False, cache_by_mtime=True)
+        self.assertTrue(cachechanged)
+
+        # Verify that the cache is used if nothing has changed
+        _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
+                                                               use_date_from_apk=False, cache_by_mtime=True)
+        self.assertFalse(cachechanged)
+
+        # Verify that the cache is stale if 'added' is different
+        apkcache[filename]['added'] += datetime.timedelta(days=1)
+        _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
+                                                               use_date_from_apk=False, cache_by_mtime=True)
+        self.assertTrue(cachechanged)
+
+        # Verify that the cache is stale if 'size' is different
+        apkcache[filename]['size'] -= 1
+        _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
+                                                               use_date_from_apk=False, cache_by_mtime=True)
+        self.assertTrue(cachechanged)
+
+        # Verify that the cache is stale if both 'size' and 'added' are different
+        apkcache[filename]['added'] -= datetime.timedelta(days=1)
+        apkcache[filename]['size'] += 1
+        _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
+                                                               use_date_from_apk=False, cache_by_mtime=True)
+        self.assertTrue(cachechanged)
 
     def test_translate_per_build_anti_features(self):
         os.chdir(os.path.join(localmodule, 'tests'))

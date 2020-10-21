@@ -543,8 +543,6 @@ def get_cache():
             v['antiFeatures'] = set(v['antiFeatures'])
         if 'added' in v:
             v['added'] = datetime.fromtimestamp(v['added'])
-        if 'mtime' in v:
-            v['mtime'] = datetime.fromtimestamp(v['mtime'])
 
     return apkcache
 
@@ -1278,6 +1276,7 @@ def scan_repo_files(apkcache, repodir, knownapks, use_date_from_file=False):
                                   .format(path=filename))
 
         shasum = sha256sum(filename)
+        file_mtime = datetime.fromtimestamp(os.path.getmtime(filename))
         usecache = False
         if name_utf8 in apkcache:
             repo_file = apkcache[name_utf8]
@@ -1297,6 +1296,7 @@ def scan_repo_files(apkcache, repodir, knownapks, use_date_from_file=False):
             repo_file['apkName'] = name_utf8
             repo_file['hash'] = shasum
             repo_file['hashType'] = 'sha256'
+            repo_file['added'] = file_mtime
             repo_file['versionCode'] = 0
             repo_file['versionName'] = shasum[0:7]
             # the static ID is the SHA256 unless it is set in the metadata
@@ -1318,13 +1318,12 @@ def scan_repo_files(apkcache, repodir, knownapks, use_date_from_file=False):
             timestamp = stat.st_ctime
             default_date_param = time.gmtime(time.mktime(datetime.fromtimestamp(timestamp).timetuple()))
         else:
-            default_date_param = None
+            default_date_param = repo_file['added']
 
-        # Record in knownapks, getting the added date at the same time..
-        added = knownapks.recordapk(repo_file['apkName'], repo_file['packageName'],
-                                    default_date=default_date_param)
-        if added:
-            repo_file['added'] = added
+        # Record in knownapks
+        # TODO: Remove this when KnownApks is not needed anymore
+        knownapks.recordapk(repo_file['apkName'], repo_file['packageName'],
+                            default_date=default_date_param)
 
         repo_files.append(repo_file)
 
@@ -1377,8 +1376,8 @@ def scan_apk(apk_file):
     # Get size of the APK
     apk['size'] = os.path.getsize(apk_file)
 
-    # Get modification timestamp of the APK
-    apk['mtime'] = datetime.fromtimestamp(os.path.getmtime(apk_file))
+    # Get the "added" timestamp of the APK (file modify time)
+    apk['added'] = datetime.fromtimestamp(os.path.getmtime(apk_file))
 
     if 'minSdkVersion' not in apk:
         logging.warning("No SDK version information found in {0}".format(apk_file))
@@ -1665,7 +1664,7 @@ def process_apk(apkcache, apkfilename, repodir, knownapks, use_date_from_apk=Fal
             # Use the cached data if the file's modify timestamp and size hasn't changed
             apkfile_mtime = datetime.fromtimestamp(os.path.getmtime(apkfile))
             apkfile_size = os.path.getsize(apkfile)
-            usecache = apkfile_mtime == apk.get('mtime', 0) and apkfile_size == apk['size']
+            usecache = apkfile_mtime == apk.get('added', 0) and apkfile_size == apk['size']
         else:
             # Use the cached data if the file's sha256 checksum hasn't changed
             apkfile_hash = sha256sum(apkfile)
@@ -1766,13 +1765,12 @@ def process_apk(apkcache, apkfilename, repodir, knownapks, use_date_from_apk=Fal
         if use_date_from_apk and manifest.date_time[1] != 0:
             default_date_param = datetime(*manifest.date_time)
         else:
-            default_date_param = None
+            default_date_param = apk['added']
 
-        # Record in known apks, getting the added date at the same time..
-        added = knownapks.recordapk(apk['apkName'], apk['packageName'],
-                                    default_date=default_date_param)
-        if added:
-            apk['added'] = added
+        # Record in known apks
+        # TODO: Remove this when KnownApks is not needed anymore
+        knownapks.recordapk(apk['apkName'], apk['packageName'],
+                            default_date=default_date_param)
 
         apkcache[apkfilename] = apk
         cachechanged = True
