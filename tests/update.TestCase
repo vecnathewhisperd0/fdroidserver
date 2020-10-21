@@ -522,6 +522,7 @@ class UpdateTest(unittest.TestCase):
                              '897486e1f857c6c0ee32ccbad0e1b8cd82f6d0e65a44a23f13f852d2b63a18c8')
             self.assertEqual(apk_info['packageName'], 'org.dyndns.fules.ck')
             self.assertEqual(apk_info['versionCode'], 20)
+            self.assertEqual(apk_info['added'], datetime.fromtimestamp(os.path.getmtime('org.dyndns.fules.ck_20.apk')))
             self.assertEqual(apk_info['size'], 132453)
             self.assertEqual(apk_info['nativecode'],
                              ['arm64-v8a', 'armeabi', 'armeabi-v7a', 'mips', 'mips64', 'x86', 'x86_64'])
@@ -560,6 +561,7 @@ class UpdateTest(unittest.TestCase):
         apk_info = fdroidserver.update.scan_apk('repo/no.min.target.sdk_987.apk')
         self.maxDiff = None
         self.assertDictEqual(apk_info, {
+            'added': datetime.fromtimestamp(os.path.getmtime('repo/no.min.target.sdk_987.apk')),
             'icons': {},
             'icons_src': {'-1': 'res/drawable/ic_launcher.png',
                           '160': 'res/drawable/ic_launcher.png'},
@@ -792,6 +794,7 @@ class UpdateTest(unittest.TestCase):
 
         apkcache = {}
         filename = '../urzip.apk'
+        knownapks = fdroidserver.common.KnownApks()
 
         # Get initial cache data
         _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
@@ -831,6 +834,7 @@ class UpdateTest(unittest.TestCase):
 
         apkcache = {}
         filename = '../urzip.apk'
+        knownapks = fdroidserver.common.KnownApks()
 
         # Get initial cache data
         _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
