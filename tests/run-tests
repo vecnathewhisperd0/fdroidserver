@@ -258,6 +258,25 @@ echo "uninstall_list = ('com.android.vending', 'com.facebook.orca',)" >> config.
 echo "gpghome = '$GNUPGHOME'" >> config.py
 echo "gpgkey = 'CE71F7FB'" >> config.py
 echo "mirrors = ('http://foobarfoobarfoobar.onion/fdroid','https://foo.bar/fdroid',)" >> config.py
+# Update apk file times so 'added' matches the test index
+# Generated using jq:
+# jq -r '.packages[][] | "touch -d \"" + (.added / 1000.0 | strftime("%Y-%m-%d %H:%M:%S")) + "\" \"repo/" + .apkName + "\""' repo/index-v1.json
+touch -d "2017-06-23 00:00:00" "repo/com.politedroid_6.apk"
+touch -d "2017-06-23 00:00:00" "repo/com.politedroid_5.apk"
+touch -d "2017-06-23 00:00:00" "repo/com.politedroid_4.apk"
+touch -d "2017-06-23 00:00:00" "repo/com.politedroid_3.apk"
+touch -d "2017-12-22 00:00:00" "repo/duplicate.permisssions_9999999.apk"
+touch -d "2016-03-10 00:00:00" "repo/fake.ota.update_1234.zip"
+touch -d "2016-06-23 00:00:00" "repo/urzip-; Рахма́, [rɐxˈmanʲɪnəf] سيرجي_رخمانينوف 谢·.apk"
+touch -d "2018-10-10 00:00:00" "repo/info.zwanenburg.caffeinetile_4.apk"
+touch -d "2018-10-10 00:00:00" "repo/no.min.target.sdk_987.apk"
+touch -d "2013-12-31 00:00:00" "repo/obb.main.oldversion_1444412523.apk"
+touch -d "2016-06-20 00:00:00" "repo/obb.main.twoversions_1101617.apk"
+touch -d "2016-01-01 00:00:00" "repo/obb.main.twoversions_1101615.apk"
+touch -d "2015-10-12 00:00:00" "repo/obb.main.twoversions_1101613.apk"
+touch -d "2016-04-23 00:00:00" "repo/obb.mainpatch.current_1619.apk"
+touch -d "2017-06-01 00:00:00" "repo/obb.mainpatch.current_1619_another-release-key.apk"
+touch -d "2018-04-26 00:00:00" "repo/souch.smsbypass_9.apk"
 $fdroid update --verbose --pretty
 test -e repo/index.xml
 test -e repo/index.jar
