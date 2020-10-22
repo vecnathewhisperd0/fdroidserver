@@ -639,6 +639,9 @@ cp $WORKSPACE/tests/metadata/com.politedroid.yml metadata
 echo "com.politedroid_4.apk com.politedroid 2016-01-01" > stats/known_apks.txt
 echo "com.politedroid_5.apk com.politedroid 2017-01-01" >> stats/known_apks.txt
 echo "com.politedroid_6.apk com.politedroid 2018-01-01" >> stats/known_apks.txt
+# Update file modify timestamp for setting the 'added' date
+touch -d "2017-01-01 00:00:00" "archive/com.politedroid_5.apk"
+touch -d "2018-01-01 00:00:00" "repo/com.politedroid_6.apk"
 sed -i -e 's/ArchivePolicy:.*/ArchivePolicy: 1 versions/' metadata/com.politedroid.yml
 timestamp=1483228800  # $(date -u --date=2017-01-01 +%s)000
 
