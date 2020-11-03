@@ -522,8 +522,6 @@ class UpdateTest(unittest.TestCase):
                              '897486e1f857c6c0ee32ccbad0e1b8cd82f6d0e65a44a23f13f852d2b63a18c8')
             self.assertEqual(apk_info['packageName'], 'org.dyndns.fules.ck')
             self.assertEqual(apk_info['versionCode'], 20)
-            self.assertEqual(apk_info['added'],
-                             datetime.datetime.fromtimestamp(os.path.getmtime('org.dyndns.fules.ck_20.apk')))
             self.assertEqual(apk_info['size'], 132453)
             self.assertEqual(apk_info['nativecode'],
                              ['arm64-v8a', 'armeabi', 'armeabi-v7a', 'mips', 'mips64', 'x86', 'x86_64'])
@@ -561,8 +559,11 @@ class UpdateTest(unittest.TestCase):
         fdroidserver.update.config = config
         apk_info = fdroidserver.update.scan_apk('repo/no.min.target.sdk_987.apk')
         self.maxDiff = None
+
+        # Ignore Etag (mtime is set on git clone)
+        del apk_info['etag']
+
         self.assertDictEqual(apk_info, {
-            'added': datetime.datetime.fromtimestamp(os.path.getmtime('repo/no.min.target.sdk_987.apk')),
             'icons': {},
             'icons_src': {'-1': 'res/drawable/ic_launcher.png',
                           '160': 'res/drawable/ic_launcher.png'},
@@ -787,7 +788,7 @@ class UpdateTest(unittest.TestCase):
         fdroidserver.update.options.rename_apks = False
         fdroidserver.update.options.delete_unknown = True
         fdroidserver.update.options.allow_disabled_algorithms = False
-        fdroidserver.update.options.cache_by_mtime = True
+        fdroidserver.update.options.cache_by_etag = True
 
         for icon_dir in fdroidserver.update.get_all_icon_dirs('repo'):
             if not os.path.exists(icon_dir):
@@ -799,18 +800,18 @@ class UpdateTest(unittest.TestCase):
 
         # Get initial cache data
         _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
-                                                               use_date_from_apk=False, cache_by_mtime=False)
+                                                               use_date_from_apk=False, cache_by_etag=False)
         self.assertTrue(cachechanged)
 
         # Verify that the cache is used if nothing has changed
         _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
-                                                               use_date_from_apk=False, cache_by_mtime=False)
+                                                               use_date_from_apk=False, cache_by_etag=False)
         self.assertFalse(cachechanged)
 
         # Verify that the cache is stale if 'hash' is different
         apkcache[filename]['hash'] = "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
         _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
-                                                               use_date_from_apk=False, cache_by_mtime=False)
+                                                               use_date_from_apk=False, cache_by_etag=False)
         self.assertTrue(cachechanged)
 
     def test_process_apk_caching_with_etag(self):
@@ -827,7 +828,7 @@ class UpdateTest(unittest.TestCase):
         fdroidserver.update.options.rename_apks = False
         fdroidserver.update.options.delete_unknown = True
         fdroidserver.update.options.allow_disabled_algorithms = False
-        fdroidserver.update.options.cache_by_mtime = True
+        fdroidserver.update.options.cache_by_etag = True
 
         for icon_dir in fdroidserver.update.get_all_icon_dirs('repo'):
             if not os.path.exists(icon_dir):
@@ -839,31 +840,18 @@ class UpdateTest(unittest.TestCase):
 
         # Get initial cache data
         _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
-                                                               use_date_from_apk=False, cache_by_mtime=True)
+                                                               use_date_from_apk=False, cache_by_etag=True)
         self.assertTrue(cachechanged)
 
         # Verify that the cache is used if nothing has changed
         _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
-                                                               use_date_from_apk=False, cache_by_mtime=True)
+                                                               use_date_from_apk=False, cache_by_etag=True)
         self.assertFalse(cachechanged)
 
-        # Verify that the cache is stale if 'added' is different
-        apkcache[filename]['added'] += datetime.timedelta(days=1)
+        # Verify that the cache is stale if 'etag' is different
+        apkcache[filename]['etag'] = "aaaaaa"
         _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
-                                                               use_date_from_apk=False, cache_by_mtime=True)
-        self.assertTrue(cachechanged)
-
-        # Verify that the cache is stale if 'size' is different
-        apkcache[filename]['size'] -= 1
-        _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
-                                                               use_date_from_apk=False, cache_by_mtime=True)
-        self.assertTrue(cachechanged)
-
-        # Verify that the cache is stale if both 'size' and 'added' are different
-        apkcache[filename]['added'] -= datetime.timedelta(days=1)
-        apkcache[filename]['size'] += 1
-        _, apk, cachechanged = fdroidserver.update.process_apk(apkcache, filename, 'repo', knownapks,
-                                                               use_date_from_apk=False, cache_by_mtime=True)
+                                                               use_date_from_apk=False, cache_by_etag=True)
         self.assertTrue(cachechanged)
 
     def test_translate_per_build_anti_features(self):

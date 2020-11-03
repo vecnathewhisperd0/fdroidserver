@@ -599,6 +599,15 @@ def sha256base64(filename):
     return urlsafe_b64encode(hasher.digest()).decode()
 
 
+def calculate_file_etag(filename):
+    mtime = os.path.getmtime(filename)
+    size = os.path.getsize(filename)
+    hasher = hashlib.sha256()
+    hasher.update(bytes(str(mtime), 'utf8'))
+    hasher.update(bytes(str(size), 'utf8'))
+    return hasher.hexdigest()
+
+
 def has_known_vulnerability(filename):
     """checks for known vulnerabilities in the APK
 
@@ -1276,7 +1285,6 @@ def scan_repo_files(apkcache, repodir, knownapks, use_date_from_file=False):
                                   .format(path=filename))
 
         shasum = sha256sum(filename)
-        file_mtime = datetime.fromtimestamp(os.path.getmtime(filename))
         usecache = False
         if name_utf8 in apkcache:
             repo_file = apkcache[name_utf8]
@@ -1296,7 +1304,7 @@ def scan_repo_files(apkcache, repodir, knownapks, use_date_from_file=False):
             repo_file['apkName'] = name_utf8
             repo_file['hash'] = shasum
             repo_file['hashType'] = 'sha256'
-            repo_file['added'] = file_mtime
+            repo_file['etag'] = calculate_file_etag(filename)
             repo_file['versionCode'] = 0
             repo_file['versionName'] = shasum[0:7]
             # the static ID is the SHA256 unless it is set in the metadata
@@ -1318,12 +1326,13 @@ def scan_repo_files(apkcache, repodir, knownapks, use_date_from_file=False):
             timestamp = stat.st_ctime
             default_date_param = time.gmtime(time.mktime(datetime.fromtimestamp(timestamp).timetuple()))
         else:
-            default_date_param = repo_file['added']
+            default_date_param = None
 
-        # Record in knownapks
-        # TODO: Remove this when KnownApks is not needed anymore
-        knownapks.recordapk(repo_file['apkName'], repo_file['packageName'],
-                            default_date=default_date_param)
+        # Record in knownapks, getting the added date at the same time..
+        added = knownapks.recordapk(repo_file['apkName'], repo_file['packageName'],
+                                    default_date=default_date_param)
+        if added:
+            repo_file['added'] = added
 
         repo_files.append(repo_file)
 
@@ -1376,8 +1385,8 @@ def scan_apk(apk_file):
     # Get size of the APK
     apk['size'] = os.path.getsize(apk_file)
 
-    # Get the "added" timestamp of the APK (file modify time)
-    apk['added'] = datetime.fromtimestamp(os.path.getmtime(apk_file))
+    # Get the etag for the APK
+    apk['etag'] = calculate_file_etag(apk_file)
 
     if 'minSdkVersion' not in apk:
         logging.warning("No SDK version information found in {0}".format(apk_file))
@@ -1633,7 +1642,7 @@ def scan_apk_androguard(apk, apkfile):
 
 def process_apk(apkcache, apkfilename, repodir, knownapks, use_date_from_apk=False,
                 allow_disabled_algorithms=False, archive_bad_sig=False,
-                cache_by_mtime=False):
+                cache_by_etag=False):
     """Processes the apk with the given filename in the given repo directory.
 
     This also extracts the icons.
@@ -1647,8 +1656,8 @@ def process_apk(apkcache, apkfilename, repodir, knownapks, use_date_from_apk=Fal
     :param allow_disabled_algorithms: allow APKs with valid signatures that include
                                       disabled algorithms in the signature (e.g. MD5)
     :param archive_bad_sig: move APKs with a bad signature to the archive
-    :param cache_by_mtime: If true, verify the APK cache using the file modify time and size,
-                           otherwise, verifies using the file's sha256 checksum.
+    :param cache_by_etag: If true, verify the APK cache using the file's etag (modify time + size),
+                          otherwise, verifies using the file's sha256 checksum.
     :returns: (skip, apk, cachechanged) where skip is a boolean indicating whether to skip this apk,
      apk is the scanned apk information, and cachechanged is True if the apkcache got changed.
     """
@@ -1660,11 +1669,10 @@ def process_apk(apkcache, apkfilename, repodir, knownapks, use_date_from_apk=Fal
     usecache = False
     if apkfilename in apkcache:
         apk = apkcache[apkfilename]
-        if cache_by_mtime:
-            # Use the cached data if the file's modify timestamp and size hasn't changed
-            apkfile_mtime = datetime.fromtimestamp(os.path.getmtime(apkfile))
-            apkfile_size = os.path.getsize(apkfile)
-            usecache = apkfile_mtime == apk.get('added', 0) and apkfile_size == apk['size']
+        if cache_by_etag:
+            # Use the cached data if the file's etag hasn't changed
+            apkfile_etag = calculate_file_etag(apkfile)
+            usecache = apk.get('etag', '') == apkfile_etag
         else:
             # Use the cached data if the file's sha256 checksum hasn't changed
             apkfile_hash = sha256sum(apkfile)
@@ -1765,12 +1773,13 @@ def process_apk(apkcache, apkfilename, repodir, knownapks, use_date_from_apk=Fal
         if use_date_from_apk and manifest.date_time[1] != 0:
             default_date_param = datetime(*manifest.date_time)
         else:
-            default_date_param = apk['added']
+            default_date_param = None
 
-        # Record in known apks
-        # TODO: Remove this when KnownApks is not needed anymore
-        knownapks.recordapk(apk['apkName'], apk['packageName'],
-                            default_date=default_date_param)
+        # Record in known apks, getting the added date at the same time..
+        added = knownapks.recordapk(apk['apkName'], apk['packageName'],
+                                    default_date=default_date_param)
+        if added:
+            apk['added'] = added
 
         apkcache[apkfilename] = apk
         cachechanged = True
@@ -1779,7 +1788,7 @@ def process_apk(apkcache, apkfilename, repodir, knownapks, use_date_from_apk=Fal
 
 
 def process_apks(apkcache, repodir, knownapks, use_date_from_apk=False,
-                 cache_by_mtime=False):
+                 cache_by_etag=False):
     """Processes the apks in the given repo directory.
 
     This also extracts the icons.
@@ -1789,8 +1798,8 @@ def process_apks(apkcache, repodir, knownapks, use_date_from_apk=False,
     :param knownapks: known apks info
     :param use_date_from_apk: use date from APK (instead of current date)
                               for newly added APKs
-    :param cache_by_mtime: If true, verify the APK cache using the file modify time and size,
-                           otherwise, verifies using the file's sha256 checksum.
+    :param cache_by_etag: If true, verify the APK cache using the file's etag (modify time + size),
+                          otherwise, verifies using the file's sha256 checksum.
     :returns: (apks, cachechanged) where apks is a list of apk information,
               and cachechanged is True if the apkcache got changed.
     """
@@ -1811,7 +1820,7 @@ def process_apks(apkcache, repodir, knownapks, use_date_from_apk=False,
         ada = disabled_algorithms_allowed()
         (skip, apk, cachethis) = process_apk(apkcache, apkfilename, repodir, knownapks,
                                              use_date_from_apk, ada, True,
-                                             cache_by_mtime)
+                                             cache_by_etag)
         if skip:
             continue
         apks.append(apk)
@@ -2302,8 +2311,8 @@ def main():
                         help=_("When configured for signed indexes, create only unsigned indexes at this stage"))
     parser.add_argument("--use-date-from-apk", action="store_true", default=False,
                         help=_("Use date from APK instead of current time for newly added APKs"))
-    parser.add_argument("--cache-by-mtime", action="store_true", default=False,
-                        help=_("Verify the APK cache using the file modify time and size"))
+    parser.add_argument("--cache-by-etag", action="store_true", default=False,
+                        help=_("Verify the APK cache using the file's etag (modify time and size)"))
     parser.add_argument("--rename-apks", action="store_true", default=False,
                         help=_("Rename APK files that do not match package.name_123.apk"))
     parser.add_argument("--allow-disabled-algorithms", action="store_true", default=False,
@@ -2384,7 +2393,7 @@ def main():
 
     # Scan all apks in the main repo
     apks, cachechanged = process_apks(apkcache, repodirs[0], knownapks, options.use_date_from_apk,
-                                      options.cache_by_mtime)
+                                      options.cache_by_etag)
 
     files, fcachechanged = scan_repo_files(apkcache, repodirs[0], knownapks,
                                            options.use_date_from_apk)
@@ -2412,7 +2421,7 @@ def main():
     # Scan the archive repo for apks as well
     if len(repodirs) > 1:
         archapks, cc = process_apks(apkcache, repodirs[1], knownapks, options.use_date_from_apk,
-                                    options.cache_by_mtime)
+                                    options.cache_by_etag)
         if cc:
             cachechanged = True
     else:
