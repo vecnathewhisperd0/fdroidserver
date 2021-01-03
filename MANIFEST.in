@@ -538,7 +538,6 @@ include tests/common.TestCase
 include tests/complete-ci-tests
 include tests/config.py
 include tests/deploy.TestCase
-include tests/description-parsing.py
 include tests/dummy-keystore.jks
 include tests/dump_internal_metadata_format.py
 include tests/exception.TestCase
@@ -606,6 +605,7 @@ include tests/metadata-rewrite-yml/org.fdroid.fdroid.yml
 include tests/metadata/souch.smsbypass.yml
 include tests/metadata.TestCase
 include tests/minimal_targetsdk_30_unsigned.apk
+include tests/Norway_bouvet_europe_2.obf.zip
 include tests/no_targetsdk_minsdk1_unsigned.apk
 include tests/no_targetsdk_minsdk30_unsigned.apk
 include tests/openssl-version-check-test.py
@@ -721,6 +721,7 @@ include tests/source-files/com.nextcloud.client/src/generic/fastlane/metadata/an
 include tests/source-files/com.nextcloud.client/src/versionDev/fastlane/metadata/android/en-US/full_description.txt
 include tests/source-files/com.nextcloud.client/src/versionDev/fastlane/metadata/android/en-US/short_description.txt
 include tests/source-files/com.nextcloud.client/src/versionDev/fastlane/metadata/android/en-US/title.txt
+include tests/source-files/com.seafile.seadroid2/app/build.gradle
 include tests/source-files/eu.siacs.conversations/build.gradle
 include tests/source-files/eu.siacs.conversations/metadata/en-US/name.txt
 include tests/source-files/fdroid/fdroidclient/AndroidManifest.xml
@@ -729,6 +730,7 @@ include tests/source-files/firebase-suspect/app/build.gradle
 include tests/source-files/firebase-suspect/build.gradle
 include tests/source-files/firebase-whitelisted/app/build.gradle
 include tests/source-files/firebase-whitelisted/build.gradle
+include tests/source-files/info.guardianproject.ripple/build.gradle
 include tests/source-files/open-keychain/open-keychain/build.gradle
 include tests/source-files/open-keychain/open-keychain/OpenKeychain/build.gradle
 include tests/source-files/org.mozilla.rocket/app/build.gradle
@@ -738,6 +740,8 @@ include tests/source-files/org.tasks/build.gradle.kts
 include tests/source-files/org.tasks/buildSrc/build.gradle.kts
 include tests/source-files/org.tasks/settings.gradle.kts
 include tests/source-files/osmandapp/osmand/build.gradle
+include tests/source-files/osmandapp/osmand/gradle/wrapper/gradle-wrapper.properties
+include tests/source-files/realm/react-native/android/build.gradle
 include tests/source-files/se.manyver/android/app/build.gradle
 include tests/source-files/se.manyver/android/build.gradle
 include tests/source-files/se.manyver/android/gradle.properties
@@ -751,6 +755,7 @@ include tests/source-files/ut.ewh.audiometrytest/app/build.gradle
 include tests/source-files/ut.ewh.audiometrytest/app/src/main/AndroidManifest.xml
 include tests/source-files/ut.ewh.audiometrytest/build.gradle
 include tests/source-files/ut.ewh.audiometrytest/settings.gradle
+include tests/source-files/yuriykulikov/AlarmClock/gradle/wrapper/gradle-wrapper.properties
 include tests/source-files/Zillode/syncthing-silk/build.gradle
 include tests/SpeedoMeterApp.main_1.apk
 include tests/stats/known_apks.txt
@@ -800,7 +805,3 @@ include tests/v2.only.sig_2.apk
 include tests/valid-package-names/random-package-names
 include tests/valid-package-names/RandomPackageNames.java
 include tests/valid-package-names/test.py
-include tests/Norway_bouvet_europe_2.obf.zip
-include tests/xref/metadata/aarddict.android.yml
-include tests/xref/metadata/org.coolreader.yml
-include tests/xref/metadata/org.geometerplus.zlibrary.ui.android.yml
