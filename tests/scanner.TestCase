@@ -162,7 +162,7 @@ class ScannerTest(unittest.TestCase):
         # run scanner as if from `fdroid build`
         os.chdir(testdir)
         count = fdroidserver.scanner.scan_source(build_dir)
-        self.assertEqual(6, count, 'there should be this many errors')
+        self.assertEqual(7, count, 'there should be this many errors')
         os.chdir(build_dir)
 
         for f in keep + binaries:
@@ -190,8 +190,8 @@ class ScannerTest(unittest.TestCase):
 
         self.assertTrue('fake.png' in files['warnings'],
                         'a random binary that is executable that is not an image is a warning')
-        self.assertTrue('src/test/resources/classes.dex' in files['warnings'],
-                        'suspicious file but in a test dir is a warning')
+        self.assertTrue('src/test/resources/classes.dex' in files['errors'],
+                        'suspicious file but in a test dir is a error')
 
         for f in remove:
             self.assertTrue(f in files['infos'],
