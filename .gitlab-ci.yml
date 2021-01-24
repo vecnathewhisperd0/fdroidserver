@@ -7,6 +7,8 @@ variables:
 
 test:
   image: registry.gitlab.com/fdroid/ci-images-base
+  only:
+    - master@fdroid/fdroidserver
   script:
     - $pip install -e .[test]
     # the `fdroid build` test in tests/run-tests needs android-23
@@ -23,6 +25,8 @@ test:
 # of sed hacks needed does not continuously grow.
 metadata_v0:
   image: registry.gitlab.com/fdroid/ci-images-base
+  only:
+    - master@fdroid/fdroidserver
   variables:
     GIT_DEPTH: 1000
     RELEASE_COMMIT_ID: 37c95f59a17d86723fdb71e984121726db777f32  # 2.0a5~
@@ -112,6 +116,8 @@ ubuntu_lts_ppa:
 ubuntu_bionic_pip:
   image: ubuntu:bionic
   <<: *apt-template
+  only:
+    - master@fdroid/fdroidserver
   script:
     - apt-get install git default-jdk-headless python3-pip python3-venv rsync zipalign libarchive13
     - rm -rf env
@@ -236,7 +242,7 @@ gradle:
           python3-gitlab
           python3-requests
     # if this is a merge request fork, then only check if makebuildserver or gradlew-fdroid changed
-    - if [ "$CI_PROJECT_NAMESPACE" != "fdroid" ]; then
+    - if [ "$CI_PROJECT_NAMESPACE" == "fdroid" ]; then
         git fetch https://gitlab.com/fdroid/fdroidserver.git;
         for f in `git diff --name-only --diff-filter=d FETCH_HEAD...HEAD`; do
            test "$f" == "makebuildserver" && export CHANGED="yes";
@@ -249,6 +255,8 @@ gradle:
 fdroid build:
   image: registry.gitlab.com/fdroid/ci-images-client
   only:
+    refs:
+      - master@fdroid/fdroidserver
     changes:
       - .gitlab-ci.yml
       - buildserver/provision-apt-get-install
@@ -296,6 +304,8 @@ plugin_fetchsrclibs:
   image: debian:buster
   <<: *apt-template
   only:
+    refs:
+      - master@fdroid/fdroidserver
     changes:
       - .gitlab-ci.yml
       - examples/fdroid_fetchsrclibs.py
