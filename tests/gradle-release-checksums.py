@@ -5,15 +5,14 @@ import gitlab
 import os
 import re
 import requests
+import subprocess
 from bs4 import BeautifulSoup
+from colorama import Fore, Style
 from distutils.version import LooseVersion
+
 
 checksums = None
 versions = dict()
-
-import json
-with open('checksums.json') as fp:
-    checksums = json.load(fp)
 
 while not checksums:
    r = requests.get('https://gitlab.com/fdroid/gradle-transparency-log/-/raw/master/checksums.json')
@@ -42,10 +41,10 @@ for url, checksum in config['CACHE_FILES']:
         if m:
             makebuildserver_versions.append(m.group())
             if checksum != versions[m.group()]:
-                print('ERROR: checksum mismatch:', checksum, versions[m.group()])
+                print(Fore.RED
+                      + 'ERROR: checksum mismatch:', checksum, versions[m.group()]
+                      + Style.RESET_ALL)
                 errors += 1
-if errors:
-    exit(errors)
 
 # error if makebuildserver is missing the latest version
 for version in sorted(versions.keys()):
@@ -69,6 +68,12 @@ current = ''
 get_sha_pat = re.compile(r""" +'([0-9][0-9.]+[0-9])'\)\s+echo '([0-9a-f]{64})' ;;\n""")
 for m in get_sha_pat.finditer(gradlew_fdroid):
     current += m.group()
+    checksum = m.group(2)
+    if checksum != versions[m.group(1)]:
+        print(Fore.RED
+              + 'ERROR: checksum mismatch:', checksum, versions[m.group(1)]
+              + Style.RESET_ALL)
+        errors += 1
 new = ''
 for version in sorted(versions.keys(), key=LooseVersion):
     sha256 = versions[version]
@@ -81,6 +86,11 @@ plugin_v = ' '.join(sorted(versions.keys(), key=LooseVersion, reverse=True))
 plugin_v_pat = re.compile(r'\nplugin_v=\(([0-9. ]+)\)')
 with open('gradlew-fdroid', 'w') as fp:
     fp.write(plugin_v_pat.sub('\nplugin_v=(%s)' % plugin_v, gradlew_fdroid))
+
+if os.getenv('CI_PROJECT_NAMESPACE') != 'fdroid-bot':
+    p = subprocess.run(['git', '--no-pager', 'diff'])
+    print(p.stdout)
+    exit(errors)
 
 git_repo = git.repo.Repo('.')
 modified = git_repo.git().ls_files(modified=True).split()
@@ -99,3 +109,21 @@ if (git_repo.is_dirty()
         remote = git.remote.Remote(git_repo, 'fdroid-bot')
         remote.set_url(url)
     remote.push(force=True)
+
+    private_token = os.getenv('PERSONAL_ACCESS_TOKEN')
+    if not private_token:
+        print(Fore.RED
+              + 'ERROR: GitLab Token not found in PERSONAL_ACCESS_TOKEN!'
+              + Style.RESET_ALL)
+        sys.exit(1)
+    gl = gitlab.Gitlab(os.getenv('CI_SERVER_URL'), api_version=4,
+                       private_token=private_token)
+    project = gl.projects.get(os.getenv('CI_PROJECT_PATH'), lazy=True)
+    mr = project.mergerequests.create({
+        'source_branch': branch.name,
+        'target_branch': 'master',
+        'title': 'update to gradle v' + version,
+        'description': 'see https://gitlab.com/fdroid/gradle-transparency-log/-/blob/master/checksums.json',
+        'labels': ['fdroid-bot', 'gradle'],
+    })
+    mr.save()

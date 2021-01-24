@@ -238,7 +238,10 @@ gradle:
     - apt-get install
           ca-certificates
           git
+          openssh-client
           python3-bs4
+          python3-colorama
+          python3-git
           python3-gitlab
           python3-requests
     # if this is a merge request fork, then only check if makebuildserver or gradlew-fdroid changed
