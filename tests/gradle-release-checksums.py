@@ -1,32 +1,30 @@
 #!/usr/bin/env python3
 
+import git
+import gitlab
 import os
 import re
 import requests
-import sys
 from bs4 import BeautifulSoup
 from distutils.version import LooseVersion
 
-while True:
-    r = requests.get('https://gradle.org/release-checksums/')
-    if r.status_code == 200:
-        break
-
-soup = BeautifulSoup(r.text, 'html.parser')
-
-version_pat = re.compile(r'[0-9]+(\.[0-9]+)+')
-
+checksums = None
 versions = dict()
-for a in soup.find_all('a'):
-    if a.parent.name != 'p':
-        continue
-    name = a.get('name')
-    if not name:
-        continue
-    m = version_pat.search(name)
+
+import json
+with open('checksums.json') as fp:
+    checksums = json.load(fp)
+
+while not checksums:
+   r = requests.get('https://gitlab.com/fdroid/gradle-transparency-log/-/raw/master/checksums.json')
+   if r.status_code == 200:
+       checksums = r.json()
+
+gradle_bin_pat = re.compile(r'gradle-([0-9][0-9.]+[0-9])-bin.zip')
+for url, d in checksums.items():
+    m = gradle_bin_pat.search(url)
     if m:
-        ul = a.parent.find_next_sibling('ul')
-        versions[m.group()] = a.parent.find_next_sibling('ul').find('li').find('code').text.strip()
+        versions[m.group(1)] = d[0]['sha256']
 
 errors = 0
 makebuildserver = os.path.join(os.path.dirname(__file__), os.pardir, 'makebuildserver')
@@ -37,6 +35,7 @@ code = compile(to_compile, makebuildserver, 'exec')
 config = {}
 exec(code, None, config)  # nosec this is just a CI script
 makebuildserver_versions = []
+version_pat = re.compile(r'[0-9]+(\.[0-9]+)+')
 for url, checksum in config['CACHE_FILES']:
     if 'gradle.org' in url:
         m = version_pat.search(url.split('/')[-1])
@@ -45,6 +44,8 @@ for url, checksum in config['CACHE_FILES']:
             if checksum != versions[m.group()]:
                 print('ERROR: checksum mismatch:', checksum, versions[m.group()])
                 errors += 1
+if errors:
+    exit(errors)
 
 # error if makebuildserver is missing the latest version
 for version in sorted(versions.keys()):
@@ -81,5 +82,20 @@ plugin_v_pat = re.compile(r'\nplugin_v=\(([0-9. ]+)\)')
 with open('gradlew-fdroid', 'w') as fp:
     fp.write(plugin_v_pat.sub('\nplugin_v=(%s)' % plugin_v, gradlew_fdroid))
 
-print('makebuildserver has gradle v' + sorted(makebuildserver_versions)[-1])
-sys.exit(errors)
+git_repo = git.repo.Repo('.')
+modified = git_repo.git().ls_files(modified=True).split()
+if (git_repo.is_dirty()
+    and ('gradlew-fdroid' in modified or 'makebuildserver' in modified)):
+    branch = git_repo.create_head(os.path.basename(__file__), force=True)
+    branch.checkout()
+    git_repo.index.add(['gradlew-fdroid', 'makebuildserver'])
+    author = git.Actor('fdroid-bot', 'fdroid-bot@f-droid.org')
+    git_repo.index.commit('gradle v' + version, author=author)
+    url = ('git@%s:fdroid-bot/%s.git'
+           % (os.getenv('CI_SERVER_HOST'), os.getenv('CI_PROJECT_NAME')))
+    try:
+        remote = git_repo.create_remote('fdroid-bot', url)
+    except git.exc.GitCommandError:
+        remote = git.remote.Remote(git_repo, 'fdroid-bot')
+        remote.set_url(url)
+    remote.push(force=True)
