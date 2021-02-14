@@ -356,6 +356,14 @@ class LibvirtBuildVm(FDroidBuildVm):
         except libvirt.libvirtError as e:
             raise FDroidBuildVmException('could not connect to libvirtd: %s' % (e))
 
+    def up(self, provision=True):
+        if self.vgrnt.status()[0].state == 'paused':
+            global lock
+            with lock:
+                self.vgrnt.resume()
+        else:
+            super().up(provision=provision)
+
     def destroy(self):
 
         super().destroy()
@@ -514,6 +522,14 @@ class VirtualboxBuildVm(FDroidBuildVm):
     def __init__(self, srvdir):
         self.provider = 'virtualbox'
         super().__init__(srvdir)
+
+    def up(self, provision=True):
+        if self.vgrnt.status()[0].state == 'saved':
+            global lock
+            with lock:
+                self.vgrnt.resume()
+        else:
+            super().up(provision=provision)
 
     def snapshot_create(self, snapshot_name):
         logging.info("creating snapshot '%s' for vm '%s'", snapshot_name, self.srvname)
