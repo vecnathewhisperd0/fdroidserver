@@ -99,7 +99,7 @@ def get_gradle_compile_commands(build):
         flavors += build.gradle
 
     commands = [''.join(c) for c in itertools.product(flavors, buildTypes, compileCommands)]
-    return [re.compile(r'\s*' + c, re.IGNORECASE) for c in commands]
+    return [re.compile(r'^\s*' + c, re.IGNORECASE) for c in commands]
 
 
 def scan_binary(apkfile):
