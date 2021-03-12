@@ -3,6 +3,7 @@
 # publish.py - part of the FDroid server tools
 # Copyright (C) 2010-13, Ciaran Gultnieks, ciaran@ciarang.com
 # Copyright (C) 2013-2014 Daniel Martí <mvdan@mvdan.cc>
+# Copyright (C) 2021 Felix C. Stegerman <flx@obfusk.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -357,6 +358,28 @@ def main():
                     os.remove(devsignedtmp)
                     logging.error('...verification failed - skipping: %s', devsigned)
                     skipsigning = True
+
+            else:
+                # Otherwise we handle signature deltas for this app from local metadata
+                sigdelta = common.metadata_find_developer_sigdelta(appid, vercode)
+                if sigdelta:
+                    # There's a signature delta from the app developer present in
+                    # our metadata. This means we're going to prepare both a locally
+                    # signed APK and a version signed with the developers key.
+
+                    devsigned = '{}_{}_devsigned.apk'.format(appid, vercode)
+                    devsignedtmp = os.path.join(tmp_dir, devsigned)
+
+                    common.apk_patch_sigdelta(apkfile, sigdelta, devsignedtmp)
+
+                    # Compare our unsigned one with the patched one...
+                    compare_result = common.verify_apks(devsignedtmp, apkfile, tmp_dir)
+                    if compare_result:
+                        os.remove(devsignedtmp)
+                        logging.error('...verification failed - skipping: %s', devsigned)
+                        skipsigning = True
+                    else:
+                        shutil.move(devsignedtmp, os.path.join(output_dir, devsigned))
 
             # Now we sign with the F-Droid key.
             if not skipsigning:

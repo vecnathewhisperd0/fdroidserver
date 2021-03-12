@@ -3,6 +3,7 @@
 # common.py - part of the FDroid server tools
 # Copyright (C) 2010-13, Ciaran Gultnieks, ciaran@ciarang.com
 # Copyright (C) 2013-2014 Daniel Martí <mvdan@mvdan.cc>
+# Copyright (C) 2021 Felix C. Stegerman <flx@obfusk.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -2952,6 +2953,17 @@ def metadata_find_signing_files(appid, vercode):
     return ret
 
 
+def metadata_find_sigdelta_files(appid, vercode):
+    """Gets a list of sigdelta files.
+
+    :param appid: app id string
+    :param vercode: app version code
+    :returns: a list of sigdelta file paths
+    """
+    sigdir = metadata_get_sigdir(appid, vercode)
+    return glob.glob(os.path.join(sigdir, '*.vcdiff'))
+
+
 def metadata_find_developer_signing_files(appid, vercode):
     """Get developer signature files for specified app from metadata.
 
@@ -2961,6 +2973,18 @@ def metadata_find_developer_signing_files(appid, vercode):
     allsigningfiles = metadata_find_signing_files(appid, vercode)
     if allsigningfiles and len(allsigningfiles) == 1:
         return allsigningfiles[0]
+    else:
+        return None
+
+
+def metadata_find_developer_sigdelta(appid, vercode):
+    """Get developer sigdelta for specified app from metadata.
+
+    :returns: The path for the sigdelta file from metadata
+    """
+    allsigdeltas = metadata_find_sigdelta_files(appid, vercode)
+    if allsigdeltas and len(allsigdeltas) == 1:
+        return allsigdeltas[0]
     else:
         return None
 
@@ -3043,6 +3067,35 @@ def apk_extract_signatures(apkpath, outdir, manifest=True):
                 newpath = os.path.join(outdir, os.path.basename(f.filename))
                 with open(newpath, 'wb') as out_file:
                     out_file.write(in_apk.read(f.filename))
+
+
+def apk_create_sigdelta(unsigned_apkpath, signed_apkpath, outdir):
+    """Creates a signature delta from (un)signed APKs and puts them into target directory.
+
+    :param unsigned_apkpath: location of the unsigned apk
+    :param signed_apkpath: location of the signed apk
+    :param outdir: folder where the created sigdelta file will be stored
+    """
+    if not set_command_in_config('xdelta3'):
+        raise FDroidException("xdelta3 command missing")    # FIXME
+    outpath = os.path.join(outdir, "signature.vcdiff")
+    command = [config['xdelta3'], '-s', unsigned_apkpath, signed_apkpath, outpath]
+    if subprocess.call(command) != 0:
+        raise FDroidException("xdelta3 command failed")     # FIXME
+
+
+def apk_patch_sigdelta(unsigned_apkpath, deltafile, outfile):
+    """Patches an APK with a signature delta.
+
+    :param unsigned_apkpath: location of the input file (unsigned apk)
+    :param deltafile: location of the delta file
+    :param outfile: location of the output file (signed apk)
+    """
+    if not set_command_in_config('xdelta3'):
+        raise FDroidException("xdelta3 command missing")    # FIXME
+    command = [config['xdelta3'], '-d', '-s', unsigned_apkpath, deltafile, outfile]
+    if subprocess.call(command) != 0:
+        raise FDroidException("xdelta3 command failed")     # FIXME
 
 
 def get_min_sdk_version(apk):
