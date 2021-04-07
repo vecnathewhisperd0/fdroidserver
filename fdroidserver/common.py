@@ -3211,34 +3211,27 @@ def verify_jar_signature(jar):
 def verify_apk_signature(apk, min_sdk_version=None):
     """verify the signature on an APK
 
-    Try to use apksigner whenever possible since jarsigner is very
+    Use apksigner since jarsigner is very
     shitty: unsigned APKs pass as "verified"!  Warning, this does
     not work on JARs with apksigner >= 0.7 (build-tools 26.0.1)
 
     :returns: boolean whether the APK was verified
     """
-    if set_command_in_config('apksigner'):
-        args = [config['apksigner'], 'verify']
-        if min_sdk_version:
-            args += ['--min-sdk-version=' + min_sdk_version]
+    apksigner = config.get('apksigner', '')
+    if not shutil.which(apksigner):
+        raise BuildException(_("apksigner not found, it's required to verify signatures!"))
+    args = [apksigner, 'verify']
+    if min_sdk_version:
+        args += ['--min-sdk-version=' + min_sdk_version]
+    if options.verbose:
+        args += ['--verbose']
+    try:
+        output = subprocess.check_output(args + [apk])
         if options.verbose:
-            args += ['--verbose']
-        try:
-            output = subprocess.check_output(args + [apk])
-            if options.verbose:
-                logging.debug(apk + ': ' + output.decode('utf-8'))
-            return True
-        except subprocess.CalledProcessError as e:
-            logging.error('\n' + apk + ': ' + e.output.decode('utf-8'))
-    else:
-        if not config.get('jarsigner_warning_displayed'):
-            config['jarsigner_warning_displayed'] = True
-            logging.warning(_("Using Java's jarsigner, not recommended for verifying APKs! Use apksigner"))
-        try:
-            verify_jar_signature(apk)
-            return True
-        except Exception as e:
-            logging.error(e)
+            logging.debug(apk + ': ' + output.decode('utf-8'))
+        return True
+    except subprocess.CalledProcessError as e:
+        logging.error('\n' + apk + ': ' + e.output.decode('utf-8'))
     return False
 
 
