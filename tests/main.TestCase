@@ -45,6 +45,7 @@ class MainTest(unittest.TestCase):
                               'signindex',
                               'btlog',
                               'signatures',
+                              'sigdelta',
                               'nightly',
                               'mirror'])
 

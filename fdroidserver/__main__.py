@@ -4,6 +4,7 @@
 # Copyright (C) 2020 Michael Pöhn <michael.poehn@fsfe.org>
 # Copyright (C) 2010-2015, Ciaran Gultnieks, ciaran@ciarang.com
 # Copyright (C) 2013-2014 Daniel Marti <mvdan@mvdan.cc>
+# Copyright (C) 2021 Felix C. Stegerman <flx@obfusk.net>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as published by
@@ -51,6 +52,7 @@ COMMANDS = OrderedDict([
     ("signindex", _("Sign indexes created using update --nosign")),
     ("btlog", _("Update the binary transparency log for a URL")),
     ("signatures", _("Extract signatures from APKs")),
+    ("sigdelta", _("Create signature delta from APKs")),
     ("nightly", _("Set up an app build for a nightly build repo")),
     ("mirror", _("Download complete mirrors of small repos")),
 ])
