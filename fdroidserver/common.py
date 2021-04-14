@@ -21,30 +21,29 @@
 # common.py is imported by all modules, so do not import third-party
 # libraries here as they will become a requirement for all commands.
 
-import ast
-import base64
-import glob
-import gzip
-import hashlib
+import git
 import io
-import json
-import logging
-import operator
 import os
+import sys
 import re
+import ast
+import gzip
 import shutil
-import socket
+import glob
 import stat
 import subprocess
-import sys
-import tempfile
 import time
+import operator
+import logging
+import hashlib
+import socket
+import base64
 import urllib.parse
 import urllib.request
-import zipfile
-
-import git
 import yaml
+import zipfile
+import tempfile
+import json
 
 # TODO change to only import defusedxml once its installed everywhere
 try:
@@ -65,9 +64,12 @@ from pyasn1.error import PyAsn1Error
 import fdroidserver.metadata
 import fdroidserver.lint
 from fdroidserver import _
-from fdroidserver.exception import FDroidException, VCSException, NoSubmodulesException, \
+from fdroidserver.exception import FDroidException, VCSException, NoSubmodulesException,\
     BuildException, VerificationException, MetaDataException
 from .asynchronousfilereader import AsynchronousFileReader
+
+from . import apksigcopier
+apksigcopier.exclude_all_meta = True    # remove v1 signatures too
 
 # The path to this fdroidserver distribution
 FDROID_PATH = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
@@ -103,6 +105,7 @@ config = None
 options = None
 env = None
 orig_path = None
+
 
 default_config = {
     'sdk_path': "$ANDROID_HOME",
@@ -149,10 +152,7 @@ default_config = {
     'repo_url': "https://MyFirstFDroidRepo.org/fdroid/repo",
     'repo_name': "My First F-Droid Repo Demo",
     'repo_icon': "icon.png",
-    'repo_description': _(  # type: ignore
-        """This is a repository of apps to be used with F-Droid. Applications in this repository are either official\
-        binaries built by the original application developers, or are binaries built from source by the admin of\
-        f-droid.org using the tools on https://gitlab.com/fdroid."""),
+    'repo_description': _("""This is a repository of apps to be used with F-Droid. Applications in this repository are either official binaries built by the original application developers, or are binaries built from source by the admin of f-droid.org using the tools on https://gitlab.com/fdroid."""),  # type: ignore
     'archive_name': 'My First F-Droid Archive Demo',
     'archive_description': _('These are the apps that have been archived from the main repo.'),  # type: ignore
     'archive_older': 0,
@@ -177,13 +177,13 @@ def setup_global_opts(parser):
 
 def _add_java_paths_to_config(pathlist, thisconfig):
     def path_version_key(s):
-        version_list = []
+        versionlist = []
         for u in re.split('[^0-9]+', s):
             try:
-                version_list.append(int(u))
+                versionlist.append(int(u))
             except ValueError:
                 pass
-        return version_list
+        return versionlist
 
     for d in sorted(pathlist, key=path_version_key):
         if os.path.islink(d):
@@ -191,19 +191,19 @@ def _add_java_paths_to_config(pathlist, thisconfig):
         j = os.path.basename(d)
         # the last one found will be the canonical one, so order appropriately
         for regex in [
-            r'^1\.([16-9][0-9]?)\.0\.jdk$',  # OSX
-            r'^jdk1\.([16-9][0-9]?)\.0_[0-9]+.jdk$',  # OSX and Oracle tarball
-            r'^jdk1\.([16-9][0-9]?)\.0_[0-9]+$',  # Oracle Windows
-            r'^jdk([16-9][0-9]?)-openjdk$',  # Arch
-            r'^java-([16-9][0-9]?)-openjdk$',  # Arch
-            r'^java-([16-9][0-9]?)-jdk$',  # Arch (oracle)
-            r'^java-1\.([16-9][0-9]?)\.0-.*$',  # RedHat
-            r'^java-([16-9][0-9]?)-oracle$',  # Debian WebUpd8
-            r'^jdk-([16-9][0-9]?)-oracle-.*$',  # Debian make-jpkg
-            r'^java-([16-9][0-9]?)-openjdk-[^c][^o][^m].*$',  # Debian
-            r'^oracle-jdk-bin-1\.([17-9][0-9]?).*$',  # Gentoo (oracle)
-            r'^icedtea-bin-([17-9][0-9]?).*$',  # Gentoo (openjdk)
-        ]:
+                r'^1\.([16-9][0-9]?)\.0\.jdk$',  # OSX
+                r'^jdk1\.([16-9][0-9]?)\.0_[0-9]+.jdk$',  # OSX and Oracle tarball
+                r'^jdk1\.([16-9][0-9]?)\.0_[0-9]+$',  # Oracle Windows
+                r'^jdk([16-9][0-9]?)-openjdk$',  # Arch
+                r'^java-([16-9][0-9]?)-openjdk$',  # Arch
+                r'^java-([16-9][0-9]?)-jdk$',  # Arch (oracle)
+                r'^java-1\.([16-9][0-9]?)\.0-.*$',  # RedHat
+                r'^java-([16-9][0-9]?)-oracle$',  # Debian WebUpd8
+                r'^jdk-([16-9][0-9]?)-oracle-.*$',  # Debian make-jpkg
+                r'^java-([16-9][0-9]?)-openjdk-[^c][^o][^m].*$',  # Debian
+                r'^oracle-jdk-bin-1\.([17-9][0-9]?).*$',  # Gentoo (oracle)
+                r'^icedtea-bin-([17-9][0-9]?).*$',  # Gentoo (openjdk)
+                ]:
             m = re.match(regex, j)
             if not m:
                 continue
@@ -212,10 +212,10 @@ def _add_java_paths_to_config(pathlist, thisconfig):
                     thisconfig['java_paths'][m.group(1)] = p
 
 
-def fill_config_defaults(this_config):
+def fill_config_defaults(thisconfig):
     for k, v in default_config.items():
-        if k not in this_config:
-            this_config[k] = v
+        if k not in thisconfig:
+            thisconfig[k] = v
 
     # Expand paths (~users and $vars)
     def expand_path(path):
@@ -229,59 +229,59 @@ def fill_config_defaults(this_config):
         return path
 
     for k in ['sdk_path', 'ant', 'mvn3', 'gradle', 'keystore']:
-        v = this_config[k]
+        v = thisconfig[k]
         exp = expand_path(v)
         if exp is not None:
-            this_config[k] = exp
-            this_config[k + '_orig'] = v
+            thisconfig[k] = exp
+            thisconfig[k + '_orig'] = v
 
     # find all installed JDKs for keytool, jarsigner, and JAVA[6-9]_HOME env vars
-    if this_config['java_paths'] is None:
-        this_config['java_paths'] = dict()
-        path_list = []
-        path_list += glob.glob('/usr/lib/jvm/j*[16-9]*')
-        path_list += glob.glob('/usr/java/jdk1.[16-9]*')
-        path_list += glob.glob('/System/Library/Java/JavaVirtualMachines/1.[16-9][0-9]?.0.jdk')
-        path_list += glob.glob('/Library/Java/JavaVirtualMachines/*jdk*[0-9]*')
-        path_list += glob.glob('/opt/oracle-jdk-*1.[0-9]*')
-        path_list += glob.glob('/opt/icedtea-*[0-9]*')
+    if thisconfig['java_paths'] is None:
+        thisconfig['java_paths'] = dict()
+        pathlist = []
+        pathlist += glob.glob('/usr/lib/jvm/j*[16-9]*')
+        pathlist += glob.glob('/usr/java/jdk1.[16-9]*')
+        pathlist += glob.glob('/System/Library/Java/JavaVirtualMachines/1.[16-9][0-9]?.0.jdk')
+        pathlist += glob.glob('/Library/Java/JavaVirtualMachines/*jdk*[0-9]*')
+        pathlist += glob.glob('/opt/oracle-jdk-*1.[0-9]*')
+        pathlist += glob.glob('/opt/icedtea-*[0-9]*')
         if os.getenv('JAVA_HOME') is not None:
-            path_list.append(os.getenv('JAVA_HOME'))
+            pathlist.append(os.getenv('JAVA_HOME'))
         if os.getenv('PROGRAMFILES') is not None:
-            path_list += glob.glob(os.path.join(os.getenv('PROGRAMFILES'), 'Java', 'jdk1.[16-9][0-9]?.*'))
-        _add_java_paths_to_config(path_list, this_config)
+            pathlist += glob.glob(os.path.join(os.getenv('PROGRAMFILES'), 'Java', 'jdk1.[16-9][0-9]?.*'))
+        _add_java_paths_to_config(pathlist, thisconfig)
 
     for java_version in ('14', '13', '12', '11', '10', '9', '8', '7'):
-        if java_version not in this_config['java_paths']:
+        if java_version not in thisconfig['java_paths']:
             continue
-        java_home = this_config['java_paths'][java_version]
+        java_home = thisconfig['java_paths'][java_version]
         jarsigner = os.path.join(java_home, 'bin', 'jarsigner')
         if os.path.exists(jarsigner):
-            this_config['jarsigner'] = jarsigner
-            this_config['keytool'] = os.path.join(java_home, 'bin', 'keytool')
+            thisconfig['jarsigner'] = jarsigner
+            thisconfig['keytool'] = os.path.join(java_home, 'bin', 'keytool')
             break
 
-    if 'jarsigner' not in this_config and shutil.which('jarsigner'):
-        this_config['jarsigner'] = shutil.which('jarsigner')
-    if 'keytool' not in this_config and shutil.which('keytool'):
-        this_config['keytool'] = shutil.which('keytool')
+    if 'jarsigner' not in thisconfig and shutil.which('jarsigner'):
+        thisconfig['jarsigner'] = shutil.which('jarsigner')
+    if 'keytool' not in thisconfig and shutil.which('keytool'):
+        thisconfig['keytool'] = shutil.which('keytool')
 
     # enable apksigner by default so v2/v3 APK signatures validate
-    find_apksigner(this_config)
-    if not this_config.get('apksigner'):
+    find_apksigner(thisconfig)
+    if not thisconfig.get('apksigner'):
         logging.warning(_('apksigner not found! Cannot sign or verify modern APKs'))
 
     for k in ['ndk_paths', 'java_paths']:
-        d = this_config[k]
+        d = thisconfig[k]
         for k2 in d.copy():
             v = d[k2]
             exp = expand_path(v)
             if exp is not None:
-                this_config[k][k2] = exp
-                this_config[k][k2 + '_orig'] = v
+                thisconfig[k][k2] = exp
+                thisconfig[k][k2 + '_orig'] = v
 
 
-def reg_sub_file(pattern, repl, path):
+def regsub_file(pattern, repl, path):
     with open(path, 'rb') as f:
         text = f.read()
     text = re.sub(bytes(pattern, 'utf8'), bytes(repl, 'utf8'), text)
@@ -290,7 +290,7 @@ def reg_sub_file(pattern, repl, path):
 
 
 def read_config(opts=None):
-    """Read the repository config.
+    """Read the repository config
 
     The config is read from config_file, which is in the current
     directory when any of the repo management commands are used. If
@@ -298,7 +298,7 @@ def read_config(opts=None):
     not required, just use defaults.
 
     config.yml is the preferred form because no code is executed when
-    reading it. config.py is deprecated and supported for backwards
+    reading it.  config.py is deprecated and supported for backwards
     compatibility.
 
     """
@@ -337,16 +337,16 @@ def read_config(opts=None):
                     _("'{field}' will be in random order! Use () or [] brackets if order is important!")
                     .format(field=k))
 
-    # smartcard_options must be a list since its command line args for Popen
-    smartcard_options = config.get('smartcard_options')
-    if isinstance(smartcard_options, str):
-        config['smartcard_options'] = re.sub(r'\s+', r' ', config['smartcard_options']).split(' ')
-    elif not smartcard_options and 'keystore' in config and config['keystore'] == 'NONE':
+    # smartcardoptions must be a list since its command line args for Popen
+    smartcardoptions = config.get('smartcardoptions')
+    if isinstance(smartcardoptions, str):
+        config['smartcardoptions'] = re.sub(r'\s+', r' ', config['smartcardoptions']).split(' ')
+    elif not smartcardoptions and 'keystore' in config and config['keystore'] == 'NONE':
         # keystore='NONE' means use smartcard, these are required defaults
-        config['smartcard_options'] = ['-storetype', 'PKCS11', '-providerName',
-                                       'SunPKCS11-OpenSC', '-providerClass',
-                                       'sun.security.pkcs11.SunPKCS11',
-                                       '-providerArg', 'opensc-fdroid.cfg']
+        config['smartcardoptions'] = ['-storetype', 'PKCS11', '-providerName',
+                                      'SunPKCS11-OpenSC', '-providerClass',
+                                      'sun.security.pkcs11.SunPKCS11',
+                                      '-providerArg', 'opensc-fdroid.cfg']
 
     if any(k in config for k in ["keystore", "keystorepass", "keypass"]):
         if os.path.exists(config_file):
@@ -367,14 +367,14 @@ def read_config(opts=None):
             roots = config['serverwebroot']
         else:
             raise TypeError(_('only accepts strings, lists, and tuples'))
-        root_list = []
-        for root_str in roots:
+        rootlist = []
+        for rootstr in roots:
             # since this is used with rsync, where trailing slashes have
             # meaning, ensure there is always a trailing slash
-            if root_str[-1] != '/':
-                root_str += '/'
-            root_list.append(root_str.replace('//', '/'))
-        config['serverwebroot'] = root_list
+            if rootstr[-1] != '/':
+                rootstr += '/'
+            rootlist.append(rootstr.replace('//', '/'))
+        config['serverwebroot'] = rootlist
 
     if 'servergitmirrors' in config:
         if isinstance(config['servergitmirrors'], str):
@@ -388,32 +388,32 @@ def read_config(opts=None):
         limit = config['git_mirror_size_limit']
         config['git_mirror_size_limit'] = parse_human_readable_size(limit)
 
-    config_names_to_delete = set()
-    for config_name, dictvalue in config.items():
-        if config_name == 'java_paths':
+    confignames_to_delete = set()
+    for configname, dictvalue in config.items():
+        if configname == 'java_paths':
             new = dict()
             for k, v in dictvalue.items():
                 new[str(k)] = v
-            config[config_name] = new
-        elif config_name in ('ndk_paths', 'java_paths', 'char_limits', 'keyaliases'):
+            config[configname] = new
+        elif configname in ('ndk_paths', 'java_paths', 'char_limits', 'keyaliases'):
             continue
         elif isinstance(dictvalue, dict):
             for k, v in dictvalue.items():
                 if k == 'env':
                     env = os.getenv(v)
                     if env:
-                        config[config_name] = env
+                        config[configname] = env
                     else:
-                        config_names_to_delete.add(config_name)
-                        logging.error(_('Environment variable {var} from {config_name} is not set!')
-                                      .format(var=k, configname=config_name))
+                        confignames_to_delete.add(configname)
+                        logging.error(_('Environment variable {var} from {configname} is not set!')
+                                      .format(var=k, configname=configname))
                 else:
-                    config_names_to_delete.add(config_name)
-                    logging.error(_('Unknown entry {key} in {config_name}')
-                                  .format(key=k, configname=config_name))
+                    confignames_to_delete.add(configname)
+                    logging.error(_('Unknown entry {key} in {configname}')
+                                  .format(key=k, configname=configname))
 
-    for config_name in config_names_to_delete:
-        del (config[config_name])
+    for configname in confignames_to_delete:
+        del(config[configname])
 
     return config
 
@@ -421,8 +421,8 @@ def read_config(opts=None):
 def parse_human_readable_size(size):
     units = {
         'b': 1,
-        'kb': 1000, 'mb': 1000 ** 2, 'gb': 1000 ** 3, 'tb': 1000 ** 4,
-        'kib': 1024, 'mib': 1024 ** 2, 'gib': 1024 ** 3, 'tib': 1024 ** 4,
+        'kb': 1000, 'mb': 1000**2, 'gb': 1000**3, 'tb': 1000**4,
+        'kib': 1024, 'mib': 1024**2, 'gib': 1024**3, 'tib': 1024**4,
     }
     try:
         return int(float(size))
@@ -438,44 +438,43 @@ def parse_human_readable_size(size):
 
 
 def assert_config_keystore(config):
-    """Check whether keystore is configured correctly and raise exception if not."""
+    """Check weather keystore is configured correctly and raise exception if not."""
 
-    no_signing_key = False
+    nosigningkey = False
     if 'repo_keyalias' not in config:
-        no_signing_key = True
+        nosigningkey = True
         logging.critical(_("'repo_keyalias' not found in config.yml!"))
     if 'keystore' not in config:
-        no_signing_key = True
+        nosigningkey = True
         logging.critical(_("'keystore' not found in config.yml!"))
     elif config['keystore'] == 'NONE':
         if not config.get('smartcardoptions'):
-            no_signing_key = True
+            nosigningkey = True
             logging.critical(_("'keystore' is NONE and 'smartcardoptions' is blank!"))
     elif not os.path.exists(config['keystore']):
-        no_signing_key = True
+        nosigningkey = True
         logging.critical("'" + config['keystore'] + "' does not exist!")
     if 'keystorepass' not in config:
-        no_signing_key = True
+        nosigningkey = True
         logging.critical(_("'keystorepass' not found in config.yml!"))
     if 'keypass' not in config and config.get('keystore') != 'NONE':
-        no_signing_key = True
+        nosigningkey = True
         logging.critical(_("'keypass' not found in config.yml!"))
-    if no_signing_key:
+    if nosigningkey:
         raise FDroidException("This command requires a signing key, "
                               + "you can create one using: fdroid update --create-key")
 
 
 def find_apksigner(config):
-    """
-    Searches for the best version apksigner and adds it to the config.
+    """Searches for the best version apksigner and adds it to the config
 
     Returns the best version of apksigner following this algorithm:
     * use config['apksigner'] if set
     * try to find apksigner in path
     * find apksigner in build-tools starting from newest installed
       going down to MINIMUM_APKSIGNER_BUILD_TOOLS_VERSION
-
     :return: path to apksigner or None if no version is found
+
     """
     command = 'apksigner'
     if command in config:
@@ -506,41 +505,37 @@ def find_apksigner(config):
 
 
 def find_sdk_tools_cmd(cmd):
-    """Find a working path to a tool from the Android SDK."""
+    '''find a working path to a tool from the Android SDK'''
 
-    tool_dirs = []
+    tooldirs = []
     if config is not None and 'sdk_path' in config and os.path.exists(config['sdk_path']):
         # try to find a working path to this command, in all the recent possible paths
         build_tools = os.path.join(config['sdk_path'], 'build-tools')
         if os.path.isdir(build_tools):
             for f in sorted(os.listdir(build_tools), reverse=True):
                 if os.path.isdir(os.path.join(build_tools, f)):
-                    tool_dirs.append(os.path.join(build_tools, f))
-
+                    tooldirs.append(os.path.join(build_tools, f))
         sdk_tools = os.path.join(config['sdk_path'], 'tools')
         if os.path.exists(sdk_tools):
-            tool_dirs.append(sdk_tools)
-            tool_dirs.append(os.path.join(sdk_tools, 'bin'))
-
+            tooldirs.append(sdk_tools)
+            tooldirs.append(os.path.join(sdk_tools, 'bin'))
         sdk_platform_tools = os.path.join(config['sdk_path'], 'platform-tools')
         if os.path.exists(sdk_platform_tools):
-            tool_dirs.append(sdk_platform_tools)
-
-    tool_dirs.append('/usr/bin')
-    for d in tool_dirs:
+            tooldirs.append(sdk_platform_tools)
+    tooldirs.append('/usr/bin')
+    for d in tooldirs:
         path = os.path.join(d, cmd)
         if os.path.isfile(path):
             if cmd == 'aapt':
                 test_aapt_version(path)
             return path
-
     # did not find the command, exit with error message
     test_sdk_exists(config)  # ignore result so None is never returned
     raise FDroidException(_("Android SDK tool {cmd} found!").format(cmd=cmd))
 
 
 def test_aapt_version(aapt):
-    """Check whether the version of aapt is new enough."""
+    '''Check whether the version of aapt is new enough'''
     output = subprocess.check_output([aapt, 'version'], universal_newlines=True)
     if output is None or output == '':
         logging.error(_("'{path}' failed to execute!").format(path=aapt))
@@ -564,135 +559,134 @@ def test_aapt_version(aapt):
             logging.warning(_('Unknown version of aapt, might cause problems: ') + output)
 
 
-def test_sdk_exists(this_config):
-    if 'sdk_path' not in this_config:
+def test_sdk_exists(thisconfig):
+    if 'sdk_path' not in thisconfig:
         # TODO convert this to apksigner once it is required
-        if 'aapt' in this_config and os.path.isfile(this_config['aapt']):
-            test_aapt_version(this_config['aapt'])
+        if 'aapt' in thisconfig and os.path.isfile(thisconfig['aapt']):
+            test_aapt_version(thisconfig['aapt'])
             return True
         else:
             logging.error(_("'sdk_path' not set in config.yml!"))
             return False
-    if this_config['sdk_path'] == default_config['sdk_path']:
+    if thisconfig['sdk_path'] == default_config['sdk_path']:
         logging.error(_('No Android SDK found!'))
         logging.error(_('You can use ANDROID_HOME to set the path to your SDK, i.e.:'))
         logging.error('\texport ANDROID_HOME=/opt/android-sdk')
         return False
-    if not os.path.exists(this_config['sdk_path']):
+    if not os.path.exists(thisconfig['sdk_path']):
         logging.critical(_("Android SDK path '{path}' does not exist!")
-                         .format(path=this_config['sdk_path']))
+                         .format(path=thisconfig['sdk_path']))
         return False
-    if not os.path.isdir(this_config['sdk_path']):
+    if not os.path.isdir(thisconfig['sdk_path']):
         logging.critical(_("Android SDK path '{path}' is not a directory!")
-                         .format(path=this_config['sdk_path']))
+                         .format(path=thisconfig['sdk_path']))
         return False
     return True
 
 
 def get_local_metadata_files():
-    """
-    Get any metadata files local to an app's source repo.
+    '''get any metadata files local to an app's source repo
 
-    This tries to ignore anything that does not count as app metadata,
+    This tries to ignore anything that does not count as app metdata,
     including emacs cruft ending in ~
-    """
+
+    '''
     return glob.glob('.fdroid.[a-jl-z]*[a-rt-z]')
 
 
-def read_pkg_args(app_id_version_code_pairs, allow_versioncodes=False):
+def read_pkg_args(appid_versionCode_pairs, allow_vercodes=False):
     """
-    :param allow_versioncodes:
-    :param app_id_version_code_pairs:
-    :return: A dictionary with the set of versionCodes specified for each package.
+    :param appids: arguments in the form of multiple appid:[vc] strings
+    :returns: a dictionary with the set of vercodes specified for each package
     """
-    ver_codes = {}
-    if not app_id_version_code_pairs:
-        return ver_codes
+    vercodes = {}
+    if not appid_versionCode_pairs:
+        return vercodes
 
     apk_regex = re.compile(r'_(\d+)\.apk$')
-    for p in app_id_version_code_pairs:
+    for p in appid_versionCode_pairs:
         p = apk_regex.sub(r':\1', p)
-        if allow_versioncodes and ':' in p:
-            package, ver_code = p.split(':')
+        if allow_vercodes and ':' in p:
+            package, vercode = p.split(':')
             try:
-                i_vercode = int(ver_code, 0)
+                i_vercode = int(vercode, 0)
             except ValueError:
-                i_vercode = int(ver_code)
-            ver_code = str(i_vercode)
+                i_vercode = int(vercode)
+            vercode = str(i_vercode)
         else:
-            package, ver_code = p, None
-        if package not in ver_codes:
-            ver_codes[package] = [ver_code] if ver_code else []
+            package, vercode = p, None
+        if package not in vercodes:
+            vercodes[package] = [vercode] if vercode else []
             continue
-        elif ver_code and ver_code not in ver_codes[package]:
-            ver_codes[package] += [ver_code] if ver_code else []
+        elif vercode and vercode not in vercodes[package]:
+            vercodes[package] += [vercode] if vercode else []
 
-    return ver_codes
+    return vercodes
 
 
-def get_metadata_files(ver_codes):
+def get_metadata_files(vercodes):
     """
-    Build a list of metadata files and raise an exception for invalid app IDs.
+    Build a list of metadata files and raise an exception for invalid appids.
 
-    :param ver_codes: Version codes as returned by read_pkg_args().
-    :return: A list of corresponding metadata/*.yml files.
+    :param vercodes: version codes as returned by read_pkg_args()
+    :returns: a list of corresponding metadata/*.yml files
     """
     found_invalid = False
-    metadata_files = []
-    for app_id in ver_codes.keys():
-        f = os.path.join('metadata', '%s.yml' % app_id)
+    metadatafiles = []
+    for appid in vercodes.keys():
+        f = os.path.join('metadata', '%s.yml' % appid)
         if os.path.exists(f):
-            metadata_files.append(f)
+            metadatafiles.append(f)
         else:
             found_invalid = True
-            logging.critical(_("No such package: %s") % app_id)
+            logging.critical(_("No such package: %s") % appid)
     if found_invalid:
         raise FDroidException(_("Found invalid appids in arguments"))
-    return metadata_files
+    return metadatafiles
 
 
-def read_app_args(appid_versioncode_pairs, all_apps, allow_versioncodes=False):
-    """
-    Build a list of App instances for processing.
+def read_app_args(appid_versionCode_pairs, allapps, allow_vercodes=False):
+    """Build a list of App instances for processing
 
     On top of what read_pkg_args does, this returns the whole app
     metadata, but limiting the builds list to the builds matching the
-    appid_versionCode_pairs and ver_codes specified. If no
+    appid_versionCode_pairs and vercodes specified.  If no
     appid_versionCode_pairs are specified, then all App and Build instances are
     returned.
+
     """
 
-    ver_codes = read_pkg_args(appid_versioncode_pairs, allow_versioncodes)
+    vercodes = read_pkg_args(appid_versionCode_pairs, allow_vercodes)
 
-    if not ver_codes:
-        return all_apps
+    if not vercodes:
+        return allapps
 
     apps = {}
-    for app_id, app in all_apps.items():
-        if app_id in ver_codes:
-            apps[app_id] = app
+    for appid, app in allapps.items():
+        if appid in vercodes:
+            apps[appid] = app
 
-    if len(apps) != len(ver_codes):
-        for p in ver_codes:
-            if p not in all_apps:
+    if len(apps) != len(vercodes):
+        for p in vercodes:
+            if p not in allapps:
                 logging.critical(_("No such package: %s") % p)
         raise FDroidException(_("Found invalid appids in arguments"))
     if not apps:
         raise FDroidException(_("No packages specified"))
 
     error = False
-    for app_id, app in apps.items():
-        vc = ver_codes[app_id]
+    for appid, app in apps.items():
+        vc = vercodes[appid]
         if not vc:
             continue
         app['Builds'] = [b for b in app.get('Builds', []) if b.versionCode in vc]
-        if len(app.get('Builds', [])) != len(ver_codes[app_id]):
+        if len(app.get('Builds', [])) != len(vercodes[appid]):
             error = True
-            all_vcs = [b.versionCode for b in app.get('Builds', [])]
-            for v in ver_codes[app_id]:
-                if v not in all_vcs:
+            allvcs = [b.versionCode for b in app.get('Builds', [])]
+            for v in vercodes[appid]:
+                if v not in allvcs:
                     logging.critical(_("No such versionCode {versionCode} for app {appid}")
-                                     .format(versionCode=v, appid=app_id))
+                                     .format(versionCode=v, appid=appid))
 
     if error:
         raise FDroidException(_("Found invalid versionCodes for some apps"))
@@ -701,7 +695,7 @@ def read_app_args(appid_versioncode_pairs, all_apps, allow_versioncodes=False):
 
 
 def get_extension(filename):
-    """Get name and extension of filename, with extension always lower case."""
+    """get name and extension of filename, with extension always lower case"""
     base, ext = os.path.splitext(filename)
     if not ext:
         return base, ''
@@ -711,7 +705,7 @@ def get_extension(filename):
 publish_name_regex = re.compile(r"^(.+)_([0-9]+)\.(apk|zip)$")
 
 
-def published_name_info(filename):
+def publishednameinfo(filename):
     filename = os.path.basename(filename)
     m = publish_name_regex.match(filename)
     try:
@@ -721,29 +715,27 @@ def published_name_info(filename):
     return result
 
 
-apk_release_filename = re.compile(r'(?P<appid>[a-zA-Z0-9_.]+)_(?P<vercode>[0-9]+)\.apk')
-apk_release_filename_with_sigfp = re.compile(
-    r'(?P<appid>[a-zA-Z0-9_.]+)_(?P<vercode>[0-9]+)_(?P<sigfp>[0-9a-f]{7})\.apk')
+apk_release_filename = re.compile(r'(?P<appid>[a-zA-Z0-9_\.]+)_(?P<vercode>[0-9]+)\.apk')
+apk_release_filename_with_sigfp = re.compile(r'(?P<appid>[a-zA-Z0-9_\.]+)_(?P<vercode>[0-9]+)_(?P<sigfp>[0-9a-f]{7})\.apk')
 
 
-def apk_parse_release_filename(apk_name):
-    """
-    Parses the name of an APK file according the F-Droids APK naming
+def apk_parse_release_filename(apkname):
+    """Parses the name of an APK file according the F-Droids APK naming
     scheme and returns the tokens.
 
     WARNING: Returned values don't necessarily represent the APKs actual
-    properties, the are just parsed from the file name.
+    properties, the are just paresed from the file name.
 
     :returns: A triplet containing (appid, versionCode, signer), where appid
         should be the package name, versionCode should be the integer
-        repression of the APKs version and signer should be the first 7 hex
-        digits of the sha256 signing key fingerprint which was used to sign
+        represion of the APKs version and signer should be the first 7 hex
+        digists of the sha256 signing key fingerprint which was used to sign
         this APK.
     """
-    m = apk_release_filename_with_sigfp.match(apk_name)
+    m = apk_release_filename_with_sigfp.match(apkname)
     if m:
         return m.group('appid'), m.group('vercode'), m.group('sigfp')
-    m = apk_release_filename.match(apk_name)
+    m = apk_release_filename.match(apkname)
     if m:
         return m.group('appid'), m.group('vercode'), None
     return None, None, None
@@ -756,16 +748,16 @@ def get_release_filename(app, build):
         return "%s_%s.apk" % (app.id, build.versionCode)
 
 
-def get_tools_version_log_name(app, build):
+def get_toolsversion_logname(app, build):
     return "%s_%s_toolsversion.log" % (app.id, build.versionCode)
 
 
-def get_src_name(app, build):
+def getsrcname(app, build):
     return "%s_%s_src.tar.gz" % (app.id, build.versionCode)
 
 
 def get_build_dir(app):
-    """Get the directory that this app will be built in."""
+    '''get the dir that this app will be built in'''
 
     if app.RepoType == 'srclib':
         return os.path.join('build', 'srclib', app.Repo)
@@ -781,7 +773,7 @@ class Encoder(json.JSONEncoder):
 
 
 def setup_status_output(start_timestamp):
-    """Create the common output dictionary for public status updates."""
+    """Create the common output dictionary for public status updates"""
     output = {
         'commandLine': sys.argv,
         'startTimestamp': int(time.mktime(start_timestamp) * 1000),
@@ -817,7 +809,7 @@ def write_running_status_json(output):
 
 
 def write_status_json(output, pretty=False, name=None):
-    """Write status out as JSON, and rsync it to the repo server."""
+    """Write status out as JSON, and rsync it to the repo server"""
     status_dir = os.path.join('repo', 'status')
     if not os.path.exists(status_dir):
         os.makedirs(status_dir)
@@ -834,15 +826,15 @@ def write_status_json(output, pretty=False, name=None):
 
 
 def get_head_commit_id(git_repo):
-    """Get git commit ID for HEAD as a string.
+    """Get git commit ID for HEAD as a str
 
-    repo.head.commit.binsha is a bytearray stored in a string
+    repo.head.commit.binsha is a bytearray stored in a str
     """
     return hexlify(bytearray(git_repo.head.commit.binsha)).decode()
 
 
 def setup_vcs(app):
-    """Checkout code from VCS and return instance of VCS and the build directory."""
+    '''checkout code from VCS and return instance of vcs and the build dir'''
     build_dir = get_build_dir(app)
 
     # Set up vcs interface and make sure we have the latest code...
@@ -852,44 +844,44 @@ def setup_vcs(app):
         remote = os.getcwd()
     else:
         remote = app.Repo
-    vcs = get_vcs(app.RepoType, remote, build_dir)
+    vcs = getvcs(app.RepoType, remote, build_dir)
 
     return vcs, build_dir
 
 
-def get_vcs(vcs_type, remote, local):
-    if vcs_type == 'git':
-        return VCSGit(remote, local)
-    if vcs_type == 'git-svn':
-        return VCSGitSvn(remote, local)
-    if vcs_type == 'hg':
-        return VCSHg(remote, local)
-    if vcs_type == 'bzr':
-        return VCSBzr(remote, local)
-    if vcs_type == 'srclib':
+def getvcs(vcstype, remote, local):
+    if vcstype == 'git':
+        return vcs_git(remote, local)
+    if vcstype == 'git-svn':
+        return vcs_gitsvn(remote, local)
+    if vcstype == 'hg':
+        return vcs_hg(remote, local)
+    if vcstype == 'bzr':
+        return vcs_bzr(remote, local)
+    if vcstype == 'srclib':
         if local != os.path.join('build', 'srclib', remote):
             raise VCSException("Error: srclib paths are hard-coded!")
-        return get_srclib(remote, os.path.join('build', 'srclib'), raw=True)
-    if vcs_type == 'svn':
+        return getsrclib(remote, os.path.join('build', 'srclib'), raw=True)
+    if vcstype == 'svn':
         raise VCSException("Deprecated vcs type 'svn' - please use 'git-svn' instead")
-    raise VCSException("Invalid vcs type " + vcs_type)
+    raise VCSException("Invalid vcs type " + vcstype)
 
 
-def get_srclib_vcs(name):
+def getsrclibvcs(name):
     if name not in fdroidserver.metadata.srclibs:
         raise VCSException("Missing srclib " + name)
     return fdroidserver.metadata.srclibs[name]['RepoType']
 
 
-class VCS:
+class vcs:
 
     def __init__(self, remote, local):
 
         # svn, git-svn and bzr may require auth
         self.username = None
-        if self.repo_type() in ('git-svn', 'bzr'):
+        if self.repotype() in ('git-svn', 'bzr'):
             if '@' in remote:
-                if self.repo_type == 'git-svn':
+                if self.repotype == 'git-svn':
                     raise VCSException("Authentication is not supported for git-svn")
                 self.username, remote = remote.split('@')
                 if ':' not in self.username:
@@ -902,54 +894,54 @@ class VCS:
         self.refreshed = False
         self.srclib = None
 
-    def repo_type(self):
+    def repotype(self):
         return None
 
-    def client_version(self):
-        version_str = fdroid_popen(self.client_version_cmd()).output
-        return version_str[0:version_str.find('\n')]
+    def clientversion(self):
+        versionstr = FDroidPopen(self.clientversioncmd()).output
+        return versionstr[0:versionstr.find('\n')]
 
-    def client_version_cmd(self):
+    def clientversioncmd(self):
         return None
 
-    def go_to_revision(self, rev, refresh=True):
-        """
-        Take the local repository to a clean version of the given
-        revision, which is specified in the VCS's native
+    def gotorevision(self, rev, refresh=True):
+        """Take the local repository to a clean version of the given
+        revision, which is specificed in the VCS's native
         format. Beforehand, the repository can be dirty, or even
         non-existent. If the repository does already exist locally, it
         will be updated from the origin, but only once in the lifetime
-        of the vcs object. None is acceptable for 'rev' if you know
+        of the vcs object.  None is acceptable for 'rev' if you know
         you are cloning a clean copy of the repo - otherwise it must
         specify a valid revision.
         """
+
         if self.clone_failed:
             raise VCSException(_("Downloading the repository already failed once, not trying again."))
 
         # The .fdroidvcs-id file for a repo tells us what VCS type
         # and remote that directory was created from, allowing us to drop it
         # automatically if either of those things changes.
-        fd_path = os.path.join(self.local, '..',
-                               '.fdroidvcs-' + os.path.basename(self.local))
-        fd_path = os.path.normpath(fd_path)
-        cdata = self.repo_type() + ' ' + self.remote
-        write_back = True
-        delete_repo = False
+        fdpath = os.path.join(self.local, '..',
+                              '.fdroidvcs-' + os.path.basename(self.local))
+        fdpath = os.path.normpath(fdpath)
+        cdata = self.repotype() + ' ' + self.remote
+        writeback = True
+        deleterepo = False
         if os.path.exists(self.local):
-            if os.path.exists(fd_path):
-                with open(fd_path, 'r') as f:
-                    fs_data = f.read().strip()
-                if fs_data == cdata:
-                    write_back = False
+            if os.path.exists(fdpath):
+                with open(fdpath, 'r') as f:
+                    fsdata = f.read().strip()
+                if fsdata == cdata:
+                    writeback = False
                 else:
-                    delete_repo = True
+                    deleterepo = True
                     logging.info("Repository details for %s changed - deleting" % (
                         self.local))
             else:
-                delete_repo = True
+                deleterepo = True
                 logging.info("Repository details for %s missing - deleting" % (
                     self.local))
-        if delete_repo:
+        if deleterepo:
             shutil.rmtree(self.local)
 
         exc = None
@@ -957,73 +949,73 @@ class VCS:
             self.refreshed = True
 
         try:
-            self.go_to_revision_x(rev)
+            self.gotorevisionx(rev)
         except FDroidException as e:
             exc = e
 
         # If necessary, write the .fdroidvcs file.
-        if write_back and not self.clone_failed:
-            os.makedirs(os.path.dirname(fd_path), exist_ok=True)
-            with open(fd_path, 'w+') as f:
+        if writeback and not self.clone_failed:
+            os.makedirs(os.path.dirname(fdpath), exist_ok=True)
+            with open(fdpath, 'w+') as f:
                 f.write(cdata)
 
         if exc is not None:
             raise exc
 
-    def go_to_revision_x(self, rev):  # pylint: disable=unused-argument
-        """
-        Derived classes need to implement this.
+    def gotorevisionx(self, rev):  # pylint: disable=unused-argument
+        """Derived classes need to implement this.
+
         It's called once basic checking has been performed.
         """
         raise VCSException("This VCS type doesn't define gotorevisionx")
 
     # Initialise and update submodules
-    def init_submodules(self):
+    def initsubmodules(self):
         raise VCSException('Submodules not supported for this vcs type')
 
     # Get a list of all known tags
     def gettags(self):
         if not self._gettags:
             raise VCSException('gettags not supported for this vcs type')
-        r_tags = []
+        rtags = []
         for tag in self._gettags():
             if re.match('[-A-Za-z0-9_. /]+$', tag):
-                r_tags.append(tag)
-        return r_tags
+                rtags.append(tag)
+        return rtags
 
-    def latest_tags(self):
-        """Get a list of all the known tags, sorted from newest to oldest."""
+    def latesttags(self):
+        """Get a list of all the known tags, sorted from newest to oldest"""
         raise VCSException('latesttags not supported for this vcs type')
 
-    def get_ref(self):
-        """Get current commit reference (hash, revision, etc)."""
+    def getref(self):
+        """Get current commit reference (hash, revision, etc)"""
         raise VCSException('getref not supported for this vcs type')
 
-    def get_srclib(self):
+    def getsrclib(self):
         """Returns the srclib (name, path) used in setting up the current revision, or None."""
         return self.srclib
 
 
-class VCSGit(VCS):
+class vcs_git(vcs):
 
-    def repo_type(self):
+    def repotype(self):
         return 'git'
 
-    def client_version_cmd(self):
+    def clientversioncmd(self):
         return ['git', '--version']
 
     def git(self, args, envs=dict(), cwd=None, output=True):
-        """
-        Prevent git fetch/clone/submodule from hanging at the username/password prompt.
+        '''Prevent git fetch/clone/submodule from hanging at the username/password prompt
 
         While fetch/pull/clone respect the command line option flags,
-        it seems that submodule commands do not. They do seem to
+        it seems that submodule commands do not.  They do seem to
         follow whatever is in env vars, if the version of git is new
-        enough. So we just throw the kitchen sink at it to see what
+        enough.  So we just throw the kitchen sink at it to see what
         sticks.
 
         Also, because of CVE-2017-1000117, block all SSH URLs.
-        """
+        '''
+        #
         # supported in git >= 2.3
         git_config = [
             '-c', 'core.askpass=/bin/true',
@@ -1043,41 +1035,41 @@ class VCSGit(VCS):
             'SSH_ASKPASS': '/bin/true',
             'GIT_SSH': '/bin/false',  # for git < 2.3
         })
-        return fdroid_popen(['git', ] + git_config + args,
-                            envs=envs, cwd=cwd, output=output)
+        return FDroidPopen(['git', ] + git_config + args,
+                           envs=envs, cwd=cwd, output=output)
 
-    def check_repo(self):
-        """
-        If the local directory exists, but is somehow not a git repository,
+    def checkrepo(self):
+        """If the local directory exists, but is somehow not a git repository,
         git will traverse up the directory tree until it finds one
-        that is (i.e. fdroidserver) and then we'll proceed to destroy
-        it! This is called as a safety check.
+        that is (i.e.  fdroidserver) and then we'll proceed to destroy
+        it!  This is called as a safety check.
+
         """
 
-        p = fdroid_popen(['git', 'rev-parse', '--show-toplevel'], cwd=self.local, output=False)
+        p = FDroidPopen(['git', 'rev-parse', '--show-toplevel'], cwd=self.local, output=False)
         result = p.output.rstrip()
         if not result.endswith(self.local):
             raise VCSException('Repository mismatch')
 
-    def go_to_revision_x(self, rev):
+    def gotorevisionx(self, rev):
         if not os.path.exists(self.local):
             # Brand new checkout
             p = self.git(['clone', '--', self.remote, self.local])
             if p.returncode != 0:
                 self.clone_failed = True
                 raise VCSException("Git clone failed", p.output)
-            self.check_repo()
+            self.checkrepo()
         else:
-            self.check_repo()
+            self.checkrepo()
             # Discard any working tree changes
-            p = fdroid_popen(['git', 'submodule', 'foreach', '--recursive',
-                              'git', 'reset', '--hard'], cwd=self.local, output=False)
+            p = FDroidPopen(['git', 'submodule', 'foreach', '--recursive',
+                             'git', 'reset', '--hard'], cwd=self.local, output=False)
             if p.returncode != 0:
                 raise VCSException(_("Git reset failed"), p.output)
             # Remove untracked files now, in case they're tracked in the target
             # revision (it happens!)
-            p = fdroid_popen(['git', 'submodule', 'foreach', '--recursive',
-                              'git', 'clean', '-dffx'], cwd=self.local, output=False)
+            p = FDroidPopen(['git', 'submodule', 'foreach', '--recursive',
+                             'git', 'clean', '-dffx'], cwd=self.local, output=False)
             if p.returncode != 0:
                 raise VCSException(_("Git clean failed"), p.output)
             if not self.refreshed:
@@ -1089,15 +1081,15 @@ class VCSGit(VCS):
                 if p.returncode != 0:
                     raise VCSException(_("Git fetch failed"), p.output)
                 # Recreate origin/HEAD as git clone would do it, in case it disappeared
-                p = fdroid_popen(['git', 'remote', 'set-head', 'origin', '--auto'], cwd=self.local, output=False)
+                p = FDroidPopen(['git', 'remote', 'set-head', 'origin', '--auto'], cwd=self.local, output=False)
                 if p.returncode != 0:
                     lines = p.output.splitlines()
                     if 'Multiple remote HEAD branches' not in lines[0]:
                         logging.warning(_("Git remote set-head failed: \"%s\"") % p.output.strip())
                     else:
                         branch = lines[1].split(' ')[-1]
-                        p2 = fdroid_popen(['git', 'remote', 'set-head', 'origin', '--', branch],
-                                          cwd=self.local, output=False)
+                        p2 = FDroidPopen(['git', 'remote', 'set-head', 'origin', '--', branch],
+                                         cwd=self.local, output=False)
                         if p2.returncode != 0:
                             logging.warning(_("Git remote set-head failed: \"%s\"")
                                             % p.output.strip() + '\n' + p2.output.strip())
@@ -1105,30 +1097,30 @@ class VCSGit(VCS):
         # origin/HEAD is the HEAD of the remote, e.g. the "default branch" on
         # a github repo. Most of the time this is the same as origin/master.
         rev = rev or 'origin/HEAD'
-        p = fdroid_popen(['git', 'checkout', '-f', rev], cwd=self.local, output=False)
+        p = FDroidPopen(['git', 'checkout', '-f', rev], cwd=self.local, output=False)
         if p.returncode != 0:
             raise VCSException(_("Git checkout of '%s' failed") % rev, p.output)
         # Get rid of any uncontrolled files left behind
-        p = fdroid_popen(['git', 'clean', '-dffx'], cwd=self.local, output=False)
+        p = FDroidPopen(['git', 'clean', '-dffx'], cwd=self.local, output=False)
         if p.returncode != 0:
             raise VCSException(_("Git clean failed"), p.output)
 
-    def init_submodules(self):
-        self.check_repo()
-        submodule_file = os.path.join(self.local, '.gitmodules')
-        if not os.path.isfile(submodule_file):
+    def initsubmodules(self):
+        self.checkrepo()
+        submfile = os.path.join(self.local, '.gitmodules')
+        if not os.path.isfile(submfile):
             raise NoSubmodulesException(_("No git submodules available"))
 
         # fix submodules not accessible without an account and public key auth
-        with open(submodule_file, 'r') as f:
+        with open(submfile, 'r') as f:
             lines = f.readlines()
-        with open(submodule_file, 'w') as f:
+        with open(submfile, 'w') as f:
             for line in lines:
                 for domain in ('bitbucket.org', 'github.com', 'gitlab.com'):
                     line = re.sub('git@' + domain + ':', 'https://u:p@' + domain + '/', line)
                 f.write(line)
 
-        p = fdroid_popen(['git', 'submodule', 'sync'], cwd=self.local, output=False)
+        p = FDroidPopen(['git', 'submodule', 'sync'], cwd=self.local, output=False)
         if p.returncode != 0:
             raise VCSException(_("Git submodule sync failed"), p.output)
         p = self.git(['submodule', 'update', '--init', '--force', '--recursive'], cwd=self.local)
@@ -1136,17 +1128,17 @@ class VCSGit(VCS):
             raise VCSException(_("Git submodule update failed"), p.output)
 
     def _gettags(self):
-        self.check_repo()
-        p = fdroid_popen(['git', 'tag'], cwd=self.local, output=False)
+        self.checkrepo()
+        p = FDroidPopen(['git', 'tag'], cwd=self.local, output=False)
         return p.output.splitlines()
 
     tag_format = re.compile(r'tag: ([^),]*)')
 
-    def latest_tags(self):
-        self.check_repo()
-        p = fdroid_popen(['git', 'log', '--tags',
-                          '--simplify-by-decoration', '--pretty=format:%d'],
-                         cwd=self.local, output=False)
+    def latesttags(self):
+        self.checkrepo()
+        p = FDroidPopen(['git', 'log', '--tags',
+                         '--simplify-by-decoration', '--pretty=format:%d'],
+                        cwd=self.local, output=False)
         tags = []
         for line in p.output.splitlines():
             for tag in self.tag_format.findall(line):
@@ -1154,37 +1146,37 @@ class VCSGit(VCS):
         return tags
 
 
-class VCSGitSvn(VCS):
+class vcs_gitsvn(vcs):
 
-    def repo_type(self):
+    def repotype(self):
         return 'git-svn'
 
-    def client_version_cmd(self):
+    def clientversioncmd(self):
         return ['git', 'svn', '--version']
 
-    def check_repo(self):
-        """
-        If the local directory exists, but is somehow not a git repository,
+    def checkrepo(self):
+        """If the local directory exists, but is somehow not a git repository,
         git will traverse up the directory tree until it finds one that
-        is (i.e. fdroidserver) and then we'll proceed to destroy it!
+        is (i.e.  fdroidserver) and then we'll proceed to destory it!
         This is called as a safety check.
+
         """
-        p = fdroid_popen(['git', 'rev-parse', '--show-toplevel'], cwd=self.local, output=False)
+        p = FDroidPopen(['git', 'rev-parse', '--show-toplevel'], cwd=self.local, output=False)
         result = p.output.rstrip()
         if not result.endswith(self.local):
             raise VCSException('Repository mismatch')
 
     def git(self, args, envs=dict(), cwd=None, output=True):
-        """
-        Prevent git fetch/clone/submodule from hanging at the username/password prompt.
+        '''Prevent git fetch/clone/submodule from hanging at the username/password prompt
 
         AskPass is set to /bin/true to let the process try to connect
         without a username/password.
 
         The SSH command is set to /bin/false to block all SSH URLs
-        (supported in git >= 2.3). This protects against
+        (supported in git >= 2.3).  This protects against
         CVE-2017-1000117.
-        """
+
+        '''
         git_config = [
             '-c', 'core.askpass=/bin/true',
             '-c', 'core.sshCommand=/bin/false',
@@ -1196,22 +1188,23 @@ class VCSGitSvn(VCS):
             'GIT_SSH': '/bin/false',  # for git < 2.3
             'SVN_SSH': '/bin/false',
         })
-        return fdroid_popen(['git', ] + git_config + args,
-                            envs=envs, cwd=cwd, output=output)
+        return FDroidPopen(['git', ] + git_config + args,
+                           envs=envs, cwd=cwd, output=output)
 
-    def go_to_revision_x(self, rev):
+    def gotorevisionx(self, rev):
         if not os.path.exists(self.local):
             # Brand new checkout
-            git_svn_args = ['svn', 'clone']
+            gitsvn_args = ['svn', 'clone']
+            remote = None
             if ';' in self.remote:
                 remote_split = self.remote.split(';')
                 for i in remote_split[1:]:
                     if i.startswith('trunk='):
-                        git_svn_args.extend(['-T', i[6:]])
+                        gitsvn_args.extend(['-T', i[6:]])
                     elif i.startswith('tags='):
-                        git_svn_args.extend(['-t', i[5:]])
+                        gitsvn_args.extend(['-t', i[5:]])
                     elif i.startswith('branches='):
-                        git_svn_args.extend(['-b', i[9:]])
+                        gitsvn_args.extend(['-b', i[9:]])
                 remote = remote_split[0]
             else:
                 remote = self.remote
@@ -1231,14 +1224,14 @@ class VCSGitSvn(VCS):
                 raise VCSException(_('Invalid redirect to non-HTTPS: {before} -> {after} ')
                                    .format(before=remote, after=location))
 
-            git_svn_args.extend(['--', remote, self.local])
-            p = self.git(git_svn_args)
+            gitsvn_args.extend(['--', remote, self.local])
+            p = self.git(gitsvn_args)
             if p.returncode != 0:
                 self.clone_failed = True
                 raise VCSException(_('git svn clone failed'), p.output)
-            self.check_repo()
+            self.checkrepo()
         else:
-            self.check_repo()
+            self.checkrepo()
             # Discard any working tree changes
             p = self.git(['reset', '--hard'], cwd=self.local, output=False)
             if p.returncode != 0:
@@ -1260,10 +1253,10 @@ class VCSGitSvn(VCS):
 
         rev = rev or 'master'
         if rev:
-            no_spaces_rev = rev.replace(' ', '%20')
+            nospaces_rev = rev.replace(' ', '%20')
             # Try finding a svn tag
             for treeish in ['origin/', '']:
-                p = self.git(['checkout', treeish + 'tags/' + no_spaces_rev], cwd=self.local, output=False)
+                p = self.git(['checkout', treeish + 'tags/' + nospaces_rev], cwd=self.local, output=False)
                 if p.returncode == 0:
                     break
             if p.returncode != 0:
@@ -1271,6 +1264,7 @@ class VCSGitSvn(VCS):
                 # Translate svn rev into git format
                 rev_split = rev.split('/')
 
+                p = None
                 for treeish in ['origin/', '']:
                     if len(rev_split) > 1:
                         treeish += rev_split[0]
@@ -1293,8 +1287,7 @@ class VCSGitSvn(VCS):
                     # Try a plain git checkout as a last resort
                     p = self.git(['checkout', rev], cwd=self.local, output=False)
                     if p.returncode != 0:
-                        raise VCSException("No git treeish found and direct git checkout of '%s' failed" % rev,
-                                           p.output)
+                        raise VCSException("No git treeish found and direct git checkout of '%s' failed" % rev, p.output)
                 else:
                     # Check out the git rev equivalent to the svn rev
                     p = self.git(['checkout', git_rev], cwd=self.local, output=False)
@@ -1307,45 +1300,45 @@ class VCSGitSvn(VCS):
             raise VCSException(_("Git clean failed"), p.output)
 
     def _gettags(self):
-        self.check_repo()
+        self.checkrepo()
         for treeish in ['origin/', '']:
             d = os.path.join(self.local, '.git', 'svn', 'refs', 'remotes', treeish, 'tags')
             if os.path.isdir(d):
                 return os.listdir(d)
 
-    def get_ref(self):
-        self.check_repo()
-        p = fdroid_popen(['git', 'svn', 'find-rev', 'HEAD'], cwd=self.local, output=False)
+    def getref(self):
+        self.checkrepo()
+        p = FDroidPopen(['git', 'svn', 'find-rev', 'HEAD'], cwd=self.local, output=False)
         if p.returncode != 0:
             return None
         return p.output.strip()
 
 
-class VCSHg(VCS):
+class vcs_hg(vcs):
 
-    def repo_type(self):
+    def repotype(self):
         return 'hg'
 
-    def client_version_cmd(self):
+    def clientversioncmd(self):
         return ['hg', '--version']
 
-    def go_to_revision_x(self, rev):
+    def gotorevisionx(self, rev):
         if not os.path.exists(self.local):
-            p = fdroid_popen(['hg', 'clone', '--ssh', '/bin/false', '--', self.remote, self.local],
-                             output=False)
+            p = FDroidPopen(['hg', 'clone', '--ssh', '/bin/false', '--', self.remote, self.local],
+                            output=False)
             if p.returncode != 0:
                 self.clone_failed = True
                 raise VCSException("Hg clone failed", p.output)
         else:
-            p = fdroid_popen(['hg', 'status', '-uS'], cwd=self.local, output=False)
+            p = FDroidPopen(['hg', 'status', '-uS'], cwd=self.local, output=False)
             if p.returncode != 0:
                 raise VCSException("Hg status failed", p.output)
             for line in p.output.splitlines():
                 if not line.startswith('? '):
                     raise VCSException("Unexpected output from hg status -uS: " + line)
-                fdroid_popen(['rm', '-rf', '--', line[2:]], cwd=self.local, output=False)
+                FDroidPopen(['rm', '-rf', '--', line[2:]], cwd=self.local, output=False)
             if not self.refreshed:
-                p = fdroid_popen(['hg', 'pull', '--ssh', '/bin/false'], cwd=self.local, output=False)
+                p = FDroidPopen(['hg', 'pull', '--ssh', '/bin/false'], cwd=self.local, output=False)
                 if p.returncode != 0:
                     raise VCSException("Hg pull failed", p.output)
                 self.refreshed = True
@@ -1353,41 +1346,41 @@ class VCSHg(VCS):
         rev = rev or 'default'
         if not rev:
             return
-        p = fdroid_popen(['hg', 'update', '-C', '--', rev], cwd=self.local, output=False)
+        p = FDroidPopen(['hg', 'update', '-C', '--', rev], cwd=self.local, output=False)
         if p.returncode != 0:
             raise VCSException("Hg checkout of '%s' failed" % rev, p.output)
-        p = fdroid_popen(['hg', 'purge', '--all'], cwd=self.local, output=False)
+        p = FDroidPopen(['hg', 'purge', '--all'], cwd=self.local, output=False)
         # Also delete untracked files, we have to enable purge extension for that:
         if "'purge' is provided by the following extension" in p.output:
             with open(os.path.join(self.local, '.hg', 'hgrc'), "a") as myfile:
                 myfile.write("\n[extensions]\nhgext.purge=\n")
-            p = fdroid_popen(['hg', 'purge', '--all'], cwd=self.local, output=False)
+            p = FDroidPopen(['hg', 'purge', '--all'], cwd=self.local, output=False)
             if p.returncode != 0:
                 raise VCSException("HG purge failed", p.output)
         elif p.returncode != 0:
             raise VCSException("HG purge failed", p.output)
 
     def _gettags(self):
-        p = fdroid_popen(['hg', 'tags', '-q'], cwd=self.local, output=False)
+        p = FDroidPopen(['hg', 'tags', '-q'], cwd=self.local, output=False)
         return p.output.splitlines()[1:]
 
 
-class VCSBzr(VCS):
+class vcs_bzr(vcs):
 
-    def repo_type(self):
+    def repotype(self):
         return 'bzr'
 
-    def client_version_cmd(self):
+    def clientversioncmd(self):
         return ['bzr', '--version']
 
     def bzr(self, args, envs=dict(), cwd=None, output=True):
-        """Prevent bzr from ever using SSH to avoid security vulnerabilities."""
+        '''Prevent bzr from ever using SSH to avoid security vulns'''
         envs.update({
             'BZR_SSH': 'false',
         })
-        return fdroid_popen(['bzr', ] + args, envs=envs, cwd=cwd, output=output)
+        return FDroidPopen(['bzr', ] + args, envs=envs, cwd=cwd, output=output)
 
-    def go_to_revision_x(self, rev):
+    def gotorevisionx(self, rev):
         if not os.path.exists(self.local):
             p = self.bzr(['branch', self.remote, self.local], output=False)
             if p.returncode != 0:
@@ -1403,8 +1396,8 @@ class VCSBzr(VCS):
                     raise VCSException("Bzr update failed", p.output)
                 self.refreshed = True
 
-        rev_args = list(['-r', rev] if rev else [])
-        p = self.bzr(['revert'] + rev_args, cwd=self.local, output=False)
+        revargs = list(['-r', rev] if rev else [])
+        p = self.bzr(['revert'] + revargs, cwd=self.local, output=False)
         if p.returncode != 0:
             raise VCSException("Bzr revert of '%s' failed" % rev, p.output)
 
@@ -1423,19 +1416,20 @@ def unescape_string(string):
     return string.replace("\\'", "'")
 
 
-def retrieve_string(app_dir, string, xml_files=None):
+def retrieve_string(app_dir, string, xmlfiles=None):
+
     if not string.startswith('@string/'):
         return unescape_string(string)
 
-    if xml_files is None:
-        xml_files = []
+    if xmlfiles is None:
+        xmlfiles = []
         for res_dir in [
             os.path.join(app_dir, 'res'),
             os.path.join(app_dir, 'src', 'main', 'res'),
         ]:
             for root, dirs, files in os.walk(res_dir):
                 if os.path.basename(root) == 'values':
-                    xml_files += [os.path.join(root, x) for x in files if x.endswith('.xml')]
+                    xmlfiles += [os.path.join(root, x) for x in files if x.endswith('.xml')]
 
     name = string[len('@string/'):]
 
@@ -1445,24 +1439,24 @@ def retrieve_string(app_dir, string, xml_files=None):
         s = XMLElementTree.tostring(element, encoding='utf-8', method='text')
         return s.decode('utf-8').strip()
 
-    for path in xml_files:
+    for path in xmlfiles:
         if not os.path.isfile(path):
             continue
         xml = parse_xml(path)
         element = xml.find('string[@name="' + name + '"]')
         if element is not None:
             content = element_content(element)
-            return retrieve_string(app_dir, content, xml_files)
+            return retrieve_string(app_dir, content, xmlfiles)
 
     return ''
 
 
-def retrieve_string_single_line(app_dir, string, xml_files=None):
-    return retrieve_string(app_dir, string, xml_files).replace('\n', ' ').strip()
+def retrieve_string_singleline(app_dir, string, xmlfiles=None):
+    return retrieve_string(app_dir, string, xmlfiles).replace('\n', ' ').strip()
 
 
 def manifest_paths(app_dir, flavours):
-    """Return list of existing files that will be used to find the highest versionCode."""
+    '''Return list of existing files that will be used to find the highest vercode'''
 
     possible_manifests = \
         [os.path.join(app_dir, 'AndroidManifest.xml'),
@@ -1482,7 +1476,7 @@ def manifest_paths(app_dir, flavours):
 
 
 def fetch_real_name(app_dir, flavours):
-    """Retrieve the package name. Returns the name, or None if not found."""
+    '''Retrieve the package name. Returns the name, or None if not found.'''
     for path in manifest_paths(app_dir, flavours):
         if not path.endswith('.xml') or not os.path.isfile(path):
             continue
@@ -1494,7 +1488,7 @@ def fetch_real_name(app_dir, flavours):
         if XMLNS_ANDROID + "label" not in app.attrib:
             continue
         label = app.attrib[XMLNS_ANDROID + "label"]
-        result = retrieve_string_single_line(app_dir, label)
+        result = retrieve_string_singleline(app_dir, label)
         if result:
             result = result.strip()
         return result
@@ -1503,16 +1497,16 @@ def fetch_real_name(app_dir, flavours):
 
 def get_library_references(root_dir):
     libraries = []
-    prop_path = os.path.join(root_dir, 'project.properties')
-    if not os.path.isfile(prop_path):
+    proppath = os.path.join(root_dir, 'project.properties')
+    if not os.path.isfile(proppath):
         return libraries
-    with open(prop_path, 'r', encoding='iso-8859-1') as f:
+    with open(proppath, 'r', encoding='iso-8859-1') as f:
         for line in f:
             if not line.startswith('android.library.reference.'):
                 continue
             path = line.split('=')[1].strip()
-            rel_path = os.path.join(root_dir, path)
-            if not os.path.isdir(rel_path):
+            relpath = os.path.join(root_dir, path)
+            if not os.path.isdir(relpath):
                 continue
             logging.debug("Found subproject at %s" % path)
             libraries.append(path)
@@ -1521,12 +1515,12 @@ def get_library_references(root_dir):
 
 def ant_subprojects(root_dir):
     subprojects = get_library_references(root_dir)
-    for sub_path in subprojects:
-        sub_rel_path = os.path.join(root_dir, sub_path)
-        for p in get_library_references(sub_rel_path):
-            rel_p = os.path.normpath(os.path.join(sub_path, p))
-            if rel_p not in subprojects:
-                subprojects.insert(0, rel_p)
+    for subpath in subprojects:
+        subrelpath = os.path.join(root_dir, subpath)
+        for p in get_library_references(subrelpath):
+            relp = os.path.normpath(os.path.join(subpath, p))
+            if relp not in subprojects:
+                subprojects.insert(0, relp)
     return subprojects
 
 
@@ -1535,42 +1529,42 @@ def remove_debuggable_flags(root_dir):
     logging.debug("Removing debuggable flags from %s" % root_dir)
     for root, dirs, files in os.walk(root_dir):
         if 'AndroidManifest.xml' in files and os.path.isfile(os.path.join(root, 'AndroidManifest.xml')):
-            reg_sub_file(r'android:debuggable="[^"]*"',
-                         '',
-                         os.path.join(root, 'AndroidManifest.xml'))
+            regsub_file(r'android:debuggable="[^"]*"',
+                        '',
+                        os.path.join(root, 'AndroidManifest.xml'))
 
 
-vc_search_g = re.compile(r'''\b[Vv]ersionCode\s*=?\s*["'(]*([0-9_]+)["')]*''').search
-vn_search_g = re.compile(r'''\b[Vv]ersionName\s*=?\s*\(?(["'])((?:(?=(\\?))\3.)*?)\1''').search
-vns_search_g = re.compile(r'''\b[Vv]ersionNameSuffix\s*=?\s*(["'])((?:(?=(\\?))\3.)*?)\1''').search
-p_search_g = re.compile(r'''\b(packageName|applicationId)\s*=*\s*["']([^"']+)["']''').search
-f_search_g = re.compile(r'''\b(applicationIdSuffix)\s*=*\s*["']([^"']+)["']''').search
+vcsearch_g = re.compile(r'''\b[Vv]ersionCode\s*=?\s*["'(]*([0-9_]+)["')]*''').search
+vnsearch_g = re.compile(r'''\b[Vv]ersionName\s*=?\s*\(?(["'])((?:(?=(\\?))\3.)*?)\1''').search
+vnssearch_g = re.compile(r'''\b[Vv]ersionNameSuffix\s*=?\s*(["'])((?:(?=(\\?))\3.)*?)\1''').search
+psearch_g = re.compile(r'''\b(packageName|applicationId)\s*=*\s*["']([^"']+)["']''').search
+fsearch_g = re.compile(r'''\b(applicationIdSuffix)\s*=*\s*["']([^"']+)["']''').search
 
 
-def app_matches_package_name(app, package):
+def app_matches_packagename(app, package):
     if not package:
         return False
-    app_id = app.UpdateCheckName or app.id
-    if app_id is None or app_id == "Ignore":
+    appid = app.UpdateCheckName or app.id
+    if appid is None or appid == "Ignore":
         return True
-    return app_id == package
+    return appid == package
 
 
-def parse_android_manifests(paths, app):
+def parse_androidmanifests(paths, app):
     """
     Extract some information from the AndroidManifest.xml at the given path.
-    Returns (version, versioncode, package), any or all of which might be None.
+    Returns (version, vercode, package), any or all of which might be None.
     All values returned are strings.
     """
 
-    ignore_versions = app.UpdateCheckIgnore
-    ignore_search = re.compile(ignore_versions).search if ignore_versions else None
+    ignoreversions = app.UpdateCheckIgnore
+    ignoresearch = re.compile(ignoreversions).search if ignoreversions else None
 
     if not paths:
-        return None, None, None
+        return (None, None, None)
 
     max_version = None
-    max_versioncode = None
+    max_vercode = None
     max_package = None
 
     for path in paths:
@@ -1580,7 +1574,7 @@ def parse_android_manifests(paths, app):
 
         logging.debug(_("Parsing manifest at '{path}'").format(path=path))
         version = None
-        versioncode = None
+        vercode = None
         package = None
 
         flavour = None
@@ -1599,44 +1593,44 @@ def parse_android_manifests(paths, app):
                         continue
 
                     if "applicationId" in line and not temp_app_id:
-                        matches = p_search_g(line)
+                        matches = psearch_g(line)
                         if matches:
                             temp_app_id = matches.group(2)
 
                     if "versionName" in line and not temp_version_name:
-                        matches = vn_search_g(line)
+                        matches = vnsearch_g(line)
                         if matches:
                             temp_version_name = matches.group(2)
 
                     if inside_flavour_group > 0:
                         if inside_required_flavour > 0:
-                            matches = p_search_g(line)
+                            matches = psearch_g(line)
                             if matches:
                                 s = matches.group(2)
-                                if app_matches_package_name(app, s):
+                                if app_matches_packagename(app, s):
                                     package = s
                             else:
                                 # If build.gradle contains applicationIdSuffix add it to the end of package name
-                                matches = f_search_g(line)
+                                matches = fsearch_g(line)
                                 if matches and temp_app_id:
                                     suffix = matches.group(2)
                                     temp_app_id = temp_app_id + suffix
-                                    if app_matches_package_name(app, temp_app_id):
+                                    if app_matches_packagename(app, temp_app_id):
                                         package = temp_app_id
 
-                            matches = vn_search_g(line)
+                            matches = vnsearch_g(line)
                             if matches:
                                 version = matches.group(2)
                             else:
                                 # If build.gradle contains applicationNameSuffix add it to the end of version name
-                                matches = vns_search_g(line)
+                                matches = vnssearch_g(line)
                                 if matches and temp_version_name:
                                     name_suffix = matches.group(2)
                                     version = temp_version_name + name_suffix
 
-                            matches = vc_search_g(line)
+                            matches = vcsearch_g(line)
                             if matches:
-                                versioncode = matches.group(1)
+                                vercode = matches.group(1)
 
                             if '{' in line:
                                 inside_required_flavour += 1
@@ -1654,19 +1648,19 @@ def parse_android_manifests(paths, app):
                         if "productFlavors" in line:
                             inside_flavour_group = 1
                         if not package:
-                            matches = p_search_g(line)
+                            matches = psearch_g(line)
                             if matches:
                                 s = matches.group(2)
-                                if app_matches_package_name(app, s):
+                                if app_matches_packagename(app, s):
                                     package = s
                         if not version:
-                            matches = vn_search_g(line)
+                            matches = vnsearch_g(line)
                             if matches:
                                 version = matches.group(2)
-                        if not versioncode:
-                            matches = vc_search_g(line)
+                        if not vercode:
+                            matches = vcsearch_g(line)
                             if matches:
-                                versioncode = matches.group(1)
+                                vercode = matches.group(1)
                     if not android_plugin_file and ANDROID_PLUGIN_REGEX.match(line):
                         android_plugin_file = True
             if android_plugin_file:
@@ -1674,34 +1668,34 @@ def parse_android_manifests(paths, app):
                     max_package = package
                 if version:
                     max_version = version
-                if versioncode:
-                    max_versioncode = versioncode
-                if max_package and max_version and max_versioncode:
+                if vercode:
+                    max_vercode = vercode
+                if max_package and max_version and max_vercode:
                     break
         else:
             try:
                 xml = parse_xml(path)
                 if "package" in xml.attrib:
                     s = xml.attrib["package"]
-                    if app_matches_package_name(app, s):
+                    if app_matches_packagename(app, s):
                         package = s
                 if XMLNS_ANDROID + "versionName" in xml.attrib:
                     version = xml.attrib[XMLNS_ANDROID + "versionName"]
                     base_dir = os.path.dirname(path)
-                    version = retrieve_string_single_line(base_dir, version)
+                    version = retrieve_string_singleline(base_dir, version)
                 if XMLNS_ANDROID + "versionCode" in xml.attrib:
                     a = xml.attrib[XMLNS_ANDROID + "versionCode"]
                     if string_is_integer(a):
-                        versioncode = a
+                        vercode = a
             except Exception:
                 logging.warning(_("Problem with xml at '{path}'").format(path=path))
 
-        # Remember package name, may be defined separately from version+versioncode
+        # Remember package name, may be defined separately from version+vercode
         if package is None:
             package = max_package
 
-        logging.debug("..got package={0}, version={1}, versioncode={2}"
-                      .format(package, version, versioncode))
+        logging.debug("..got package={0}, version={1}, vercode={2}"
+                      .format(package, version, vercode))
 
         # Always grab the package name and version name in case they are not
         # together with the highest version code
@@ -1710,13 +1704,13 @@ def parse_android_manifests(paths, app):
         if max_version is None and version is not None:
             max_version = version
 
-        if versioncode is not None \
-                and (max_versioncode is None or versioncode > max_versioncode):
-            if version and (not ignore_search or not ignore_search(version)):
+        if vercode is not None \
+           and (max_vercode is None or vercode > max_vercode):
+            if version and (not ignoresearch or not ignoresearch(version)):
                 if version is not None:
                     max_version = version
-                if versioncode is not None:
-                    max_versioncode = versioncode
+                if vercode is not None:
+                    max_vercode = vercode
                 if package is not None:
                     max_package = package
             else:
@@ -1732,23 +1726,23 @@ def parse_android_manifests(paths, app):
         elif not is_strict_application_id(max_package):
             logging.warning(msg)
 
-    return max_version, max_versioncode, max_package
+    return (max_version, max_vercode, max_package)
 
 
 def is_valid_package_name(name):
-    """
-    Check whether name is a valid fdroid package name.
+    """Check whether name is a valid fdroid package name
 
     APKs and manually defined package names must use a valid Java
-    Package Name. Automatically generated package names for non-APK
+    Package Name.  Automatically generated package names for non-APK
     files use the SHA-256 sum.
+
     """
-    return VALID_APPLICATION_ID_REGEX.match(name) is not None or FDROID_PACKAGE_NAME_REGEX.match(name) is not None
+    return VALID_APPLICATION_ID_REGEX.match(name) is not None \
+        or FDROID_PACKAGE_NAME_REGEX.match(name) is not None
 
 
 def is_strict_application_id(name):
-    """
-    Check whether name is a valid Android Application ID.
+    """Check whether name is a valid Android Application ID
 
     The Android ApplicationID is basically a Java Package Name, but
     with more restrictive naming rules:
@@ -1758,8 +1752,10 @@ def is_strict_application_id(name):
     * All characters must be alphanumeric or an underscore [a-zA-Z0-9_].
 
     https://developer.android.com/studio/build/application-id
+
     """
-    return STRICT_APPLICATION_ID_REGEX.match(name) is not None and '.' in name
+    return STRICT_APPLICATION_ID_REGEX.match(name) is not None \
+        and '.' in name
 
 
 def get_all_gradle_and_manifests(build_dir):
@@ -1767,14 +1763,14 @@ def get_all_gradle_and_manifests(build_dir):
     for root, dirs, files in os.walk(build_dir):
         for f in sorted(files):
             if f == 'AndroidManifest.xml' \
-                    or f.endswith('.gradle') or f.endswith('.gradle.kts'):
+               or f.endswith('.gradle') or f.endswith('.gradle.kts'):
                 full = os.path.join(root, f)
                 paths.append(full)
     return paths
 
 
 def get_gradle_subdir(build_dir, paths):
-    """Get the subdir where the gradle build is based."""
+    """get the subdir where the gradle build is based"""
     first_gradle_dir = None
     for path in paths:
         if not first_gradle_dir:
@@ -1796,20 +1792,20 @@ def get_gradle_subdir(build_dir, paths):
     return ''
 
 
-def get_repo_from_page(url):
-    """
-    Get the repo type and address from the given web page.
+def getrepofrompage(url):
+    """Get the repo type and address from the given web page.
 
     The page is scanned in a rather naive manner for 'git clone xxxx',
     'hg clone xxxx', etc, and when one of these is found it's assumed
-    that's the information we want. Returns repo_type, address, or
-    None, reason.
+    that's the information we want.  Returns repotype, address, or
+    None, reason
+
     """
     if not url.startswith('http'):
-        return None, _('{url} does not start with "http"!'.format(url=url))
+        return (None, _('{url} does not start with "http"!'.format(url=url)))
     req = urllib.request.urlopen(url)  # nosec B310 non-http URLs are filtered out
     if req.getcode() != 200:
-        return None, 'Unable to get ' + url + ' - return code ' + str(req.getcode())
+        return (None, 'Unable to get ' + url + ' - return code ' + str(req.getcode()))
     page = req.read().decode(req.headers.get_content_charset())
 
     # Works for BitBucket
@@ -1818,44 +1814,44 @@ def get_repo_from_page(url):
         repo = m.group(1)
 
         if repo.endswith('.git'):
-            return 'git', repo
+            return ('git', repo)
 
-        return 'hg', repo
+        return ('hg', repo)
 
     # Works for BitBucket (obsolete)
     index = page.find('hg clone')
     if index != -1:
-        repo_type = 'hg'
+        repotype = 'hg'
         repo = page[index + 9:]
         index = repo.find('<')
         if index == -1:
-            return None, _("Error while getting repo address")
+            return (None, _("Error while getting repo address"))
         repo = repo[:index]
         repo = repo.split('"')[0]
-        return repo_type, repo
+        return (repotype, repo)
 
     # Works for BitBucket (obsolete)
     index = page.find('git clone')
     if index != -1:
-        repo_type = 'git'
+        repotype = 'git'
         repo = page[index + 10:]
         index = repo.find('<')
         if index == -1:
-            return None, _("Error while getting repo address")
+            return (None, _("Error while getting repo address"))
         repo = repo[:index]
         repo = repo.split('"')[0]
-        return repo_type, repo
+        return (repotype, repo)
 
-    return None, _("No information found.") + page
+    return (None, _("No information found.") + page)
 
 
 def get_app_from_url(url):
-    """
-    Guess basic app metadata from the URL.
+    """Guess basic app metadata from the URL.
 
     The URL must include a network hostname, unless it is an lp:,
-    file:, or git/ssh URL. This throws ValueError on bad URLs to
+    file:, or git/ssh URL.  This throws ValueError on bad URLs to
     match urlparse().
+
     """
 
     parsed = urllib.parse.urlparse(url)
@@ -1891,8 +1887,8 @@ def get_app_from_url(url):
             url = url[:-1]
         app.SourceCode = url + '/src'
         app.IssueTracker = url + '/issues'
-        # Figure out the repo type and address...
-        app.RepoType, app.Repo = get_repo_from_page(url)
+        # Figure out the repo type and adddress...
+        app.RepoType, app.Repo = getrepofrompage(url)
     elif parsed.netloc == 'codeberg.org':
         app.RepoType = 'git'
         app.SourceCode = url
@@ -1913,8 +1909,9 @@ def get_app_from_url(url):
 
 
 def parse_srclib_spec(spec):
+
     if type(spec) != str:
-        raise MetaDataException(_("can not parse srclib spec "
+        raise MetaDataException(_("can not parse scrlib spec "
                                   "(not a string): '{}'")
                                 .format(spec))
 
@@ -1938,18 +1935,18 @@ def parse_srclib_spec(spec):
     if '/' in name:
         name, subdir = name.split('/', 1)
 
-    return name, ref, number, subdir
+    return (name, ref, number, subdir)
 
 
-def get_srclib(spec, srclib_dir, base_path=False,
-               raw=False, prepare=True, prep_only=False, refresh=True,
-               build=None):
-    """
-    Get the specified source library.
+def getsrclib(spec, srclib_dir, basepath=False,
+              raw=False, prepare=True, preponly=False, refresh=True,
+              build=None):
+    """Get the specified source library.
 
     Returns the path to it. Normally this is the path to be used when
     referencing it, which may be a subdirectory of the actual project. If
     you want the base directory of the project, pass 'basepath=True'.
+
     """
     number = None
     subdir = None
@@ -1968,64 +1965,66 @@ def get_srclib(spec, srclib_dir, base_path=False,
 
     srclib = fdroidserver.metadata.srclibs[name]
 
-    s_dir = os.path.join(srclib_dir, name)
+    sdir = os.path.join(srclib_dir, name)
 
-    if not prep_only:
-        vcs = get_vcs(srclib["RepoType"], srclib["Repo"], s_dir)
-        vcs.srclib = (name, number, s_dir)
+    if not preponly:
+        vcs = getvcs(srclib["RepoType"], srclib["Repo"], sdir)
+        vcs.srclib = (name, number, sdir)
         if ref:
-            vcs.go_to_revision(ref, refresh)
+            vcs.gotorevision(ref, refresh)
 
         if raw:
             return vcs
 
-    lib_dir = None
+    libdir = None
     if subdir:
-        lib_dir = os.path.join(s_dir, subdir)
+        libdir = os.path.join(sdir, subdir)
     elif srclib["Subdir"]:
         for subdir in srclib["Subdir"]:
-            lib_dir_candidate = os.path.join(s_dir, subdir)
-            if os.path.exists(lib_dir_candidate):
-                lib_dir = lib_dir_candidate
+            libdir_candidate = os.path.join(sdir, subdir)
+            if os.path.exists(libdir_candidate):
+                libdir = libdir_candidate
                 break
 
-    if lib_dir is None:
-        lib_dir = s_dir
+    if libdir is None:
+        libdir = sdir
 
-    remove_signing_keys(s_dir)
-    remove_debuggable_flags(s_dir)
+    remove_signing_keys(sdir)
+    remove_debuggable_flags(sdir)
 
     if prepare:
 
         if srclib["Prepare"]:
             cmd = replace_config_vars(srclib["Prepare"], build)
 
-            p = fdroid_popen(['bash', '-x', '-c', '--', cmd], cwd=lib_dir)
+            p = FDroidPopen(['bash', '-x', '-c', '--', cmd], cwd=libdir)
             if p.returncode != 0:
                 raise BuildException("Error running prepare command for srclib %s"
                                      % name, p.output)
 
-    if base_path:
-        lib_dir = s_dir
+    if basepath:
+        libdir = sdir
 
-    return name, number, lib_dir
-
-
-gradle_version_regex = re.compile(r"[^/]*'com\.android\.tools\.build:gradle:([^.]+\.[^.]+).*'.*")
+    return (name, number, libdir)
 
 
-def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, on_server=False, refresh=True):
-    """
-    Prepare the source code for a particular build.
+gradle_version_regex = re.compile(r"[^/]*'com\.android\.tools\.build:gradle:([^\.]+\.[^\.]+).*'.*")
 
+
+def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, onserver=False, refresh=True):
+    """ Prepare the source code for a particular build
+
+    :param vcs: the appropriate vcs object for the application
     :param app: the application details from the metadata
     :param build: the build details from the metadata
     :param build_dir: the path to the build directory, usually 'build/app.id'
-    :param extlib_dir: the path to the external libraries directory, usually 'build/extlib'
-    :param on_server:
-    :param refresh:
     :param srclib_dir: the path to the source libraries directory, usually 'build/srclib'
-    :param vcs: the appropriate vcs object for the application
+    :param extlib_dir: the path to the external libraries directory, usually 'build/extlib'
+
+    Returns the (root, srclibpaths) where:
+    :param root: is the root directory, which may be the same as 'build_dir' or may
+                 be a subdirectory of it.
+    :param srclibpaths: is information on the srclibs being used
     """
 
     # Optionally, the actual app source can be in a subdirectory
@@ -2036,12 +2035,12 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, on_server
 
     # Get a working copy of the right revision
     logging.info("Getting source for revision " + build.commit)
-    vcs.go_to_revision(build.commit, refresh)
+    vcs.gotorevision(build.commit, refresh)
 
     # Initialise submodules if required
     if build.submodules:
         logging.info(_("Initialising submodules"))
-        vcs.init_submodules()
+        vcs.initsubmodules()
 
     # Check that a subdir (if we're using one) exists. This has to happen
     # after the checkout, since it might not exist elsewhere
@@ -2053,7 +2052,7 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, on_server
         cmd = replace_config_vars(build.init, build)
         logging.info("Running 'init' commands in %s" % root_dir)
 
-        p = fdroid_popen(['bash', '-x', '-c', '--', cmd], cwd=root_dir)
+        p = FDroidPopen(['bash', '-x', '-c', '--', cmd], cwd=root_dir)
         if p.returncode != 0:
             raise BuildException("Error running init command for %s:%s" %
                                  (app.id, build.versionName), p.output)
@@ -2065,35 +2064,35 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, on_server
             patch = patch.strip()
             logging.info("Applying " + patch)
             patch_path = os.path.join('metadata', app.id, patch)
-            p = fdroid_popen(['patch', '-p1', '-i', os.path.abspath(patch_path)], cwd=build_dir)
+            p = FDroidPopen(['patch', '-p1', '-i', os.path.abspath(patch_path)], cwd=build_dir)
             if p.returncode != 0:
                 raise BuildException("Failed to apply patch %s" % patch_path)
 
     # Get required source libraries
-    srclib_paths = []
+    srclibpaths = []
     if build.srclibs:
         logging.info("Collecting source libraries")
         for lib in build.srclibs:
-            srclib_paths.append(get_srclib(lib, srclib_dir, prep_only=on_server,
-                                           refresh=refresh, build=build))
+            srclibpaths.append(getsrclib(lib, srclib_dir, preponly=onserver,
+                                         refresh=refresh, build=build))
 
-    for name, number, lib_path in srclib_paths:
-        place_srclib(root_dir, int(number) if number else None, lib_path)
+    for name, number, libpath in srclibpaths:
+        place_srclib(root_dir, int(number) if number else None, libpath)
 
-    base_srclib = vcs.get_srclib()
+    basesrclib = vcs.getsrclib()
     # If one was used for the main source, add that too.
-    if base_srclib:
-        srclib_paths.append(base_srclib)
+    if basesrclib:
+        srclibpaths.append(basesrclib)
 
     # Update the local.properties file
-    local_props = [os.path.join(build_dir, 'local.properties')]
+    localprops = [os.path.join(build_dir, 'local.properties')]
     if build.subdir:
         parts = build.subdir.split(os.sep)
         cur = build_dir
         for d in parts:
             cur = os.path.join(cur, d)
-            local_props += [os.path.join(cur, 'local.properties')]
-    for path in local_props:
+            localprops += [os.path.join(cur, 'local.properties')]
+    for path in localprops:
         props = ""
         if os.path.isfile(path):
             logging.info("Updating local.properties file at %s" % path)
@@ -2105,9 +2104,9 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, on_server
         # Fix old-fashioned 'sdk-location' by copying
         # from sdk.dir, if necessary
         if build.oldsdkloc:
-            sdk_loc = re.match(r".*^sdk.dir=(\S+)$.*", props,
-                               re.S | re.M).group(1)
-            props += "sdk-location=%s\n" % sdk_loc
+            sdkloc = re.match(r".*^sdk.dir=(\S+)$.*", props,
+                              re.S | re.M).group(1)
+            props += "sdk-location=%s\n" % sdkloc
         else:
             props += "sdk.dir=%s\n" % config['sdk_path']
             props += "sdk-location=%s\n" % config['sdk_path']
@@ -2135,12 +2134,12 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, on_server
             build_gradle = os.path.join(root_dir, "build.gradle")
             build_gradle_kts = build_gradle + ".kts"
             if os.path.exists(build_gradle):
-                gradle_file = build_gradle
+                gradlefile = build_gradle
             elif os.path.exists(build_gradle_kts):
-                gradle_file = build_gradle_kts
-            reg_sub_file(r'compileSdkVersion[ =]+[0-9]+',
-                         r'compileSdkVersion %s' % n,
-                         gradle_file)
+                gradlefile = build_gradle_kts
+            regsub_file(r'compileSdkVersion[ =]+[0-9]+',
+                        r'compileSdkVersion %s' % n,
+                        gradlefile)
 
     # Remove forced debuggable flags
     remove_debuggable_flags(root_dir)
@@ -2152,13 +2151,13 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, on_server
             if not os.path.isfile(path):
                 continue
             if path.endswith('.xml'):
-                reg_sub_file(r'android:versionName="[^"]*"',
-                             r'android:versionName="%s"' % build.versionName,
-                             path)
+                regsub_file(r'android:versionName="[^"]*"',
+                            r'android:versionName="%s"' % build.versionName,
+                            path)
             elif path.endswith('.gradle'):
-                reg_sub_file(r"""(\s*)versionName[\s'"=]+.*""",
-                             r"""\1versionName '%s'""" % build.versionName,
-                             path)
+                regsub_file(r"""(\s*)versionName[\s'"=]+.*""",
+                            r"""\1versionName '%s'""" % build.versionName,
+                            path)
 
     if build.forcevercode:
         logging.info("Changing the version code")
@@ -2166,26 +2165,26 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, on_server
             if not os.path.isfile(path):
                 continue
             if path.endswith('.xml'):
-                reg_sub_file(r'android:versionCode="[^"]*"',
-                             r'android:versionCode="%s"' % build.versionCode,
-                             path)
+                regsub_file(r'android:versionCode="[^"]*"',
+                            r'android:versionCode="%s"' % build.versionCode,
+                            path)
             elif path.endswith('.gradle'):
-                reg_sub_file(r'versionCode[ =]+[0-9]+',
-                             r'versionCode %s' % build.versionCode,
-                             path)
+                regsub_file(r'versionCode[ =]+[0-9]+',
+                            r'versionCode %s' % build.versionCode,
+                            path)
 
     # Delete unwanted files
     if build.rm:
         logging.info(_("Removing specified files"))
-        for part in get_paths(build_dir, build.rm):
-            destination = os.path.join(build_dir, part)
+        for part in getpaths(build_dir, build.rm):
+            dest = os.path.join(build_dir, part)
             logging.info("Removing {0}".format(part))
-            if os.path.lexists(destination):
+            if os.path.lexists(dest):
                 # rmtree can only handle directories that are not symlinks, so catch anything else
-                if not os.path.isdir(destination) or os.path.islink(destination):
-                    os.remove(destination)
+                if not os.path.isdir(dest) or os.path.islink(dest):
+                    os.remove(dest)
                 else:
-                    shutil.rmtree(destination)
+                    shutil.rmtree(dest)
             else:
                 logging.info("...but it didn't exist")
 
@@ -2194,24 +2193,24 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, on_server
     # Add required external libraries
     if build.extlibs:
         logging.info("Collecting prebuilt libraries")
-        libs_dir = os.path.join(root_dir, 'libs')
-        if not os.path.exists(libs_dir):
-            os.mkdir(libs_dir)
+        libsdir = os.path.join(root_dir, 'libs')
+        if not os.path.exists(libsdir):
+            os.mkdir(libsdir)
         for lib in build.extlibs:
             lib = lib.strip()
             logging.info("...installing extlib {0}".format(lib))
-            lib_f = os.path.basename(lib)
-            lib_src = os.path.join(extlib_dir, lib)
-            if not os.path.exists(lib_src):
-                raise BuildException("Missing extlib file {0}".format(lib_src))
-            shutil.copyfile(lib_src, os.path.join(libs_dir, lib_f))
+            libf = os.path.basename(lib)
+            libsrc = os.path.join(extlib_dir, lib)
+            if not os.path.exists(libsrc):
+                raise BuildException("Missing extlib file {0}".format(libsrc))
+            shutil.copyfile(libsrc, os.path.join(libsdir, libf))
             # Add extlibs to scanignore (this is relative to the build dir root, *sigh*)
             if build.subdir:
-                scanignore_path = os.path.join(build.subdir, 'libs', lib_f)
+                scanignorepath = os.path.join(build.subdir, 'libs', libf)
             else:
-                scanignore_path = os.path.join('libs', lib_f)
-            if scanignore_path not in build.scanignore:
-                build.scanignore.append(scanignore_path)
+                scanignorepath = os.path.join('libs', libf)
+            if scanignorepath not in build.scanignore:
+                build.scanignore.append(scanignorepath)
 
     # Run a pre-build command if one is required
     if build.prebuild:
@@ -2220,22 +2219,22 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, on_server
         cmd = replace_config_vars(build.prebuild, build)
 
         # Substitute source library paths into prebuild commands
-        for name, number, lib_path in srclib_paths:
-            cmd = cmd.replace('$$' + name + '$$', os.path.join(os.getcwd(), lib_path))
+        for name, number, libpath in srclibpaths:
+            cmd = cmd.replace('$$' + name + '$$', os.path.join(os.getcwd(), libpath))
 
-        p = fdroid_popen(['bash', '-x', '-c', '--', cmd], cwd=root_dir)
+        p = FDroidPopen(['bash', '-x', '-c', '--', cmd], cwd=root_dir)
         if p.returncode != 0:
             raise BuildException("Error running prebuild command for %s:%s" %
                                  (app.id, build.versionName), p.output)
 
     # Generate (or update) the ant build file, build.xml...
     if build.build_method() == 'ant' and build.androidupdate != ['no']:
-        params = ['android', 'update', 'lib-project']
-        l_params = ['android', 'update', 'project']
+        parms = ['android', 'update', 'lib-project']
+        lparms = ['android', 'update', 'project']
 
         if build.target:
-            params += ['-t', build.target]
-            l_params += ['-t', build.target]
+            parms += ['-t', build.target]
+            lparms += ['-t', build.target]
         if build.androidupdate:
             update_dirs = build.androidupdate
         else:
@@ -2245,11 +2244,11 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, on_server
             subdir = os.path.join(root_dir, d)
             if d == '.':
                 logging.debug("Updating main project")
-                cmd = params + ['-p', d]
+                cmd = parms + ['-p', d]
             else:
                 logging.debug("Updating subproject %s" % d)
-                cmd = l_params + ['-p', d]
-            p = sdk_tools_popen(cmd, cwd=root_dir)
+                cmd = lparms + ['-p', d]
+            p = SdkToolsPopen(cmd, cwd=root_dir)
             # Check to see whether an error was returned without a proper exit
             # code (this is the case for the 'no target set or target invalid'
             # error)
@@ -2258,15 +2257,15 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, on_server
             # Clean update dirs via ant
             if d != '.':
                 logging.info("Cleaning subproject %s" % d)
-                p = fdroid_popen(['ant', 'clean'], cwd=subdir)
+                p = FDroidPopen(['ant', 'clean'], cwd=subdir)
 
-    return root_dir, srclib_paths
+    return (root_dir, srclibpaths)
 
 
-def get_paths_map(build_dir, glob_paths):
-    """Extend via globbing the paths from a field and return them as a map from original path to resulting paths."""
+def getpaths_map(build_dir, globpaths):
+    """Extend via globbing the paths from a field and return them as a map from original path to resulting paths"""
     paths = dict()
-    for p in glob_paths:
+    for p in globpaths:
         p = p.strip()
         full_path = os.path.join(build_dir, p)
         full_path = os.path.normpath(full_path)
@@ -2276,9 +2275,9 @@ def get_paths_map(build_dir, glob_paths):
     return paths
 
 
-def get_paths(build_dir, glob_paths):
-    """Extend via globbing the paths from a field and return them as a set."""
-    paths_map = get_paths_map(build_dir, glob_paths)
+def getpaths(build_dir, globpaths):
+    """Extend via globbing the paths from a field and return them as a set"""
+    paths_map = getpaths_map(build_dir, globpaths)
     paths = set()
     for k, v in paths_map.items():
         for p in v:
@@ -2291,37 +2290,36 @@ def natural_key(s):
 
 
 def check_system_clock(dt_obj, path):
-    """
-    Check if system clock is updated based on provided date.
+    """Check if system clock is updated based on provided date
 
     If an APK has files newer than the system time, suggest updating
-    the system clock. This is useful for offline systems, used for
+    the system clock.  This is useful for offline systems, used for
     signing, which do not have another source of clock sync info. It
     has to be more than 24 hours newer because ZIP/APK files do not
-    store timezone info.
+    store timezone info
+
     """
-    check_dt = dt_obj - timedelta(1)
-    if datetime.today() < check_dt:
+    checkdt = dt_obj - timedelta(1)
+    if datetime.today() < checkdt:
         logging.warning(_('System clock is older than date in {path}!').format(path=path)
                         + '\n' + _('Set clock to that time using:') + '\n'
                         + 'sudo date -s "' + str(dt_obj) + '"')
 
 
 class KnownApks:
-    """
-    Permanent store of existing APKs with the date they were added.
+    """permanent store of existing APKs with the date they were added
 
     This is currently the only way to permanently store the "updated"
     date of APKs.
     """
 
     def __init__(self):
-        """Load filename/date info about previously seen APKs
+        '''Load filename/date info about previously seen APKs
 
-        Since the app ID and date strings both will never have spaces,
+        Since the appid and date strings both will never have spaces,
         this is parsed as a list from the end to allow the filename to
         have any combo of spaces.
-        """
+        '''
 
         self.path = os.path.join('stats', 'known_apks.txt')
         self.apks = {}
@@ -2332,14 +2330,14 @@ class KnownApks:
                     if len(t) == 2:
                         self.apks[t[0]] = (t[1], None)
                     else:
-                        app_id = t[-2]
+                        appid = t[-2]
                         date = datetime.strptime(t[-1], '%Y-%m-%d')
-                        filename = line[0:line.rfind(app_id) - 1]
-                        self.apks[filename] = (app_id, date)
+                        filename = line[0:line.rfind(appid) - 1]
+                        self.apks[filename] = (appid, date)
                         check_system_clock(date, self.path)
         self.changed = False
 
-    def write_if_changed(self):
+    def writeifchanged(self):
         if not self.changed:
             return
 
@@ -2348,8 +2346,8 @@ class KnownApks:
 
         lst = []
         for apk, app in self.apks.items():
-            app_id, added = app
-            line = apk + ' ' + app_id
+            appid, added = app
+            line = apk + ' ' + appid
             if added:
                 line += ' ' + added.strftime('%Y-%m-%d')
             lst.append(line)
@@ -2358,41 +2356,41 @@ class KnownApks:
             for line in sorted(lst, key=natural_key):
                 f.write(line + '\n')
 
-    def record_apk(self, apk_name, app, default_date=None):
-        """
-        Record an APK (if it's new, otherwise do nothing).
-        Returns the date it was added as a datetime instance.
-        """
-        if apk_name not in self.apks:
+    def recordapk(self, apkName, app, default_date=None):
+        '''
+        Record an APK (if it's new, otherwise does nothing)
+        Returns the date it was added as a datetime instance
+        '''
+        if apkName not in self.apks:
             if default_date is None:
                 default_date = datetime.utcnow()
-            self.apks[apk_name] = (app, default_date)
+            self.apks[apkName] = (app, default_date)
             self.changed = True
-        _ignored, added = self.apks[apk_name]
+        _ignored, added = self.apks[apkName]
         return added
 
-    def get_app(self, apk_name):
-        """
-        Look up information - given the 'apk_name', returns (app id, date added/None).
+    def getapp(self, apkname):
+        """Look up information - given the 'apkname', returns (app id, date added/None).
+
         Or returns None for an unknown apk.
         """
-        if apk_name in self.apks:
-            return self.apks[apk_name]
+        if apkname in self.apks:
+            return self.apks[apkname]
         return None
 
-    def get_latest(self, num):
-        """Get the most recent 'num' apps added to the repo, as a list of package IDs with the most recent first."""
+    def getlatest(self, num):
+        """Get the most recent 'num' apps added to the repo, as a list of package ids with the most recent first"""
         apps = {}
         for apk, app in self.apks.items():
-            app_id, added = app
+            appid, added = app
             if added:
-                if app_id in apps:
-                    if apps[app_id] > added:
-                        apps[app_id] = added
+                if appid in apps:
+                    if apps[appid] > added:
+                        apps[appid] = added
                 else:
-                    apps[app_id] = added
-        sorted_apps = sorted(apps.items(), key=operator.itemgetter(1))[-num:]
-        lst = [app for app, _ignored in sorted_apps]
+                    apps[appid] = added
+        sortedapps = sorted(apps.items(), key=operator.itemgetter(1))[-num:]
+        lst = [app for app, _ignored in sortedapps]
         lst.reverse()
         return lst
 
@@ -2405,7 +2403,7 @@ def get_file_extension(filename):
 
 
 def use_androguard():
-    """Report if androguard is available, and config its debug logging."""
+    """Report if androguard is available, and config its debug logging"""
 
     try:
         import androguard
@@ -2422,49 +2420,48 @@ def use_androguard():
 use_androguard.show_path = True  # type: ignore
 
 
-def _get_androguard_apk(apk_file):
+def _get_androguard_APK(apkfile):
     try:
         from androguard.core.bytecodes.apk import APK
     except ImportError:
         raise FDroidException("androguard library is not installed")
 
-    return APK(apk_file)
+    return APK(apkfile)
 
 
-def ensure_final_value(package_name, arsc, value):
-    """
-    Ensure incoming value is always the value, not the resID.
+def ensure_final_value(packageName, arsc, value):
+    """Ensure incoming value is always the value, not the resid
 
     androguard will sometimes return the Android "resId" aka
-    Resource ID instead of the actual value. This checks whether
+    Resource ID instead of the actual value.  This checks whether
     the value is actually a resId, then performs the Android
     Resource lookup as needed.
+
     """
     if value:
-        return_value = value
+        returnValue = value
         if value[0] == '@':
             try:  # can be a literal value or a resId
                 res_id = int('0x' + value[1:], 16)
-                res_id = arsc.get_id(package_name, res_id)[1]
-                return_value = arsc.get_string(package_name, res_id)[1]
+                res_id = arsc.get_id(packageName, res_id)[1]
+                returnValue = arsc.get_string(packageName, res_id)[1]
             except (ValueError, TypeError):
                 pass
-        return return_value
+        return returnValue
     return ''
 
 
-def is_apk_and_debuggable(apk_file):
-    """
-    Returns True if the given file is an APK and is debuggable.
+def is_apk_and_debuggable(apkfile):
+    """Returns True if the given file is an APK and is debuggable
 
     Parse only <application android:debuggable=""> from the APK.
 
-    :param apk_file: Full path to the APK to check.
-    """
-    if get_file_extension(apk_file) != 'apk':
+    :param apkfile: full path to the APK to check"""
+
+    if get_file_extension(apkfile) != 'apk':
         return False
     from androguard.core.bytecodes.axml import AXMLParser, format_value, START_TAG
-    with ZipFile(apk_file) as apk:
+    with ZipFile(apkfile) as apk:
         with apk.open('AndroidManifest.xml') as manifest:
             axml = AXMLParser(manifest.read())
             while axml.is_valid():
@@ -2484,46 +2481,46 @@ def is_apk_and_debuggable(apk_file):
     return False
 
 
-def get_apk_id(apk_file):
-    """
-    Extract identification information from APK.
+def get_apk_id(apkfile):
+    """Extract identification information from APK.
 
     Androguard is preferred since it is more reliable and a lot
-    faster. Occasionally, when androguard can't get the info from the
-    APK, aapt still can. So aapt is also used as the final fallback
+    faster.  Occasionally, when androguard can't get the info from the
+    APK, aapt still can.  So aapt is also used as the final fallback
     method.
 
-    :param apk_file: path to an APK file.
+    :param apkfile: path to an APK file.
     :returns: triplet (appid, version code, version name)
+
     """
     try:
-        return get_apk_id_androguard(apk_file)
+        return get_apk_id_androguard(apkfile)
     except zipfile.BadZipFile as e:
-        logging.error(apk_file + ': ' + str(e))
+        logging.error(apkfile + ': ' + str(e))
         if 'aapt' in config:
-            return get_apk_id_aapt(apk_file)
+            return get_apk_id_aapt(apkfile)
 
 
-def get_apk_id_androguard(apk_file):
-    """
-    Read (app_id, version_code, version_name) from an APK.
+def get_apk_id_androguard(apkfile):
+    """Read (appid, versionCode, versionName) from an APK
 
     This first tries to do quick binary XML parsing to just get the
-    values that are needed. It will fallback to full androguard
+    values that are needed.  It will fallback to full androguard
     parsing, which is slow, if it can't find the versionName value or
     versionName is set to a Android String Resource (e.g. an integer
     hex value that starts with @).
+
     """
-    if not os.path.exists(apk_file):
+    if not os.path.exists(apkfile):
         raise FDroidException(_("Reading packageName/versionCode/versionName failed, APK invalid: '{apkfilename}'")
-                              .format(apkfilename=apk_file))
+                              .format(apkfilename=apkfile))
 
     from androguard.core.bytecodes.axml import AXMLParser, format_value, START_TAG, END_TAG, TEXT, END_DOCUMENT
 
-    app_id = None
-    version_code = None
-    version_name = None
-    with zipfile.ZipFile(apk_file) as apk:
+    appid = None
+    versionCode = None
+    versionName = None
+    with zipfile.ZipFile(apkfile) as apk:
         with apk.open('AndroidManifest.xml') as manifest:
             axml = AXMLParser(manifest.read())
             count = 0
@@ -2536,53 +2533,51 @@ def get_apk_id_androguard(apk_file):
                         _type = axml.getAttributeValueType(i)
                         _data = axml.getAttributeValueData(i)
                         value = format_value(_type, _data, lambda _: axml.getAttributeValue(i))
-                        if app_id is None and name == 'package':
-                            app_id = value
-                        elif version_code is None and name == 'versionCode':
+                        if appid is None and name == 'package':
+                            appid = value
+                        elif versionCode is None and name == 'versionCode':
                             if value.startswith('0x'):
-                                version_code = str(int(value, 16))
+                                versionCode = str(int(value, 16))
                             else:
-                                version_code = value
-                        elif version_name is None and name == 'versionName':
-                            version_name = value
+                                versionCode = value
+                        elif versionName is None and name == 'versionName':
+                            versionName = value
 
                     if axml.getName() == 'manifest':
                         break
                 elif _type == END_TAG or _type == TEXT or _type == END_DOCUMENT:
                     raise RuntimeError('{path}: <manifest> must be the first element in AndroidManifest.xml'
-                                       .format(path=apk_file))
+                                       .format(path=apkfile))
 
-    if not version_name or version_name[0] == '@':
-        a = _get_androguard_apk(apk_file)
-        version_name = ensure_final_value(a.package, a.get_android_resources(), a.get_androidversion_name())
-    if not version_name:
-        version_name = ''  # version_name is expected to always be a str
+    if not versionName or versionName[0] == '@':
+        a = _get_androguard_APK(apkfile)
+        versionName = ensure_final_value(a.package, a.get_android_resources(), a.get_androidversion_name())
+    if not versionName:
+        versionName = ''  # versionName is expected to always be a str
 
-    return app_id, version_code, version_name.strip('\0')
+    return appid, versionCode, versionName.strip('\0')
 
 
-def get_apk_id_aapt(apk_file):
-    p = sdk_tools_popen(['aapt', 'dump', 'badging', apk_file], output=False)
+def get_apk_id_aapt(apkfile):
+    p = SdkToolsPopen(['aapt', 'dump', 'badging', apkfile], output=False)
     m = APK_ID_TRIPLET_REGEX.match(p.output[0:p.output.index('\n')])
     if m:
         return m.group(1), m.group(2), m.group(3)
     raise FDroidException(_("Reading packageName/versionCode/versionName failed, APK invalid: '{apkfilename}'")
-                          .format(apkfilename=apk_file))
+                          .format(apkfilename=apkfile))
 
 
-def get_native_code(apk_file):
-    """
-    aapt checks if there are architecture folders under the lib/ folder
-    so we are simulating the same behaviour.
-    """
+def get_native_code(apkfile):
+    """aapt checks if there are architecture folders under the lib/ folder
+    so we are simulating the same behaviour"""
     arch_re = re.compile("^lib/(.*)/.*$")
-    arch_set = set()
-    with ZipFile(apk_file) as apk:
+    archset = set()
+    with ZipFile(apkfile) as apk:
         for filename in apk.namelist():
             m = arch_re.match(filename)
             if m:
-                arch_set.add(m.group(1))
-    return sorted(list(arch_set))
+                archset.add(m.group(1))
+    return sorted(list(archset))
 
 
 class PopenResult:
@@ -2591,34 +2586,32 @@ class PopenResult:
         self.output = None
 
 
-def sdk_tools_popen(commands, cwd=None, output=True):
+def SdkToolsPopen(commands, cwd=None, output=True):
     cmd = commands[0]
     if cmd not in config:
         config[cmd] = find_sdk_tools_cmd(commands[0])
-    abs_cmd = config[cmd]
-    if abs_cmd is None:
+    abscmd = config[cmd]
+    if abscmd is None:
         raise FDroidException(_("Could not find '{command}' on your system").format(command=cmd))
     if cmd == 'aapt':
         test_aapt_version(config['aapt'])
-    return fdroid_popen([abs_cmd] + commands[1:],
-                        cwd=cwd, output=output)
+    return FDroidPopen([abscmd] + commands[1:],
+                       cwd=cwd, output=output)
 
 
-def fdroid_popen_bytes(commands, cwd=None, envs=None, output=True, stderr_to_stdout=True):
+def FDroidPopenBytes(commands, cwd=None, envs=None, output=True, stderr_to_stdout=True):
     """
     Run a command and capture the possibly huge output as bytes.
 
-    :param commands: Command and argument list like in subprocess.Popen.
-    :param cwd: Optionally specifies a working directory.
-    :param envs: A optional dictionary of environment variables and their values.
-    :param output:
-    :param stderr_to_stdout:
-    :return: A PopenResult.
+    :param commands: command and argument list like in subprocess.Popen
+    :param cwd: optionally specifies a working directory
+    :param envs: a optional dictionary of environment variables and their values
+    :returns: A PopenResult.
     """
 
     global env
     if env is None:
-        set_fdroid_popen_env()
+        set_FDroidPopen_env()
 
     process_env = env.copy()
     if envs is not None and len(envs) > 0:
@@ -2631,6 +2624,7 @@ def fdroid_popen_bytes(commands, cwd=None, envs=None, output=True, stderr_to_std
 
     stderr_param = subprocess.STDOUT if stderr_to_stdout else subprocess.PIPE
     result = PopenResult()
+    p = None
     try:
         p = subprocess.Popen(commands, cwd=cwd, shell=False, env=process_env,
                              stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
@@ -2672,26 +2666,24 @@ def fdroid_popen_bytes(commands, cwd=None, envs=None, output=True, stderr_to_std
     result.output = buf.getvalue()
     buf.close()
     # make sure all filestreams of the subprocess are closed
-    for stream_var in ['stdin', 'stdout', 'stderr']:
-        if hasattr(p, stream_var):
-            stream = getattr(p, stream_var)
+    for streamvar in ['stdin', 'stdout', 'stderr']:
+        if hasattr(p, streamvar):
+            stream = getattr(p, streamvar)
             if stream:
                 stream.close()
     return result
 
 
-def fdroid_popen(commands, cwd=None, envs=None, output=True, stderr_to_stdout=True):
+def FDroidPopen(commands, cwd=None, envs=None, output=True, stderr_to_stdout=True):
     """
-    Run a command and capture the possibly huge output as a string.
+    Run a command and capture the possibly huge output as a str.
 
-    :param commands: Command and argument list like in subprocess.Popen.
-    :param cwd: Optionally specifies a working directory.
-    :param envs: A optional dictionary of environment variables and their values.
-    :param output:
-    :param stderr_to_stdout:
-    :return: A PopenResult.
+    :param commands: command and argument list like in subprocess.Popen
+    :param cwd: optionally specifies a working directory
+    :param envs: a optional dictionary of environment variables and their values
+    :returns: A PopenResult.
     """
-    result = fdroid_popen_bytes(commands, cwd, envs, output, stderr_to_stdout)
+    result = FDroidPopenBytes(commands, cwd, envs, output, stderr_to_stdout)
     result.output = result.output.decode('utf-8', 'ignore')
     return result
 
@@ -2707,13 +2699,13 @@ gradle_line_matches = [
 
 def remove_signing_keys(build_dir):
     for root, dirs, files in os.walk(build_dir):
-        gradle_file = None
+        gradlefile = None
         if 'build.gradle' in files:
-            gradle_file = "build.gradle"
+            gradlefile = "build.gradle"
         elif 'build.gradle.kts' in files:
-            gradle_file = "build.gradle.kts"
-        if gradle_file:
-            path = os.path.join(root, gradle_file)
+            gradlefile = "build.gradle.kts"
+        if gradlefile:
+            path = os.path.join(root, gradlefile)
             with open(path, "r") as o:
                 lines = o.readlines()
 
@@ -2751,15 +2743,15 @@ def remove_signing_keys(build_dir):
                         o.write(line)
 
             if changed:
-                logging.info("Cleaned %s of keysigning configs at %s" % (gradle_file, path))
+                logging.info("Cleaned %s of keysigning configs at %s" % (gradlefile, path))
 
-        for prop_file in [
+        for propfile in [
                 'project.properties',
                 'build.properties',
                 'default.properties',
                 'ant.properties', ]:
-            if prop_file in files:
-                path = os.path.join(root, prop_file)
+            if propfile in files:
+                path = os.path.join(root, propfile)
 
                 with open(path, "r", encoding='iso-8859-1') as o:
                     lines = o.readlines()
@@ -2775,17 +2767,17 @@ def remove_signing_keys(build_dir):
                         o.write(line)
 
                 if changed:
-                    logging.info("Cleaned %s of keysigning configs at %s" % (prop_file, path))
+                    logging.info("Cleaned %s of keysigning configs at %s" % (propfile, path))
 
 
-def set_fdroid_popen_env(build=None):
-    """
-    Set up the environment variables for the build environment.
+def set_FDroidPopen_env(build=None):
+    '''
+    set up the environment variables for the build environment
 
     There is only a weak standard, the variables used by gradle, so also set
-    up the most commonly used environment variables for SDK and NDK. Also, if
+    up the most commonly used environment variables for SDK and NDK.  Also, if
     there is no locale set, this will set the locale (e.g. LANG) to en_US.UTF-8.
-    """
+    '''
     global env, orig_path
 
     if env is None:
@@ -2798,13 +2790,13 @@ def set_fdroid_popen_env(build=None):
             for k, v in config.get('java_paths', {}).items():
                 env['JAVA%s_HOME' % k] = v
 
-    missing_locale = True
+    missinglocale = True
     for k, v in env.items():
         if k == 'LANG' and v != 'C':
-            missing_locale = False
+            missinglocale = False
         elif k == 'LC_ALL':
-            missing_locale = False
-    if missing_locale:
+            missinglocale = False
+    if missinglocale:
         env['LANG'] = 'en_US.UTF-8'
 
     if build is not None:
@@ -2833,96 +2825,94 @@ def replace_config_vars(cmd, build):
     return cmd
 
 
-def place_srclib(root_dir, number, lib_path):
+def place_srclib(root_dir, number, libpath):
     if not number:
         return
-    rel_path = os.path.relpath(lib_path, root_dir)
-    prop_path = os.path.join(root_dir, 'project.properties')
+    relpath = os.path.relpath(libpath, root_dir)
+    proppath = os.path.join(root_dir, 'project.properties')
 
     lines = []
-    if os.path.isfile(prop_path):
-        with open(prop_path, "r", encoding='iso-8859-1') as o:
+    if os.path.isfile(proppath):
+        with open(proppath, "r", encoding='iso-8859-1') as o:
             lines = o.readlines()
 
-    with open(prop_path, "w", encoding='iso-8859-1') as o:
+    with open(proppath, "w", encoding='iso-8859-1') as o:
         placed = False
         for line in lines:
             if line.startswith('android.library.reference.%d=' % number):
-                o.write('android.library.reference.%d=%s\n' % (number, rel_path))
+                o.write('android.library.reference.%d=%s\n' % (number, relpath))
                 placed = True
             else:
                 o.write(line)
         if not placed:
-            o.write('android.library.reference.%d=%s\n' % (number, rel_path))
+            o.write('android.library.reference.%d=%s\n' % (number, relpath))
 
 
 APK_SIGNATURE_FILES = re.compile(r'META-INF/[0-9A-Za-z_\-]+\.(SF|RSA|DSA|EC)')
 
 
 def signer_fingerprint_short(cert_encoded):
-    """
-    Obtain shortened sha256 signing-key fingerprint for pkcs7 DER certficate.
+    """Obtain shortened sha256 signing-key fingerprint for pkcs7 DER certficate.
 
     Extracts the first 7 hexadecimal digits of sha256 signing-key fingerprint
     for a given pkcs7 signature.
 
     :param cert_encoded: Contents of an APK signing certificate.
-    :return: Shortened signing-key fingerprint.
+    :returns: shortened signing-key fingerprint.
     """
     return signer_fingerprint(cert_encoded)[:7]
 
 
 def signer_fingerprint(cert_encoded):
-    """
-    Obtain sha256 signing-key fingerprint for pkcs7 DER certificate.
+    """Obtain sha256 signing-key fingerprint for pkcs7 DER certificate.
 
     Extracts hexadecimal sha256 signing-key fingerprint string
     for a given pkcs7 signature.
 
     :param: Contents of an APK signature.
-    :return: Shortened signature fingerprint.
+    :returns: shortened signature fingerprint.
     """
     return hashlib.sha256(cert_encoded).hexdigest()
 
 
-def get_first_signer_certificate(apk_path):
-    """Get the first signing certificate from the APK, DER-encoded."""
+def get_first_signer_certificate(apkpath):
+    """Get the first signing certificate from the APK,  DER-encoded"""
+    certs = None
     cert_encoded = None
-    with zipfile.ZipFile(apk_path, 'r') as apk:
+    with zipfile.ZipFile(apkpath, 'r') as apk:
         cert_files = [n for n in apk.namelist() if SIGNATURE_BLOCK_FILE_REGEX.match(n)]
         if len(cert_files) > 1:
-            logging.error(_("Found multiple JAR Signature Block Files in {path}").format(path=apk_path))
+            logging.error(_("Found multiple JAR Signature Block Files in {path}").format(path=apkpath))
             return None
         elif len(cert_files) == 1:
             cert_encoded = get_certificate(apk.read(cert_files[0]))
 
     if not cert_encoded and use_androguard():
-        apk_object = _get_androguard_apk(apk_path)
-        certs = apk_object.get_certificates_der_v2()
+        apkobject = _get_androguard_APK(apkpath)
+        certs = apkobject.get_certificates_der_v2()
         if len(certs) > 0:
             logging.debug(_('Using APK Signature v2'))
             cert_encoded = certs[0]
         if not cert_encoded:
-            certs = apk_object.get_certificates_der_v3()
+            certs = apkobject.get_certificates_der_v3()
             if len(certs) > 0:
                 logging.debug(_('Using APK Signature v3'))
                 cert_encoded = certs[0]
 
     if not cert_encoded:
-        logging.error(_("No signing certificates found in {path}").format(path=apk_path))
+        logging.error(_("No signing certificates found in {path}").format(path=apkpath))
         return None
     return cert_encoded
 
 
 def apk_signer_fingerprint(apk_path):
-    """
-    Obtain sha256 signing-key fingerprint for APK.
+    """Obtain sha256 signing-key fingerprint for APK.
 
     Extracts hexadecimal sha256 signing-key fingerprint string
     for a given APK.
 
-    :param apk_path: Path to APK.
-    :return: Signature fingerprint.
+    :param apk_path: path to APK
+    :returns: signature fingerprint
     """
 
     cert_encoded = get_first_signer_certificate(apk_path)
@@ -2932,98 +2922,98 @@ def apk_signer_fingerprint(apk_path):
 
 
 def apk_signer_fingerprint_short(apk_path):
-    """
-    Obtain shortened sha256 signing-key fingerprint for APK.
+    """Obtain shortened sha256 signing-key fingerprint for APK.
 
     Extracts the first 7 hexadecimal digits of sha256 signing-key fingerprint
     for a given pkcs7 APK.
 
-    :param apk_path: Path to APK.
-    :returns: Shortened signing-key fingerprint.
+    :param apk_path: path to APK
+    :returns: shortened signing-key fingerprint
     """
     return apk_signer_fingerprint(apk_path)[:7]
 
 
-def metadata_get_signature_dir(app_id, versioncode=None):
-    """Get signature directory for app."""
-    if versioncode:
-        return os.path.join('metadata', app_id, 'signatures', versioncode)
+def metadata_get_sigdir(appid, vercode=None):
+    """Get signature directory for app"""
+    if vercode:
+        return os.path.join('metadata', appid, 'signatures', vercode)
     else:
-        return os.path.join('metadata', app_id, 'signatures')
+        return os.path.join('metadata', appid, 'signatures')
 
 
-def metadata_find_developer_signature(app_id, versioncode=None):
-    """
-    Tires to find the developer signature for given app ID.
+def metadata_find_developer_signature(appid, vercode=None):
+    """Tires to find the developer signature for given appid.
 
     This picks the first signature file found in metadata an returns its
     signature.
 
-    :return: sha256 signing key fingerprint of the developer signing key.
-        None in case no signature can not be found.
-    """
+    :returns: sha256 signing key fingerprint of the developer signing key.
+        None in case no signature can not be found."""
 
     # fetch list of dirs for all versions of signatures
-    app_ver_sig_dirs = []
-    if versioncode:
-        app_ver_sig_dirs.append(metadata_get_signature_dir(app_id, versioncode))
+    appversigdirs = []
+    if vercode:
+        appversigdirs.append(metadata_get_sigdir(appid, vercode))
     else:
-        app_sig_dir = metadata_get_signature_dir(app_id)
-        if os.path.isdir(app_sig_dir):
-            num_re = re.compile('[0-9]+')
-            for ver in os.listdir(app_sig_dir):
-                if num_re.match(ver):
-                    appversigdir = os.path.join(app_sig_dir, ver)
-                    app_ver_sig_dirs.append(appversigdir)
+        appsigdir = metadata_get_sigdir(appid)
+        if os.path.isdir(appsigdir):
+            numre = re.compile('[0-9]+')
+            for ver in os.listdir(appsigdir):
+                if numre.match(ver):
+                    appversigdir = os.path.join(appsigdir, ver)
+                    appversigdirs.append(appversigdir)
 
-    for sig_dir in app_ver_sig_dirs:
-        signs = glob.glob(os.path.join(sig_dir, '*.DSA')) + glob.glob(os.path.join(sig_dir, '*.EC'))\
-            + glob.glob(os.path.join(sig_dir, '*.RSA'))
-        if len(signs) > 1:
-            raise FDroidException(
-                'ambiguous signatures, please make sure there is only one signature in \'{}\'. (The signature has to '
-                'be the App maintainers signature for version of the APK.)'.format(
-                    sig_dir))
-        for sig in signs:
+    for sigdir in appversigdirs:
+        sigs = glob.glob(os.path.join(sigdir, '*.DSA')) + \
+            glob.glob(os.path.join(sigdir, '*.EC')) + \
+            glob.glob(os.path.join(sigdir, '*.RSA'))
+        if len(sigs) > 1:
+            raise FDroidException('ambiguous signatures, please make sure there is only one signature in \'{}\'. (The signature has to be the App maintainers signature for version of the APK.)'.format(sigdir))
+        for sig in sigs:
             with open(sig, 'rb') as f:
                 return signer_fingerprint(get_certificate(f.read()))
     return None
 
 
-def metadata_find_signing_files(app_id, versioncode):
-    """
-    Gets a list of singed manifests and signatures.
+def metadata_find_signing_files(appid, vercode):
+    """Gets a list of singed manifests and signatures.
 
-    :param app_id: App ID string.
-    :param versioncode: App version code.
-    :return: A list of triplets for each signing key with following paths:
-        (signature_file, singed_file, manifest_file).
+    :param appid: app id string
+    :param vercode: app version code
+    :returns: a list of 4-tuples for each signing key with following paths:
+        (signature_file, singed_file, manifest_file, v2_files), where v2_files
+        is either a (sb_offset_file, sb_file) pair or None
     """
     ret = []
-    sig_dir = metadata_get_signature_dir(app_id, versioncode)
-    signs = glob.glob(os.path.join(sig_dir, '*.DSA')) + \
-        glob.glob(os.path.join(sig_dir, '*.EC')) + \
-        glob.glob(os.path.join(sig_dir, '*.RSA'))
-    ext_re = re.compile(r'(\.DSA|\.EC|\.RSA)$')
-    for sig in signs:
-        sf = ext_re.sub('.SF', sig)
+    sigdir = metadata_get_sigdir(appid, vercode)
+    sigs = glob.glob(os.path.join(sigdir, '*.DSA')) + \
+        glob.glob(os.path.join(sigdir, '*.EC')) + \
+        glob.glob(os.path.join(sigdir, '*.RSA'))
+    extre = re.compile(r'(\.DSA|\.EC|\.RSA)$')
+    apk_sb = os.path.isfile(os.path.join(sigdir, "APKSigningBlock"))
+    apk_sbo = os.path.isfile(os.path.join(sigdir, "APKSigningBlockOffset"))
+    if os.path.isfile(apk_sb) and os.path.isfile(apk_sbo):
+        v2_files = apk_sb, apk_sbo
+    else:
+        v2_files = None
+    for sig in sigs:
+        sf = extre.sub('.SF', sig)
         if os.path.isfile(sf):
-            mf = os.path.join(sig_dir, 'MANIFEST.MF')
+            mf = os.path.join(sigdir, 'MANIFEST.MF')
             if os.path.isfile(mf):
-                ret.append((sig, sf, mf))
+                ret.append((sig, sf, mf, v2_files))
     return ret
 
 
 def metadata_find_developer_signing_files(appid, vercode):
-    """
-    Get developer signature files for specified app from metadata.
+    """Get developer signature files for specified app from metadata.
 
-    :return: A triplet of paths for signing files from metadata:
-        (signature_file, singed_file, manifest_file).
+    :returns: A triplet of paths for signing files from metadata:
+        (signature_file, singed_file, manifest_file)
     """
-    all_signing_files = metadata_find_signing_files(appid, vercode)
-    if all_signing_files and len(all_signing_files) == 1:
-        return all_signing_files[0]
+    allsigningfiles = metadata_find_signing_files(appid, vercode)
+    if allsigningfiles and len(allsigningfiles) == 1:
+        return allsigningfiles[0]
     else:
         return None
 
@@ -3049,16 +3039,24 @@ class ClonedZipInfo(zipfile.ZipInfo):
         return object.__getattribute__(self, name)
 
 
-def apk_strip_v1_signatures(signed_apk, strip_manifest=False):
-    """
-    Removes signatures from APK.
+def apk_has_v1_signatures(apkfile):
+    """Test whether an APK has v1 signature files."""
+    with ZipFile(apkfile, 'r') as apk:
+        for info in apk.infolist():
+            if APK_SIGNATURE_FILES.match(info.filename):
+                return True
+    return False
 
-    :param signed_apk: Path to APK file.
-    :param strip_manifest: When set to True also the manifest file will
+
+def apk_strip_v1_signatures(signed_apk, strip_manifest=False):
+    """Removes signatures from APK.
+
+    :param signed_apk: path to APK file.
+    :param strip_manifest: when set to True also the manifest file will
         be removed from the APK.
     """
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        tmp_apk = os.path.join(tmp_dir, 'tmp.apk')
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_apk = os.path.join(tmpdir, 'tmp.apk')
         shutil.move(signed_apk, tmp_apk)
         with ZipFile(tmp_apk, 'r') as in_apk:
             with ZipFile(signed_apk, 'w') as out_apk:
@@ -3074,74 +3072,45 @@ def apk_strip_v1_signatures(signed_apk, strip_manifest=False):
 
 
 def _zipalign(unsigned_apk, aligned_apk):
-    """
-    Run 'zipalign' using standard flags used by Gradle Android Plugin.
+    """run 'zipalign' using standard flags used by Gradle Android Plugin
 
     -p was added in build-tools-23.0.0
 
     https://developer.android.com/studio/publish/app-signing#sign-manually
     """
-    p = sdk_tools_popen(['zipalign', '-v', '-p', '4', unsigned_apk, aligned_apk])
+    p = SdkToolsPopen(['zipalign', '-v', '-p', '4', unsigned_apk, aligned_apk])
     if p.returncode != 0:
         raise BuildException("Failed to align application")
 
 
-def apk_implant_signatures(apk_path, signature_file, signed_file, manifest):
+def apk_implant_signatures(apkpath, outpath, manifest, v2_files):
+    """Implants a signature from metadata into an APK.
+
+    :param apkpath: location of the unsigned apk
+    :param outpath: location of the output apk
     """
-    Implants a signature from metadata into an APK.
 
-    Note: this changes there supplied APK in place. So copy it if you
-    need the original to be preserved.
+    sigdir = os.path.dirname(manifest)  # FIXME
+    apksigcopier.do_patch(sigdir, apkpath, outpath, v1_only=v2_files is None)
 
-    :param apk_path: Location of the apk file.
-    :param manifest:
-    :param signature_file:
-    :param signed_file:
+
+def apk_extract_signatures(apkpath, outdir, v1_only=None):
+    """Extracts a signature files from APK and puts them into target directory.
+
+    :param apkpath: location of the apk
+    :param outdir: folder where the extracted signature files will be stored
+    :param v1_only: True for v1-only signatures, False for v1 and v2 signatures,
+                    or None for autodetection
     """
-    # get list of available signature files in metadata
-    with tempfile.TemporaryDirectory() as tmp_dir:
-        apk_with_new_sig = os.path.join(tmp_dir, 'newsig.apk')
-        with ZipFile(apk_path, 'r') as in_apk:
-            with ZipFile(apk_with_new_sig, 'w') as out_apk:
-                for sig_file in [signature_file, signed_file, manifest]:
-                    with open(sig_file, 'rb') as fp:
-                        buf = fp.read()
-                    info = zipfile.ZipInfo('META-INF/' + os.path.basename(sig_file))
-                    info.compress_type = zipfile.ZIP_DEFLATED
-                    info.create_system = 0  # "Windows" aka "FAT", what Android SDK uses
-                    out_apk.writestr(info, buf)
-                for info in in_apk.infolist():
-                    if not APK_SIGNATURE_FILES.match(info.filename):
-                        if info.filename != 'META-INF/MANIFEST.MF':
-                            buf = in_apk.read(info.filename)
-                            out_apk.writestr(info, buf)
-        os.remove(apk_path)
-        _zipalign(apk_with_new_sig, apk_path)
-
-
-def apk_extract_signatures(apk_path, out_dir, manifest=True):
-    """
-    Extracts a signature files from APK and puts them into target directory.
-
-    :param apk_path: location of the apk
-    :param out_dir: folder where the extracted signature files will be stored
-    :param manifest: (optionally) disable extracting manifest file
-    """
-    with ZipFile(apk_path, 'r') as in_apk:
-        for f in in_apk.infolist():
-            if APK_SIGNATURE_FILES.match(f.filename) or \
-                    (manifest and f.filename == 'META-INF/MANIFEST.MF'):
-                new_path = os.path.join(out_dir, os.path.basename(f.filename))
-                with open(new_path, 'wb') as out_file:
-                    out_file.write(in_apk.read(f.filename))
+    apksigcopier.do_extract(apkpath, outdir, v1_only=v1_only)
 
 
 def get_min_sdk_version(apk):
     """
     This wraps the androguard function to always return and int and fall back to 1
-    if we can't get a valid minSDK version.
-    :param apk: Androguard APK object.
-    :return: minSKD as int.
+    if we can't get a valid minsdk version
+    :param apk: androguard APK object
+    :return: minsdk as int
     """
     try:
         return int(apk.get_min_sdk_version())
@@ -3149,21 +3118,21 @@ def get_min_sdk_version(apk):
         return 1
 
 
-def sign_apk(unsigned_path, signed_path, key_alias):
-    """
-    Sign and zipalign an unsigned APK, then save to a new file, deleting the unsigned.
+def sign_apk(unsigned_path, signed_path, keyalias):
+    """Sign and zipalign an unsigned APK, then save to a new file, deleting the unsigned
 
     NONE is a Java keyword used to configure smartcards as the
-    keystore. Otherwise, the keystore is a local file.
+    keystore.  Otherwise, the keystore is a local file.
     https://docs.oracle.com/javase/7/docs/technotes/guides/security/p11guide.html#KeyToolJarSigner
 
     When using smartcards, apksigner does not use the same options has
     Java/keytool/jarsigner (-providerName, -providerClass,
-    -providerArg, -storetype). apksigner documents the options as
-    --ks-provider-class and --ks-provider-arg. Those seem to be
+    -providerArg, -storetype).  apksigner documents the options as
+    --ks-provider-class and --ks-provider-arg.  Those seem to be
     accepted but fail when actually making a signature with weird
-    internal exceptions. We use the options that actually work. From:
+    internal exceptions. We use the options that actually work.  From:
     https://geoffreymetais.github.io/code/key-signing/#scripting
+
     """
     if config['keystore'] == 'NONE':
         apksigner_smartcardoptions = config['smartcardoptions'].copy()
@@ -3185,10 +3154,10 @@ def sign_apk(unsigned_path, signed_path, key_alias):
            '--ks', config['keystore'],
            '--ks-pass', 'env:FDROID_KEY_STORE_PASS']
     cmd += signing_args
-    cmd += ['--ks-key-alias', key_alias,
+    cmd += ['--ks-key-alias', keyalias,
             '--in', unsigned_path,
             '--out', signed_path]
-    p = fdroid_popen(cmd, envs={
+    p = FDroidPopen(cmd, envs={
         'FDROID_KEY_STORE_PASS': config['keystorepass'],
         'FDROID_KEY_PASS': config.get('keypass', "")})
     if p.returncode != 0:
@@ -3196,77 +3165,62 @@ def sign_apk(unsigned_path, signed_path, key_alias):
     os.remove(unsigned_path)
 
 
-def verify_apks(signed_apk, unsigned_apk, tmp_dir):
-    """
-    Verify that two apks are the same.
+def verify_apks(signed_apk, unsigned_apk, tmp_dir, v1_only=None):
+    """Verify that two apks are the same
 
     One of the inputs is signed, the other is unsigned. The signature metadata
-    is transferred from the signed to the unsigned apk, and then jarsigner is
+    is transferred from the signed to the unsigned apk, and then apksigner is
     used to verify that the signature from the signed APK is also valid for
-    the unsigned one. If the APK given as unsigned actually does have a
+    the unsigned one.  If the APK given as unsigned actually does have a
     signature, it will be stripped out and ignored.
 
     :param signed_apk: Path to a signed APK file
     :param unsigned_apk: Path to an unsigned APK file expected to match it
     :param tmp_dir: Path to directory for temporary files
-    :return: None if the verification is successful, otherwise a string
+    :param v1_only: True for v1-only signatures, False for v1 and v2 signatures,
+                    or None for autodetection
+    :returns: None if the verification is successful, otherwise a string
               describing what went wrong.
     """
+
+    if not verify_apk_signature(signed_apk):
+        logging.info('...NOT verified - {0}'.format(signed_apk))
+        return 'verification of signed APK failed'
+
     if not os.path.isfile(signed_apk):
         return 'can not verify: file does not exists: {}'.format(signed_apk)
-
     if not os.path.isfile(unsigned_apk):
         return 'can not verify: file does not exists: {}'.format(unsigned_apk)
 
-    with ZipFile(signed_apk, 'r') as signed:
-        meta_inf_files = ['META-INF/MANIFEST.MF']
-        for f in signed.namelist():
-            if APK_SIGNATURE_FILES.match(f):
-                meta_inf_files.append(f)
-        if len(meta_inf_files) < 3:
-            return "Signature files missing from {0}".format(signed_apk)
+    tmp_apk = os.path.join(tmp_dir, 'sigcp_' + os.path.basename(unsigned_apk))
 
-        tmp_apk = os.path.join(tmp_dir, 'sigcp_' + os.path.basename(unsigned_apk))
-        with ZipFile(unsigned_apk, 'r') as unsigned:
-            # only read the signature from the signed APK, everything else from unsigned
-            with ZipFile(tmp_apk, 'w') as tmp:
-                for filename in meta_inf_files:
-                    tmp.writestr(signed.getinfo(filename), signed.read(filename))
-                for info in unsigned.infolist():
-                    if info.filename in meta_inf_files:
-                        logging.warning('Ignoring %s from %s', info.filename, unsigned_apk)
-                        continue
-                    if info.filename in tmp.namelist():
-                        return "duplicate filename found: " + info.filename
-                    tmp.writestr(info, unsigned.read(info.filename))
-
-    # Use jarsigner to verify the v1 signature on the reproduced APK, as
-    # apksigner will reject the reproduced APK if the original also had a v2
-    # signature
     try:
-        verify_jar_signature(tmp_apk)
-        verified = True
-    except Exception:
-        verified = False
+        apksigcopier.do_copy(signed_apk, unsigned_apk, tmp_apk, v1_only=v1_only)
+    except apksigcopier.APKSigCopierError as e:
+        logging.info('...NOT verified - {0}'.format(tmp_apk))
+        return 'signature copying failed: {}'.format(str(e))
 
-    if not verified:
-        logging.info("...NOT verified - {0}".format(tmp_apk))
-        return compare_apks(signed_apk, tmp_apk, tmp_dir,
-                            os.path.dirname(unsigned_apk))
+    if not verify_apk_signature(tmp_apk):
+        logging.info('...NOT verified - {0}'.format(tmp_apk))
+        result = compare_apks(signed_apk, tmp_apk, tmp_dir,
+                              os.path.dirname(unsigned_apk))
+        if result is not None:
+            return result
+        return 'verification of APK with copied signature failed'
 
-    logging.info("...successfully verified")
+    logging.info('...successfully verified')
     return None
 
 
 def verify_jar_signature(jar):
-    """
-    Verifies the signature of a given JAR file.
+    """Verifies the signature of a given JAR file.
 
     jarsigner is very shitty: unsigned JARs pass as "verified"! So
     this has to turn on -strict then check for result 4, since this
     does not expect the signature to be from a CA-signed certificate.
 
     :raises: VerificationException() if the JAR's signature could not be verified
+
     """
 
     error = _('JAR signature failed to verify: {path}').format(path=jar)
@@ -3282,14 +3236,13 @@ def verify_jar_signature(jar):
 
 
 def verify_apk_signature(apk, min_sdk_version=None):
-    """
-    Verify the signature on an APK.
+    """verify the signature on an APK
 
     Try to use apksigner whenever possible since jarsigner is very
     shitty: unsigned APKs pass as "verified"!  Warning, this does
     not work on JARs with apksigner >= 0.7 (build-tools 26.0.1)
 
-    :return: Boolean whether the APK was verified.
+    :returns: boolean whether the APK was verified
     """
     if set_command_in_config('apksigner'):
         args = [config['apksigner'], 'verify']
@@ -3317,21 +3270,21 @@ def verify_apk_signature(apk, min_sdk_version=None):
 
 
 def verify_old_apk_signature(apk):
-    """
-    Verify the signature on an archived APK, supporting deprecated algorithms.
+    """verify the signature on an archived APK, supporting deprecated algorithms
 
-    F-Droid aims to keep every single binary that it ever published. Therefore,
+    F-Droid aims to keep every single binary that it ever published.  Therefore,
     it needs to be able to verify APK signatures that include deprecated/removed
-    algorithms. For example, jarsigner treats an MD5 signature as unsigned.
+    algorithms.  For example, jarsigner treats an MD5 signature as unsigned.
 
     jarsigner passes unsigned APKs as "verified"! So this has to turn
     on -strict then check for result 4.
 
     Just to be safe, this never reuses the file, and locks down the
-    file permissions while in use. That should prevent a bad actor
+    file permissions while in use.  That should prevent a bad actor
     from changing the settings during operation.
 
-    :returns: Boolean whether the APK was verified.
+    :returns: boolean whether the APK was verified
+
     """
 
     _java_security = os.path.join(os.getcwd(), '.java.security')
@@ -3364,12 +3317,11 @@ def verify_old_apk_signature(apk):
     return False
 
 
-apk_bad_chars = re.compile('''[/ :;'"]''')
+apk_badchars = re.compile('''[/ :;'"]''')
 
 
 def compare_apks(apk1, apk2, tmp_dir, log_dir=None):
-    """
-    Compare two apks.
+    """Compare two apks
 
     Returns None if the APK content is the same (apart from the signing key),
     otherwise a string describing what's different, or what went wrong when
@@ -3379,47 +3331,47 @@ def compare_apks(apk1, apk2, tmp_dir, log_dir=None):
     if not log_dir:
         log_dir = tmp_dir
 
-    abs_apk_1 = os.path.abspath(apk1)
-    abs_apk_2 = os.path.abspath(apk2)
+    absapk1 = os.path.abspath(apk1)
+    absapk2 = os.path.abspath(apk2)
 
     if set_command_in_config('diffoscope'):
-        log_file_name = os.path.join(log_dir, os.path.basename(abs_apk_1))
-        html_file = log_file_name + '.diffoscope.html'
-        text_file = log_file_name + '.diffoscope.txt'
+        logfilename = os.path.join(log_dir, os.path.basename(absapk1))
+        htmlfile = logfilename + '.diffoscope.html'
+        textfile = logfilename + '.diffoscope.txt'
         if subprocess.call([config['diffoscope'],
                             '--max-report-size', '12345678', '--max-diff-block-lines', '128',
-                            '--html', html_file, '--text', text_file,
-                            abs_apk_1, abs_apk_2]) != 0:
-            return "Failed to run diffoscope " + apk1
+                            '--html', htmlfile, '--text', textfile,
+                            absapk1, absapk2]) != 0:
+            return("Failed to run diffoscope " + apk1)
 
-    apk1dir = os.path.join(tmp_dir, apk_bad_chars.sub('_', apk1[0:-4]))  # trim .apk
-    apk2dir = os.path.join(tmp_dir, apk_bad_chars.sub('_', apk2[0:-4]))  # trim .apk
+    apk1dir = os.path.join(tmp_dir, apk_badchars.sub('_', apk1[0:-4]))  # trim .apk
+    apk2dir = os.path.join(tmp_dir, apk_badchars.sub('_', apk2[0:-4]))  # trim .apk
     for d in [apk1dir, apk2dir]:
         if os.path.exists(d):
             shutil.rmtree(d)
         os.mkdir(d)
         os.mkdir(os.path.join(d, 'content'))
 
-    # extract APK contents for comparison
-    with ZipFile(abs_apk_1, 'r') as f:
+    # extract APK contents for comparision
+    with ZipFile(absapk1, 'r') as f:
         f.extractall(path=os.path.join(apk1dir, 'content'))
-    with ZipFile(abs_apk_2, 'r') as f:
+    with ZipFile(absapk2, 'r') as f:
         f.extractall(path=os.path.join(apk2dir, 'content'))
 
     if set_command_in_config('apktool'):
-        if subprocess.call([config['apktool'], 'd', abs_apk_1, '--output', 'apktool'],
+        if subprocess.call([config['apktool'], 'd', absapk1, '--output', 'apktool'],
                            cwd=apk1dir) != 0:
-            return "Failed to run apktool " + apk1
-        if subprocess.call([config['apktool'], 'd', abs_apk_2, '--output', 'apktool'],
+            return("Failed to run apktool " + apk1)
+        if subprocess.call([config['apktool'], 'd', absapk2, '--output', 'apktool'],
                            cwd=apk2dir) != 0:
-            return "Failed to run apktool " + apk2
+            return("Failed to run apktool " + apk2)
 
-    p = fdroid_popen(['diff', '-r', apk1dir, apk2dir], output=False)
+    p = FDroidPopen(['diff', '-r', apk1dir, apk2dir], output=False)
     lines = p.output.splitlines()
     if len(lines) != 1 or 'META-INF' not in lines[0]:
         if set_command_in_config('meld'):
-            p = fdroid_popen([config['meld'], apk1dir, apk2dir], output=False)
-        return "Unexpected diff output:\n" + p.output
+            p = FDroidPopen([config['meld'], apk1dir, apk2dir], output=False)
+        return("Unexpected diff output:\n" + p.output)
 
     # since everything verifies, delete the comparison to keep cruft down
     shutil.rmtree(apk1dir)
@@ -3430,11 +3382,11 @@ def compare_apks(apk1, apk2, tmp_dir, log_dir=None):
 
 
 def set_command_in_config(command):
-    """
-    Try to find specified command in the path, if it hasn't been
-    manually set in config.yml. If found, it is added to the config
-    dict. The return value says whether the command is available.
-    """
+    '''Try to find specified command in the path, if it hasn't been
+    manually set in config.yml.  If found, it is added to the config
+    dict.  The return value says whether the command is available.
+
+    '''
     if command in config:
         return True
     else:
@@ -3446,13 +3398,13 @@ def set_command_in_config(command):
 
 
 def find_command(command):
-    """Find the full path of a command, or None if it can't be found in the PATH."""
+    '''find the full path of a command, or None if it can't be found in the PATH'''
 
-    def is_exe(f_path):
-        return os.path.isfile(f_path) and os.access(f_path, os.X_OK)
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
-    f_path, f_name = os.path.split(command)
-    if f_path:
+    fpath, fname = os.path.split(command)
+    if fpath:
         if is_exe(command):
             return command
     else:
@@ -3465,8 +3417,8 @@ def find_command(command):
     return None
 
 
-def gen_password():
-    """Generate a random password for when generating keys."""
+def genpassword():
+    '''generate a random password for when generating keys'''
     h = hashlib.sha256()
     h.update(os.urandom(16))  # salt
     h.update(socket.getfqdn().encode('utf-8'))
@@ -3474,56 +3426,56 @@ def gen_password():
     return passwd.decode('utf-8')
 
 
-def gen_keystore(local_config):
+def genkeystore(localconfig):
     """
-    Generate a new key with password provided in :param local_config and add it to new keystore.
-    :return: Hexed public key, public key fingerprint.
+    Generate a new key with password provided in :param localconfig and add it to new keystore
+    :return: hexed public key, public key fingerprint
     """
-    logging.info('Generating a new key in "' + local_config['keystore'] + '"...')
-    keystore_dir = os.path.dirname(local_config['keystore'])
-    if keystore_dir is None or keystore_dir == '':
-        keystore_dir = os.path.join(os.getcwd(), keystore_dir)
-    if not os.path.exists(keystore_dir):
-        os.makedirs(keystore_dir, mode=0o700)
+    logging.info('Generating a new key in "' + localconfig['keystore'] + '"...')
+    keystoredir = os.path.dirname(localconfig['keystore'])
+    if keystoredir is None or keystoredir == '':
+        keystoredir = os.path.join(os.getcwd(), keystoredir)
+    if not os.path.exists(keystoredir):
+        os.makedirs(keystoredir, mode=0o700)
 
     env_vars = {'LC_ALL': 'C.UTF-8',
-                'FDROID_KEY_STORE_PASS': local_config['keystorepass'],
-                'FDROID_KEY_PASS': local_config.get('keypass', "")}
+                'FDROID_KEY_STORE_PASS': localconfig['keystorepass'],
+                'FDROID_KEY_PASS': localconfig.get('keypass', "")}
 
     cmd = [config['keytool'], '-genkey',
-           '-keystore', local_config['keystore'],
-           '-alias', local_config['repo_keyalias'],
+           '-keystore', localconfig['keystore'],
+           '-alias', localconfig['repo_keyalias'],
            '-keyalg', 'RSA', '-keysize', '4096',
            '-sigalg', 'SHA256withRSA',
            '-validity', '10000',
            '-storetype', 'pkcs12',
            '-storepass:env', 'FDROID_KEY_STORE_PASS',
-           '-dname', local_config['keydname'],
+           '-dname', localconfig['keydname'],
            '-J-Duser.language=en']
-    if local_config['keystore'] == "NONE":
-        cmd += local_config['smartcardoptions']
+    if localconfig['keystore'] == "NONE":
+        cmd += localconfig['smartcardoptions']
     else:
         cmd += '-keypass:env', 'FDROID_KEY_PASS'
-    p = fdroid_popen(cmd, envs=env_vars)
+    p = FDroidPopen(cmd, envs=env_vars)
     if p.returncode != 0:
         raise BuildException("Failed to generate key", p.output)
-    if local_config['keystore'] != "NONE":
-        os.chmod(local_config['keystore'], 0o0600)
+    if localconfig['keystore'] != "NONE":
+        os.chmod(localconfig['keystore'], 0o0600)
     if not options.quiet:
         # now show the lovely key that was just generated
-        p = fdroid_popen([config['keytool'], '-list', '-v',
-                          '-keystore', local_config['keystore'],
-                          '-alias', local_config['repo_keyalias'],
-                          '-storepass:env', 'FDROID_KEY_STORE_PASS', '-J-Duser.language=en']
-                         + config['smartcardoptions'], envs=env_vars)
+        p = FDroidPopen([config['keytool'], '-list', '-v',
+                         '-keystore', localconfig['keystore'],
+                         '-alias', localconfig['repo_keyalias'],
+                         '-storepass:env', 'FDROID_KEY_STORE_PASS', '-J-Duser.language=en']
+                        + config['smartcardoptions'], envs=env_vars)
         logging.info(p.output.strip() + '\n\n')
     # get the public key
-    p = fdroid_popen_bytes([config['keytool'], '-exportcert',
-                            '-keystore', local_config['keystore'],
-                            '-alias', local_config['repo_keyalias'],
-                            '-storepass:env', 'FDROID_KEY_STORE_PASS']
-                           + config['smartcardoptions'],
-                           envs=env_vars, output=False, stderr_to_stdout=False)
+    p = FDroidPopenBytes([config['keytool'], '-exportcert',
+                          '-keystore', localconfig['keystore'],
+                          '-alias', localconfig['repo_keyalias'],
+                          '-storepass:env', 'FDROID_KEY_STORE_PASS']
+                         + config['smartcardoptions'],
+                         envs=env_vars, output=False, stderr_to_stdout=False)
     if p.returncode != 0 or len(p.output) < 20:
         raise BuildException("Failed to get public key", p.output)
     pubkey = p.output
@@ -3534,7 +3486,7 @@ def gen_keystore(local_config):
 def get_cert_fingerprint(pubkey):
     """
     Generate a certificate fingerprint the same way keytool does it
-    (but with slightly different formatting).
+    (but with slightly different formatting)
     """
     digest = hashlib.sha256(pubkey).digest()
     ret = [' '.join("%02X" % b for b in bytearray(digest))]
@@ -3542,14 +3494,14 @@ def get_cert_fingerprint(pubkey):
 
 
 def get_certificate(signature_block_file):
-    """
-    Extracts a DER certificate from JAR Signature's "Signature Block File".
+    """Extracts a DER certificate from JAR Signature's "Signature Block File".
 
-    :param signature_block_file: File bytes (as string) representing the
-    certificate, as read directly out of the APK/ZIP.
+    :param signature_block_file: file bytes (as string) representing the
+    certificate, as read directly out of the APK/ZIP
 
     :return: A binary representation of the certificate's public key,
-    or None in case of error.
+    or None in case of error
+
     """
     content = decoder.decode(signature_block_file, asn1Spec=rfc2315.ContentInfo())[0]
     if content.getComponentByName('contentType') != rfc2315.signedData:
@@ -3566,53 +3518,46 @@ def get_certificate(signature_block_file):
 
 
 def load_stats_fdroid_signing_key_fingerprints():
-    """
-    Load signing-key fingerprints stored in file generated by fdroid publish.
+    """Load signing-key fingerprints stored in file generated by fdroid publish.
 
-    :return: Dict containing the signing-key fingerprints.
+    :returns: dict containing the signing-key fingerprints.
     """
     jar_file = os.path.join('stats', 'publishsigkeys.jar')
     if not os.path.isfile(jar_file):
         return {}
     cmd = [config['jarsigner'], '-strict', '-verify', jar_file]
-    p = fdroid_popen(cmd, output=False)
+    p = FDroidPopen(cmd, output=False)
     if p.returncode != 4:
         raise FDroidException("Signature validation of '{}' failed! "
                               "Please run publish again to rebuild this file.".format(jar_file))
 
-    jar_sig_key = apk_signer_fingerprint(jar_file)
+    jar_sigkey = apk_signer_fingerprint(jar_file)
     repo_key_sig = config.get('repo_key_sha256')
     if repo_key_sig:
-        if jar_sig_key != repo_key_sig:
-            raise FDroidException(
-                "Signature key fingerprint of file '{}' does not match repo_key_sha256 in config.yml (found "
-                "fingerprint: '{}')".format(
-                    jar_file, jar_sig_key))
+        if jar_sigkey != repo_key_sig:
+            raise FDroidException("Signature key fingerprint of file '{}' does not match repo_key_sha256 in config.yml (found fingerprint: '{}')".format(jar_file, jar_sigkey))
     else:
-        logging.warning(
-            "repo_key_sha256 not in config.yml, setting it to the signature key fingerprint of '{}'".format(jar_file))
-        config['repo_key_sha256'] = jar_sig_key
+        logging.warning("repo_key_sha256 not in config.yml, setting it to the signature key fingerprint of '{}'".format(jar_file))
+        config['repo_key_sha256'] = jar_sigkey
         write_to_config(config, 'repo_key_sha256')
 
     with zipfile.ZipFile(jar_file, 'r') as f:
         return json.loads(str(f.read('publishsigkeys.json'), 'utf-8'))
 
 
-def write_to_config(this_config, key, value=None, config_file=None):
-    """
-    Write a key/value to the local config.yml or config.py.
+def write_to_config(thisconfig, key, value=None, config_file=None):
+    '''write a key/value to the local config.yml or config.py
 
     NOTE: only supports writing string variables.
 
-    :param config_file:
-    :param key: Variable name in config to be overwritten/added.
-    :param this_config: Config dictionary.
-    :param value: Optional value to be written, instead of fetched
-        from 'this_config' dictionary.
-    """
+    :param thisconfig: config dictionary
+    :param key: variable name in config to be overwritten/added
+    :param value: optional value to be written, instead of fetched
+        from 'thisconfig' dictionary.
+    '''
     if value is None:
-        orig_key = key + '_orig'
-        value = this_config[orig_key] if orig_key in this_config else this_config[key]
+        origkey = key + '_orig'
+        value = thisconfig[origkey] if origkey in thisconfig else thisconfig[key]
     if config_file:
         cfg = config_file
     elif os.path.exists('config.py') and not os.path.exists('config.yml'):
@@ -3627,7 +3572,7 @@ def write_to_config(this_config, key, value=None, config_file=None):
     with open(cfg, 'r') as f:
         lines = f.readlines()
 
-    # make sure the file ends with a carriage return
+    # make sure the file ends with a carraige return
     if len(lines) > 0:
         if not lines[-1].endswith('\n'):
             lines[-1] += '\n'
@@ -3648,19 +3593,19 @@ def write_to_config(this_config, key, value=None, config_file=None):
 
     # If we replaced this line once, we make sure won't be a
     # second instance of this line for this key in the document.
-    did_repl = False
+    didRepl = False
     # edit config file
     with open(cfg, 'w') as f:
         for line in lines:
             if pattern.match(line) or pattern2.match(line):
-                if not did_repl:
+                if not didRepl:
                     line = pattern.sub(repl, line)
                     line = pattern2.sub(repl2, line)
                     f.write(line)
-                    did_repl = True
+                    didRepl = True
             else:
                 f.write(line)
-        if not did_repl:
+        if not didRepl:
             f.write('\n')
             f.write(repl)
             f.write('\n')
@@ -3682,20 +3627,20 @@ def string_is_integer(string):
             return False
 
 
-def version_code_string_to_int(versioncode):
-    """Convert an version code string of any base into an integer."""
+def version_code_string_to_int(vercode):
+    """Convert an version code string of any base into an int"""
     try:
-        return int(versioncode, 0)
+        return int(vercode, 0)
     except ValueError:
-        return int(versioncode)
+        return int(vercode)
 
 
 def get_app_display_name(app):
-    """
-    Get a human readable name for the app for logging and sorting.
+    """get a human readable name for the app for logging and sorting
 
     When trying to find a localized name, this first tries en-US since
     that his the historical language used for sorting.
+
     """
     if app.get('Name'):
         return app['Name']
@@ -3710,37 +3655,36 @@ def get_app_display_name(app):
     return app.get('AutoName') or app['id']
 
 
-def local_rsync(options, from_dir, to_dir):
-    """
-    Rsync method for local to local copying of things.
+def local_rsync(options, fromdir, todir):
+    '''Rsync method for local to local copying of things
 
     This is an rsync wrapper with all the settings for safe use within
     the various fdroidserver use cases. This uses stricter rsync
     checking on all files since people using offline mode are already
     prioritizing security above ease and speed.
-    """
-    rsync_args = ['rsync', '--recursive', '--safe-links', '--times', '--perms',
-                  '--one-file-system', '--delete', '--chmod=Da+rx,Fa-x,a+r,u+w']
+
+    '''
+    rsyncargs = ['rsync', '--recursive', '--safe-links', '--times', '--perms',
+                 '--one-file-system', '--delete', '--chmod=Da+rx,Fa-x,a+r,u+w']
     if not options.no_checksum:
-        rsync_args.append('--checksum')
+        rsyncargs.append('--checksum')
     if options.verbose:
-        rsync_args += ['--verbose']
+        rsyncargs += ['--verbose']
     if options.quiet:
-        rsync_args += ['--quiet']
-    logging.debug(' '.join(rsync_args + [from_dir, to_dir]))
-    if subprocess.call(rsync_args + [from_dir, to_dir]) != 0:
+        rsyncargs += ['--quiet']
+    logging.debug(' '.join(rsyncargs + [fromdir, todir]))
+    if subprocess.call(rsyncargs + [fromdir, todir]) != 0:
         raise FDroidException()
 
 
-def deploy_build_log_with_rsync(app_id, versioncode, log_content):
-    """
-    Upload build log of one individual app build to an fdroid repository.
+def deploy_build_log_with_rsync(appid, vercode, log_content):
+    """Upload build log of one individual app build to an fdroid repository.
 
-    :param app_id: Package name for deintifying to which app this log belongs.
-    :param versioncode: Version of the app to which this build belongs.
+    :param appid: package name for dientifying to which app this log belongs.
+    :param vercode: version of the app to which this build belongs.
     :param log_content: Content of the log which is about to be posted.
                         Should be either a string or bytes. (bytes will
-                        be decoded as 'utf-8').
+                        be decoded as 'utf-8')
     """
 
     if not log_content:
@@ -3752,8 +3696,8 @@ def deploy_build_log_with_rsync(app_id, versioncode, log_content):
 
     # gzip compress log file
     log_gz_path = os.path.join('repo',
-                               '{appid}_{versionCode}.log.gz'.format(appid=app_id,
-                                                                     versionCode=versioncode))
+                               '{appid}_{versionCode}.log.gz'.format(appid=appid,
+                                                                     versionCode=vercode))
 
     with gzip.open(log_gz_path, 'wb') as f:
         if isinstance(log_content, str):
@@ -3764,7 +3708,7 @@ def deploy_build_log_with_rsync(app_id, versioncode, log_content):
 
 
 def rsync_status_file_to_repo(path, repo_subdir=None):
-    """Copy a build log or status JSON to the repo using rsync."""
+    """Copy a build log or status JSON to the repo using rsync"""
 
     if not config.get('deploy_process_logs', False):
         logging.debug(_('skip deploying full build logs: not enabled in config'))
@@ -3782,15 +3726,15 @@ def rsync_status_file_to_repo(path, repo_subdir=None):
         if 'identity_file' in config:
             cmd += ['-e', 'ssh -oBatchMode=yes -oIdentitiesOnly=yes -i ' + config['identity_file']]
 
-        destination_path = os.path.join(webroot, "repo")
+        dest_path = os.path.join(webroot, "repo")
         if repo_subdir is not None:
-            destination_path = os.path.join(destination_path, repo_subdir)
-        if not destination_path.endswith('/'):
-            destination_path += '/'  # make sure rsync knows this is a directory
-        cmd += [path, destination_path]
+            dest_path = os.path.join(dest_path, repo_subdir)
+        if not dest_path.endswith('/'):
+            dest_path += '/'  # make sure rsync knows this is a directory
+        cmd += [path, dest_path]
 
-        ret_code = subprocess.call(cmd)
-        if ret_code:
+        retcode = subprocess.call(cmd)
+        if retcode:
             logging.error(_('process log deploy {path} to {dest} failed!')
                           .format(path=path, dest=webroot))
         else:
@@ -3799,7 +3743,7 @@ def rsync_status_file_to_repo(path, repo_subdir=None):
 
 
 def get_per_app_repos():
-    """Per-app repos are directories named with the packageName of a single app."""
+    '''per-app repos are dirs named with the packageName of a single app'''
 
     # Android packageNames are Java packages, they may contain uppercase or
     # lowercase letters ('A' through 'Z'), numbers, and underscores
@@ -3822,14 +3766,14 @@ def get_per_app_repos():
 
 
 def is_repo_file(filename):
-    """Whether the file in a repo is a build product to be delivered to users."""
+    '''Whether the file in a repo is a build product to be delivered to users'''
     if isinstance(filename, str):
         filename = filename.encode('utf-8', errors="surrogateescape")
-    return os.path.isfile(filename)\
-        and not filename.endswith(b'.asc')\
-        and not filename.endswith(b'.sig')\
-        and not filename.endswith(b'.idsig')\
-        and not filename.endswith(b'.log.gz')\
+    return os.path.isfile(filename) \
+        and not filename.endswith(b'.asc') \
+        and not filename.endswith(b'.sig') \
+        and not filename.endswith(b'.idsig') \
+        and not filename.endswith(b'.log.gz') \
         and os.path.basename(filename) not in [
             b'index.css',
             b'index.jar',
@@ -3844,29 +3788,30 @@ def is_repo_file(filename):
 
 
 def get_examples_dir():
-    """Return the directory where the fdroidserver example files are available."""
+    '''Return the dir where the fdroidserver example files are available'''
+    examplesdir = None
     tmp = os.path.dirname(sys.argv[0])
     if os.path.basename(tmp) == 'bin':
         egg_links = glob.glob(os.path.join(tmp, '..',
                                            'local/lib/python3.*/site-packages/fdroidserver.egg-link'))
         if egg_links:
             # installed from local git repo
-            examples_dir = os.path.join(open(egg_links[0]).readline().rstrip(), 'examples')
+            examplesdir = os.path.join(open(egg_links[0]).readline().rstrip(), 'examples')
         else:
             # try .egg layout
-            examples_dir = os.path.dirname(os.path.dirname(__file__)) + '/share/doc/fdroidserver/examples'
-            if not os.path.exists(examples_dir):  # use UNIX layout
-                examples_dir = os.path.dirname(tmp) + '/share/doc/fdroidserver/examples'
+            examplesdir = os.path.dirname(os.path.dirname(__file__)) + '/share/doc/fdroidserver/examples'
+            if not os.path.exists(examplesdir):  # use UNIX layout
+                examplesdir = os.path.dirname(tmp) + '/share/doc/fdroidserver/examples'
     else:
         # we're running straight out of the git repo
         prefix = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
-        examples_dir = prefix + '/examples'
+        examplesdir = prefix + '/examples'
 
-    return examples_dir
+    return examplesdir
 
 
 def get_wiki_timestamp(timestamp=None):
-    """Return current time in the standard format for posting to the wiki."""
+    """Return current time in the standard format for posting to the wiki"""
 
     if timestamp is None:
         timestamp = time.gmtime()
@@ -3874,7 +3819,7 @@ def get_wiki_timestamp(timestamp=None):
 
 
 def get_android_tools_versions(ndk_path=None):
-    """Get a list of the versions of all installed Android SDK/NDK components."""
+    '''get a list of the versions of all installed Android SDK/NDK components'''
 
     global config
     sdk_path = config['sdk_path']
@@ -3900,7 +3845,7 @@ def get_android_tools_versions(ndk_path=None):
 
 
 def get_android_tools_version_log(ndk_path=None):
-    """Get a list of the versions of all installed Android SDK/NDK components."""
+    '''get a list of the versions of all installed Android SDK/NDK components'''
     log = '== Installed Android Tools ==\n\n'
     components = get_android_tools_versions(ndk_path)
     for name, version in sorted(components):
@@ -3910,7 +3855,9 @@ def get_android_tools_version_log(ndk_path=None):
 
 
 def get_git_describe_link():
-    """Get a link to the current fdroiddata commit, to post to the wiki."""
+    """Get a link to the current fdroiddata commit, to post to the wiki
+
+    """
     try:
         output = subprocess.check_output(['git', 'describe', '--always', '--dirty', '--abbrev=0'],
                                          universal_newlines=True).strip()
@@ -3954,17 +3901,17 @@ def calculate_math_string(expr):
                           .format(expr=expr))
 
 
-def force_exit(exit_value=0):
-    """
-    Force exit when thread operations could block the exit.
+def force_exit(exitvalue=0):
+    """force exit when thread operations could block the exit
 
     The build command has to use some threading stuff to handle the
-    timeout and locks. This seems to prevent the command from
+    timeout and locks.  This seems to prevent the command from
     exiting, unless this hack is used.
+
     """
     sys.stdout.flush()
     sys.stderr.flush()
-    os._exit(exit_value)
+    os._exit(exitvalue)
 
 
 YAML_LINT_CONFIG = {'extends': 'default',
@@ -3974,6 +3921,7 @@ YAML_LINT_CONFIG = {'extends': 'default',
 
 
 def run_yamllint(path, indent=0):
+
     try:
         import yamllint.config
         import yamllint.linter
