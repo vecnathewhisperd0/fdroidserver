@@ -29,7 +29,7 @@ MetaDataException  # NOQA: B101
 VerificationException  # NOQA: B101
 
 from fdroidserver.common import (verify_apk_signature,
-                                 genkeystore as generate_keystore)  # NOQA: E402
+                                 gen_keystore as generate_keystore)  # NOQA: E402
 
 verify_apk_signature  # NOQA: B101
 generate_keystore  # NOQA: B101

@@ -113,8 +113,8 @@ def scan_binary(apkfile):
     """
 
     logging.info(_('Scanning APK with apkanalyzer for known non-free classes.'))
-    result = common.SdkToolsPopen(["apkanalyzer", "dex", "packages", "--defined-only", apkfile], output=False)
-    if result.return_code != 0:
+    result = common.sdk_tools_popen(["apkanalyzer", "dex", "packages", "--defined-only", apkfile], output=False)
+    if result.returncode != 0:
         logging.warning(_('scanner not cleanly run apkanalyzer: %s') % result.output)
     problems = 0
     for suspect, regexp in CODE_SIGNATURES.items():
@@ -169,8 +169,8 @@ def scan_source(build_dir, build=metadata.Build()):
         ]
     ]
 
-    scanignore = common.getpaths_map(build_dir, build.scanignore)
-    scandelete = common.getpaths_map(build_dir, build.scandelete)
+    scanignore = common.get_paths_map(build_dir, build.scanignore)
+    scandelete = common.get_paths_map(build_dir, build.scandelete)
 
     scanignore_worked = set()
     scandelete_worked = set()
@@ -437,7 +437,7 @@ def main():
             if app.get('Builds'):
                 logging.info(_("Processing {appid}").format(appid=appid))
                 # Set up vcs interface and make sure we have the latest code...
-                vcs = common.getvcs(app.RepoType, app.Repo, build_dir)
+                vcs = common.get_vcs(app.RepoType, app.Repo, build_dir)
             else:
                 logging.info(_("{appid}: no builds specified, running on current source state")
                              .format(appid=appid))
