@@ -420,7 +420,6 @@ def checkupdates_app(app):
     If a change is made, commit_msg should be set to a description of it.
     Only if this is set will changes be written back to the metadata.
     """
-
     tag = None
     ver_code = None
     no_ver_ok = False
@@ -666,10 +665,10 @@ def main():
     for app_id, app in apps.items():
 
         if options.autoonly and app.AutoUpdateMode in ('None', 'Static'):
-            logging.debug(_(f"Nothing to do for {app_id}.").format(appid=app_id))
+            logging.debug(_("Nothing to do for {appid}.").format(appid=app_id))
             continue
 
-        msg = _(f"Processing {app_id}").format(appid=app_id)
+        msg = _("Processing {appid}").format(appid=app_id)
         logging.info(msg)
         local_log += '* ' + msg + '\n'
 
