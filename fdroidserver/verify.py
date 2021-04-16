@@ -198,7 +198,7 @@ def main():
 
         apkfilename = os.path.basename(apkfile)
         url = 'https://f-droid.org/repo/' + apkfilename
-        appid, vercode = common.publishednameinfo(apkfile)
+        appid, vercode = common.published_name_info(apkfile)
 
         if vercodes and appid not in vercodes:
             continue

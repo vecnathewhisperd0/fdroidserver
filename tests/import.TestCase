@@ -71,7 +71,7 @@ class ImportTest(unittest.TestCase):
 
             app = fdroidserver.common.get_app_from_url(url)
             with mock.patch('fdroidserver.common.getvcs',
-                            lambda a, b, c: fdroidserver.common.vcs(url, testdir)):
+                            lambda a, b, c: fdroidserver.common.VCS(url, testdir)):
                 with mock.patch('fdroidserver.common.vcs.gotorevision',
                                 lambda s, rev: None):
                     with mock.patch('shutil.rmtree', lambda a: None):
@@ -82,7 +82,7 @@ class ImportTest(unittest.TestCase):
             logging.info(build_dir)
             paths = fdroidserver.common.get_all_gradle_and_manifests(build_dir)
             self.assertNotEqual(paths, [])
-            versionName, versionCode, package = fdroidserver.common.parse_androidmanifests(paths, app)
+            versionName, versionCode, package = fdroidserver.common.parse_android_manifests(paths, app)
             self.assertEqual(vn, versionName)
             self.assertEqual(vc, versionCode)
             self.assertEqual(appid, package)

@@ -29,10 +29,10 @@ def main():
     srclibpaths = []
     for appid, app in apps.items():
         vcs, _ignored = common.setup_vcs(app)
-        vcs.gotorevision('HEAD', refresh=False)
+        vcs.go_to_revision('HEAD', refresh=False)
         for build in app.get('Builds', []):
             for lib in build.srclibs:
-                srclibpaths.append(common.getsrclib(lib, srclib_dir, prepare=False, build=build))
+                srclibpaths.append(common.get_srclib(lib, srclib_dir, prepare=False, build=build))
     print('Set up srclibs:')
     pprint.pprint(srclibpaths)
 

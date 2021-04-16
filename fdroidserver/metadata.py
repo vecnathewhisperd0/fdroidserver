@@ -769,7 +769,7 @@ def parse_metadata(metadatapath):
             else:
                 root_dir = '.'
             paths = fdroidserver.common.manifest_paths(root_dir, build.gradle)
-            _ignored, _ignored, app.id = fdroidserver.common.parse_androidmanifests(paths, app)
+            _ignored, _ignored, app.id = fdroidserver.common.parse_android_manifests(paths, app)
 
     return app
 

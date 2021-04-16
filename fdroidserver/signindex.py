@@ -54,7 +54,7 @@ def sign_jar(jar):
         'FDROID_KEY_STORE_PASS': config['keystorepass'],
         'FDROID_KEY_PASS': config.get('keypass', ""),
     }
-    p = common.FDroidPopen(args, envs=env_vars)
+    p = common.fdroid_popen(args, envs=env_vars)
     if p.returncode != 0:
         raise FDroidException("Failed to sign %s!" % jar)
 

@@ -43,7 +43,7 @@ from . import metadata
 from . import net
 from . import scanner
 from . import vmtools
-from .common import FDroidPopen
+from .common import fdroid_popen
 from .exception import FDroidException, BuildException, VCSException
 
 try:
@@ -188,10 +188,10 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
         if build.srclibs:
             for lib in build.srclibs:
                 srclib_paths.append(
-                    common.getsrclib(lib, 'build/srclib', basepath=True, prepare=False))
+                    common.get_srclib(lib, 'build/srclib', base_path=True, prepare=False))
 
         # If one was used for the main source, add that too.
-        base_srclib = vcs.getsrclib()
+        base_srclib = vcs.get_srclib()
         if base_srclib:
             srclib_paths.append(base_srclib)
         for name, number, lib in srclib_paths:
@@ -267,7 +267,7 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
                                  None if options.verbose else str(output, 'utf-8'))
 
         # Retrieve logs...
-        tools_version_log = common.get_toolsversion_logname(app, build)
+        tools_version_log = common.get_tools_version_log_name(app, build)
         try:
             ftp.chdir(posixpath.join(home_dir, log_dir))
             ftp.get(tools_version_log, os.path.join(log_dir, tools_version_log))
@@ -282,7 +282,7 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
         else:
             ftp.chdir(posixpath.join(home_dir, 'unsigned'))
         apk_file = common.get_release_filename(app, build)
-        tarball = common.getsrcname(app, build)
+        tarball = common.get_src_name(app, build)
         try:
             ftp.get(apk_file, os.path.join(output_dir, apk_file))
             if not options.notarball:
@@ -316,9 +316,9 @@ def force_gradle_build_tools(build_dir, build_tools):
             if not os.path.isfile(path):
                 continue
             logging.debug("Forcing build-tools %s in %s" % (build_tools, path))
-            common.regsub_file(r"""(\s*)buildToolsVersion([\s=]+).*""",
+            common.reg_sub_file(r"""(\s*)buildToolsVersion([\s=]+).*""",
                                r"""\1buildToolsVersion\2'%s'""" % build_tools,
-                               path)
+                                path)
 
 
 def transform_first_char(string, method):
@@ -375,7 +375,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
             logging.critical("Android NDK '%s' is not a directory!" % ndk_path)
             raise FDroidException()
 
-    common.set_FDroidPopen_env(build)
+    common.set_fdroid_popen_env(build)
 
     # create ..._toolsversion.log when running in builder vm
     if on_server:
@@ -383,24 +383,24 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
         if build.sudo:
             logging.info("Running 'sudo' commands in %s" % os.getcwd())
 
-            p = FDroidPopen(['sudo', 'DEBIAN_FRONTEND=noninteractive',
+            p = fdroid_popen(['sudo', 'DEBIAN_FRONTEND=noninteractive',
                              'bash', '-x', '-c', build.sudo])
             if p.returncode != 0:
                 raise BuildException("Error running sudo command for %s:%s" %
                                      (app.id, build.versionName), p.output)
 
-        p = FDroidPopen(['sudo', 'passwd', '--lock', 'root'])
+        p = fdroid_popen(['sudo', 'passwd', '--lock', 'root'])
         if p.returncode != 0:
             raise BuildException("Error locking root account for %s:%s" %
                                  (app.id, build.versionName), p.output)
 
-        p = FDroidPopen(['sudo', 'SUDO_FORCE_REMOVE=yes', 'dpkg', '--purge', 'sudo'])
+        p = fdroid_popen(['sudo', 'SUDO_FORCE_REMOVE=yes', 'dpkg', '--purge', 'sudo'])
         if p.returncode != 0:
             raise BuildException("Error removing sudo for %s:%s" %
                                  (app.id, build.versionName), p.output)
 
         log_path = os.path.join(log_dir,
-                                common.get_toolsversion_logname(app, build))
+                                common.get_tools_version_log_name(app, build))
         with open(log_path, 'w') as f:
             f.write(common.get_android_tools_version_log(build.ndk_path()))
     else:
@@ -430,7 +430,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
         else:
             maven_dir = root_dir
 
-        p = FDroidPopen(cmd, cwd=maven_dir)
+        p = fdroid_popen(cmd, cwd=maven_dir)
 
     elif b_method == 'gradle':
 
@@ -452,15 +452,15 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
             cmd += ['-P' + kv for kv in build.gradleprops]
 
         cmd += ['clean']
-        p = FDroidPopen(cmd, cwd=root_dir,
-                        envs={"GRADLE_VERSION_DIR": config['gradle_version_dir'], "CACHEDIR": config['cachedir']})
+        p = fdroid_popen(cmd, cwd=root_dir,
+                         envs={"GRADLE_VERSION_DIR": config['gradle_version_dir'], "CACHEDIR": config['cachedir']})
 
     elif b_method == 'buildozer':
         pass
 
     elif b_method == 'ant':
         logging.info("Cleaning Ant project...")
-        p = FDroidPopen(['ant', 'clean'], cwd=root_dir)
+        p = fdroid_popen(['ant', 'clean'], cwd=root_dir)
 
     if p is not None and p.returncode != 0:
         raise BuildException("Error cleaning %s:%s" %
@@ -521,7 +521,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
     if not options.notarball:
         # Build the source tarball right before we build the release...
         logging.info("Creating source tarball...")
-        tar_name = common.getsrcname(app, build)
+        tar_name = common.get_src_name(app, build)
         tarball = tarfile.open(os.path.join(tmp_dir, tar_name), "w:gz")
 
         def tar_exc(t):
@@ -539,7 +539,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
         for name, number, libpath in srclib_paths:
             cmd = cmd.replace('$$' + name + '$$', os.path.join(os.getcwd(), libpath))
 
-        p = FDroidPopen(['bash', '-x', '-c', cmd], cwd=root_dir)
+        p = fdroid_popen(['bash', '-x', '-c', cmd], cwd=root_dir)
 
         if p.returncode != 0:
             raise BuildException("Error running build command for %s:%s" %
@@ -569,7 +569,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
                 open(manifest, 'w').write(manifest_text)
                 # In case the AM.xml read was big, free the memory
                 del manifest_text
-            p = FDroidPopen(cmd, cwd=os.path.join(root_dir, d))
+            p = fdroid_popen(cmd, cwd=os.path.join(root_dir, d))
             if p.returncode != 0:
                 raise BuildException("NDK build failed for %s:%s" % (app.id, build.versionName), p.output)
 
@@ -590,15 +590,15 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
                   'package']
         if build.target:
             target = build.target.split('-')[1]
-            common.regsub_file(r'<platform>[0-9]*</platform>',
+            common.reg_sub_file(r'<platform>[0-9]*</platform>',
                                r'<platform>%s</platform>' % target,
-                               os.path.join(root_dir, 'pom.xml'))
+                                os.path.join(root_dir, 'pom.xml'))
             if '@' in build.maven:
-                common.regsub_file(r'<platform>[0-9]*</platform>',
+                common.reg_sub_file(r'<platform>[0-9]*</platform>',
                                    r'<platform>%s</platform>' % target,
-                                   os.path.join(maven_dir, 'pom.xml'))
+                                    os.path.join(maven_dir, 'pom.xml'))
 
-        p = FDroidPopen(mvncmd, cwd=maven_dir)
+        p = fdroid_popen(mvncmd, cwd=maven_dir)
 
         bin_dir = os.path.join(root_dir, 'target')
 
@@ -649,7 +649,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
         # execute buildozer
         cmd = ['buildozer', 'android', 'release']
         try:
-            p = FDroidPopen(cmd, cwd=root_dir)
+            p = fdroid_popen(cmd, cwd=root_dir)
         except Exception:
             pass
 
@@ -662,7 +662,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
                 raise BuildException("Distribute build failed")
 
             cmd = ['python', 'buildozer/buildozer/scripts/client.py', 'android', 'release']
-            p = FDroidPopen(cmd, cwd=root_dir)
+            p = fdroid_popen(cmd, cwd=root_dir)
 
         # expected to fail.
         # Signing will fail if not set by environment vars (cf. p4a docs).
@@ -678,8 +678,8 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
 
         cmd += gradle_tasks
 
-        p = FDroidPopen(cmd, cwd=root_dir,
-                        envs={"GRADLE_VERSION_DIR": config['gradle_version_dir'], "CACHEDIR": config['cachedir']})
+        p = fdroid_popen(cmd, cwd=root_dir,
+                         envs={"GRADLE_VERSION_DIR": config['gradle_version_dir'], "CACHEDIR": config['cachedir']})
 
     elif b_method == 'ant':
         logging.info("Building Ant project...")
@@ -688,7 +688,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
             cmd += build.antcommands
         else:
             cmd += ['release']
-        p = FDroidPopen(cmd, cwd=root_dir)
+        p = fdroid_popen(cmd, cwd=root_dir)
 
         bin_dir = os.path.join(root_dir, 'bin')
 
@@ -881,7 +881,7 @@ def try_build(app, build, build_dir, output_dir, log_dir, also_check_dir, srclib
     if server:
         # When using server mode, still keep a local cache of the repo, by
         # grabbing the source now.
-        vcs.gotorevision(build.commit, refresh)
+        vcs.go_to_revision(build.commit, refresh)
 
         build_server(app, build, vcs, build_dir, output_dir, log_dir, force)
     else:
@@ -1120,13 +1120,13 @@ def main():
                     vcs, build_dir = common.setup_vcs(app)
                     first = False
 
-                logging.info("Using %s" % vcs.clientversion())
+                logging.info("Using %s" % vcs.client_version())
                 logging.debug("Checking " + build.versionName)
                 if try_build(app, build, build_dir, output_dir, log_dir, also_check_dir, srclib_dir, extlib_dir,
                              tmp_dir, repo_dir, vcs, options.test, options.server, options.force, options.onserver,
                              options.refresh):
                     tools_log = os.path.join(log_dir,
-                                             common.get_toolsversion_logname(app, build))
+                                             common.get_tools_version_log_name(app, build))
                     if not options.onserver and os.path.exists(tools_log):
                         with open(tools_log, 'r') as f:
                             tools_version_log = ''.join(f.readlines())

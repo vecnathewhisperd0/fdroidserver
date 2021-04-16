@@ -37,7 +37,7 @@ def extract_signature(apkpath):
     logging.debug('signature okay: %s', apkpath)
 
     appid, vercode, _ignored = common.get_apk_id(apkpath)
-    sigdir = common.metadata_get_sigdir(appid, vercode)
+    sigdir = common.metadata_get_signature_dir(appid, vercode)
     if not os.path.exists(sigdir):
         os.makedirs(sigdir)
     common.apk_extract_signatures(apkpath, sigdir)

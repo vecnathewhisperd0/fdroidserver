@@ -48,7 +48,7 @@ class UpdateTest(unittest.TestCase):
         fdroidserver.update.options.clean = True
         fdroidserver.update.options.delete_unknown = True
 
-        self.assertTrue(fdroidserver.common.SdkToolsPopen('aapt'))
+        self.assertTrue(fdroidserver.common.sdk_tools_popen('aapt'))
         try:
             from androguard.core.bytecodes.apk import APK
             dir(APK)

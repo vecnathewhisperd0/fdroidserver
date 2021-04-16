@@ -34,7 +34,7 @@ import zipfile
 from . import _
 from . import common
 from . import metadata
-from .common import FDroidPopen
+from .common import fdroid_popen
 from .exception import BuildException, FDroidException
 
 config = None
@@ -83,7 +83,7 @@ def read_fingerprints_from_keystore():
            '-storepass:env', 'FDROID_KEY_STORE_PASS']
     if config['keystore'] == 'NONE':
         cmd += config['smartcardoptions']
-    p = FDroidPopen(cmd, envs=env_vars, output=False)
+    p = fdroid_popen(cmd, envs=env_vars, output=False)
     if p.returncode != 0:
         raise FDroidException('could not read keystore {}'.format(config['keystore']))
 
@@ -117,7 +117,7 @@ def sign_sig_key_fingerprint_list(jar_file):
         cmd += '-keypass:env', 'FDROID_KEY_PASS'
     env_vars = {'FDROID_KEY_STORE_PASS': config['keystorepass'],
                 'FDROID_KEY_PASS': config.get('keypass', "")}
-    p = common.FDroidPopen(cmd, envs=env_vars)
+    p = common.fdroid_popen(cmd, envs=env_vars)
     if p.returncode != 0:
         raise FDroidException("Failed to sign '{}'!".format(jar_file))
 
@@ -198,7 +198,7 @@ def create_key_if_not_existing(keyalias):
            '-storepass:env', 'FDROID_KEY_STORE_PASS']
     if config['keystore'] == 'NONE':
         cmd += config['smartcardoptions']
-    p = FDroidPopen(cmd, envs=env_vars)
+    p = fdroid_popen(cmd, envs=env_vars)
     if p.returncode != 0:
         logging.info("Key does not exist - generating...")
         cmd = [config['keytool'], '-genkey',
@@ -212,7 +212,7 @@ def create_key_if_not_existing(keyalias):
             cmd += config['smartcardoptions']
         else:
             cmd += '-keypass:env', 'FDROID_KEY_PASS'
-        p = FDroidPopen(cmd, envs=env_vars)
+        p = fdroid_popen(cmd, envs=env_vars)
         if p.returncode != 0:
             raise BuildException("Failed to generate key", p.output)
         return True
@@ -279,7 +279,7 @@ def main():
     for apkfile in sorted(glob.glob(os.path.join(unsigned_dir, '*.apk'))
                           + glob.glob(os.path.join(unsigned_dir, '*.zip'))):
 
-        appid, vercode = common.publishednameinfo(apkfile)
+        appid, vercode = common.published_name_info(apkfile)
         apkfilename = os.path.basename(apkfile)
         if vercodes and appid not in vercodes:
             continue

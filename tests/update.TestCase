@@ -52,7 +52,7 @@ import fdroidserver.common
 import fdroidserver.exception
 import fdroidserver.metadata
 import fdroidserver.update
-from fdroidserver.common import FDroidPopen
+from fdroidserver.common import fdroid_popen
 
 
 DONATION_FIELDS = (
@@ -414,7 +414,7 @@ class UpdateTest(unittest.TestCase):
         config = dict()
         fdroidserver.common.fill_config_defaults(config)
         fdroidserver.common.config = config
-        p = FDroidPopen(['java', '-cp', 'getsig',
+        p = fdroid_popen(['java', '-cp', 'getsig',
                          'getsig', apkfile])
         sig = None
         for line in p.output.splitlines():
@@ -618,7 +618,7 @@ class UpdateTest(unittest.TestCase):
         shutil.copy(os.path.join(self.basedir, filename), 'repo')
         knownapks = fdroidserver.common.KnownApks()
         files, fcachechanged = fdroidserver.update.scan_repo_files(dict(), 'repo', knownapks, False)
-        knownapks.writeifchanged()
+        knownapks.write_if_changed()
         self.assertTrue(fcachechanged)
 
         info = files[0]

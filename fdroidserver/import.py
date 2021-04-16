@@ -53,8 +53,8 @@ def clone_to_tmp_dir(app):
     tmp_dir = os.path.join(tmp_dir, 'importer')
     if os.path.exists(tmp_dir):
         shutil.rmtree(tmp_dir)
-    vcs = common.getvcs(app.RepoType, app.Repo, tmp_dir)
-    vcs.gotorevision(options.rev)
+    vcs = common.get_vcs(app.RepoType, app.Repo, tmp_dir)
+    vcs.go_to_revision(options.rev)
 
     return tmp_dir
 
@@ -168,7 +168,7 @@ def main():
     paths = common.get_all_gradle_and_manifests(tmp_importer_dir)
     subdir = common.get_gradle_subdir(tmp_importer_dir, paths)
     if paths:
-        versionName, versionCode, appid = common.parse_androidmanifests(paths, app)
+        versionName, versionCode, appid = common.parse_android_manifests(paths, app)
         if not appid:
             raise FDroidException(_("Couldn't find Application ID"))
         if not versionName:

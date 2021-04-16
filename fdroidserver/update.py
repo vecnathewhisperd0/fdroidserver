@@ -1355,8 +1355,8 @@ def scan_repo_files(apkcache, repodir, knownapks, use_date_from_file=False):
             default_date_param = None
 
         # Record in knownapks, getting the added date at the same time..
-        added = knownapks.recordapk(repo_file['apkName'], repo_file['packageName'],
-                                    default_date=default_date_param)
+        added = knownapks.record_apk(repo_file['apkName'], repo_file['packageName'],
+                                     default_date=default_date_param)
         if added:
             repo_file['added'] = added
 
@@ -1710,8 +1710,8 @@ def process_apk(apkcache, apkfilename, repodir, knownapks, use_date_from_apk=Fal
             default_date_param = None
 
         # Record in known apks, getting the added date at the same time..
-        added = knownapks.recordapk(apk['apkName'], apk['packageName'],
-                                    default_date=default_date_param)
+        added = knownapks.record_apk(apk['apkName'], apk['packageName'],
+                                     default_date=default_date_param)
         if added:
             apk['added'] = added
 
@@ -2293,14 +2293,14 @@ def main():
             config['keystore'] = common.default_config['keystore']
             common.write_to_config(config, 'keystore', config['keystore'])
 
-        password = common.genpassword()
+        password = common.gen_password()
         if 'keystorepass' not in config:
             config['keystorepass'] = password
             common.write_to_config(config, 'keystorepass', config['keystorepass'])
         if 'keypass' not in config and not config['keystore'] == "NONE":
             config['keypass'] = password
             common.write_to_config(config, 'keypass', config['keypass'])
-        common.genkeystore(config)
+        common.gen_keystore(config)
 
     # Get all apps...
     apps = metadata.read_metadata()
@@ -2408,7 +2408,7 @@ def main():
 
     if config['update_stats']:
         # Update known apks info...
-        knownapks.writeifchanged()
+        knownapks.write_if_changed()
 
     # Update the wiki...
     if options.wiki:

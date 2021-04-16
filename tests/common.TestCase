@@ -329,7 +329,7 @@ class CommonTest(unittest.TestCase):
 
         fdroidserver.common.prepare_source(FakeVcs(), app, build,
                                            app_build_dir, srclib_testdir, app_build_dir,
-                                           onserver=True, refresh=False)  # do not clone in this test
+                                           on_server=True, refresh=False)  # do not clone in this test
 
     def test_prepare_sources_refresh(self):
         packageName = 'org.fdroid.ci.test.app'
@@ -354,10 +354,10 @@ class CommonTest(unittest.TestCase):
             yaml.dump(metadata, fp)
 
         gitrepo = os.path.join(testdir, 'build', packageName)
-        vcs0 = fdroidserver.common.getvcs('git', git_url, gitrepo)
-        vcs0.gotorevision('0.3', refresh=True)
-        vcs1 = fdroidserver.common.getvcs('git', git_url, gitrepo)
-        vcs1.gotorevision('0.3', refresh=False)
+        vcs0 = fdroidserver.common.get_vcs('git', git_url, gitrepo)
+        vcs0.go_to_revision('0.3', refresh=True)
+        vcs1 = fdroidserver.common.get_vcs('git', git_url, gitrepo)
+        vcs1.go_to_revision('0.3', refresh=False)
 
     def test_fdroid_popen_stderr_redirect(self):
         config = dict()
@@ -366,10 +366,10 @@ class CommonTest(unittest.TestCase):
 
         commands = ['sh', '-c', 'echo stdout message && echo stderr message 1>&2']
 
-        p = fdroidserver.common.FDroidPopen(commands)
+        p = fdroidserver.common.fdroid_popen(commands)
         self.assertEqual(p.output, 'stdout message\nstderr message\n')
 
-        p = fdroidserver.common.FDroidPopen(commands, stderr_to_stdout=False)
+        p = fdroidserver.common.fdroid_popen(commands, stderr_to_stdout=False)
         self.assertEqual(p.output, 'stdout message\n')
 
     def test_signjar(self):
@@ -738,7 +738,7 @@ class CommonTest(unittest.TestCase):
         self.assertTrue(os.path.isfile(signed))
         self.assertFalse(os.path.isfile(unsigned))
         self.assertTrue(fdroidserver.common.verify_apk_signature(signed))
-        self.assertEqual('18', fdroidserver.common._get_androguard_APK(signed).get_min_sdk_version())
+        self.assertEqual('18', fdroidserver.common._get_androguard_apk(signed).get_min_sdk_version())
 
         shutil.copy(os.path.join(self.basedir, 'minimal_targetsdk_30_unsigned.apk'), testdir)
         unsigned = os.path.join(testdir, 'minimal_targetsdk_30_unsigned.apk')
@@ -751,7 +751,7 @@ class CommonTest(unittest.TestCase):
         self.assertFalse(os.path.isfile(unsigned))
         self.assertTrue(fdroidserver.common.verify_apk_signature(signed))
         # verify it has a v2 signature
-        self.assertTrue(fdroidserver.common._get_androguard_APK(signed).is_signed_v2())
+        self.assertTrue(fdroidserver.common._get_androguard_apk(signed).is_signed_v2())
 
         shutil.copy(os.path.join(self.basedir, 'no_targetsdk_minsdk30_unsigned.apk'), testdir)
         unsigned = os.path.join(testdir, 'no_targetsdk_minsdk30_unsigned.apk')
@@ -759,7 +759,7 @@ class CommonTest(unittest.TestCase):
 
         fdroidserver.common.sign_apk(unsigned, signed, config['keyalias'])
         self.assertTrue(fdroidserver.common.verify_apk_signature(signed))
-        self.assertTrue(fdroidserver.common._get_androguard_APK(signed).is_signed_v2())
+        self.assertTrue(fdroidserver.common._get_androguard_apk(signed).is_signed_v2())
 
         shutil.copy(os.path.join(self.basedir, 'no_targetsdk_minsdk1_unsigned.apk'), testdir)
         unsigned = os.path.join(testdir, 'no_targetsdk_minsdk1_unsigned.apk')
@@ -869,11 +869,11 @@ class CommonTest(unittest.TestCase):
     def test_get_sdkversions_androguard(self):
         """This is a sanity test that androguard isn't broken"""
         def get_minSdkVersion(apkfile):
-            apk = fdroidserver.common._get_androguard_APK(apkfile)
+            apk = fdroidserver.common._get_androguard_apk(apkfile)
             return fdroidserver.common.get_min_sdk_version(apk)
 
         def get_targetSdkVersion(apkfile):
-            apk = fdroidserver.common._get_androguard_APK(apkfile)
+            apk = fdroidserver.common._get_androguard_apk(apkfile)
             return apk.get_effective_target_sdk_version()
 
         self.assertEqual(4, get_minSdkVersion('bad-unicode-πÇÇ现代通用字-български-عربي1.apk'))
@@ -939,7 +939,7 @@ class CommonTest(unittest.TestCase):
         for path in paths:
             self.assertTrue(os.path.isfile(path))
         self.assertEqual(('0.94-test', '940', 'org.fdroid.fdroid'),
-                         fdroidserver.common.parse_androidmanifests(paths, app))
+                         fdroidserver.common.parse_android_manifests(paths, app))
 
         app = fdroidserver.metadata.App()
         app.AutoName = 'android-chat'
@@ -963,7 +963,7 @@ class CommonTest(unittest.TestCase):
         for path in paths:
             self.assertTrue(os.path.isfile(path))
         self.assertEqual(('0.6.9', '23', 'cn.wildfirechat.chat'),
-                         fdroidserver.common.parse_androidmanifests(paths, app))
+                         fdroidserver.common.parse_android_manifests(paths, app))
 
         app = fdroidserver.metadata.App()
         app.Repo = 'https://github.com/Integreight/1Sheeld-Android-App'
@@ -984,7 +984,7 @@ class CommonTest(unittest.TestCase):
         for path in paths:
             self.assertTrue(os.path.isfile(path))
         self.assertEqual(('1.9.0', '170521', 'com.integreight.onesheeld'),
-                         fdroidserver.common.parse_androidmanifests(paths, app))
+                         fdroidserver.common.parse_android_manifests(paths, app))
 
         app = fdroidserver.metadata.App()
         app.id = 'dev.patrickgold.florisboard'
@@ -994,7 +994,7 @@ class CommonTest(unittest.TestCase):
         for path in paths:
             self.assertTrue(os.path.isfile(path))
         self.assertEqual(('0.3.10', '29', 'dev.patrickgold.florisboard'),
-                         fdroidserver.common.parse_androidmanifests(paths, app))
+                         fdroidserver.common.parse_android_manifests(paths, app))
 
     def test_parse_androidmanifests_ignore(self):
         app = fdroidserver.metadata.App()
@@ -1007,7 +1007,7 @@ class CommonTest(unittest.TestCase):
         for path in paths:
             self.assertTrue(os.path.isfile(path))
         self.assertEqual(('Ignore', None, 'org.fdroid.fdroid'),
-                         fdroidserver.common.parse_androidmanifests(paths, app))
+                         fdroidserver.common.parse_android_manifests(paths, app))
 
     def test_parse_androidmanifests_with_flavor(self):
         app = fdroidserver.metadata.App()
@@ -1022,7 +1022,7 @@ class CommonTest(unittest.TestCase):
         for path in paths:
             self.assertTrue(os.path.isfile(path))
         self.assertEqual(('0.95-dev', '949', 'org.fdroid.fdroid.dev'),
-                         fdroidserver.common.parse_androidmanifests(paths, app))
+                         fdroidserver.common.parse_android_manifests(paths, app))
 
         app = fdroidserver.metadata.App()
         build = fdroidserver.metadata.Build()
@@ -1035,7 +1035,7 @@ class CommonTest(unittest.TestCase):
         for path in paths:
             self.assertTrue(os.path.isfile(path))
         self.assertEqual(('1.23.1', '245', 'eu.siacs.conversations'),
-                         fdroidserver.common.parse_androidmanifests(paths, app))
+                         fdroidserver.common.parse_android_manifests(paths, app))
 
         app = fdroidserver.metadata.App()
         build = fdroidserver.metadata.Build()
@@ -1048,7 +1048,7 @@ class CommonTest(unittest.TestCase):
         for path in paths:
             self.assertTrue(os.path.isfile(path))
         self.assertEqual(('2.0.0', '20000099', 'com.nextcloud.client'),
-                         fdroidserver.common.parse_androidmanifests(paths, app))
+                         fdroidserver.common.parse_android_manifests(paths, app))
 
         app = fdroidserver.metadata.App()
         build = fdroidserver.metadata.Build()
@@ -1061,7 +1061,7 @@ class CommonTest(unittest.TestCase):
         for path in paths:
             self.assertTrue(os.path.isfile(path))
         self.assertEqual(('20171223', '20171223', 'com.nextcloud.android.beta'),
-                         fdroidserver.common.parse_androidmanifests(paths, app))
+                         fdroidserver.common.parse_android_manifests(paths, app))
 
         app = fdroidserver.metadata.App()
         build = fdroidserver.metadata.Build()
@@ -1074,7 +1074,7 @@ class CommonTest(unittest.TestCase):
         for path in paths:
             self.assertTrue(os.path.isfile(path))
         self.assertEqual(('1.9.8.1-ose', '197', 'at.bitfire.davdroid'),
-                         fdroidserver.common.parse_androidmanifests(paths, app))
+                         fdroidserver.common.parse_android_manifests(paths, app))
 
         app = fdroidserver.metadata.App()
         build = fdroidserver.metadata.Build()
@@ -1087,7 +1087,7 @@ class CommonTest(unittest.TestCase):
         for path in paths:
             self.assertTrue(os.path.isfile(path))
         self.assertEqual(('1.0-libre', '1', 'com.kunzisoft.fdroidtest.applicationidsuffix.libre'),
-                         fdroidserver.common.parse_androidmanifests(paths, app))
+                         fdroidserver.common.parse_android_manifests(paths, app))
 
         app = fdroidserver.metadata.App()
         build = fdroidserver.metadata.Build()
@@ -1100,7 +1100,7 @@ class CommonTest(unittest.TestCase):
         for path in paths:
             self.assertTrue(os.path.isfile(path))
         self.assertEqual(('20180430-pro', '20180430', 'com.kunzisoft.fdroidtest.applicationidsuffix.pro'),
-                         fdroidserver.common.parse_androidmanifests(paths, app))
+                         fdroidserver.common.parse_android_manifests(paths, app))
 
         app = fdroidserver.metadata.App()
         build = fdroidserver.metadata.Build()
@@ -1113,7 +1113,7 @@ class CommonTest(unittest.TestCase):
         for path in paths:
             self.assertTrue(os.path.isfile(path))
         self.assertEqual(('1.0-free', '1', 'com.kunzisoft.fdroidtest.applicationidsuffix'),
-                         fdroidserver.common.parse_androidmanifests(paths, app))
+                         fdroidserver.common.parse_android_manifests(paths, app))
 
         app = fdroidserver.metadata.App()
         build = fdroidserver.metadata.Build()
@@ -1126,7 +1126,7 @@ class CommonTest(unittest.TestCase):
         for path in paths:
             self.assertTrue(os.path.isfile(path))
         self.assertEqual(('20180430-underscore', '2018_04_30', 'com.kunzisoft.fdroidtest.applicationidsuffix.underscore'),
-                         fdroidserver.common.parse_androidmanifests(paths, app))
+                         fdroidserver.common.parse_android_manifests(paths, app))
 
     def test_get_all_gradle_and_manifests(self):
         a = fdroidserver.common.get_all_gradle_and_manifests(os.path.join('source-files', 'cn.wildfirechat.chat'))
@@ -1406,11 +1406,11 @@ class CommonTest(unittest.TestCase):
         fdroidserver.metadata.srclibs = {'somelib': {'RepoType': 'git'},
                                          'yeslib': {'RepoType': 'hg'},
                                          'nolib': {'RepoType': 'git-svn'}}
-        self.assertEqual(fdroidserver.common.getsrclibvcs('somelib'), 'git')
-        self.assertEqual(fdroidserver.common.getsrclibvcs('yeslib'), 'hg')
-        self.assertEqual(fdroidserver.common.getsrclibvcs('nolib'), 'git-svn')
+        self.assertEqual(fdroidserver.common.get_srclib_vcs('somelib'), 'git')
+        self.assertEqual(fdroidserver.common.get_srclib_vcs('yeslib'), 'hg')
+        self.assertEqual(fdroidserver.common.get_srclib_vcs('nolib'), 'git-svn')
         with self.assertRaises(VCSException):
-            fdroidserver.common.getsrclibvcs('nonexistentlib')
+            fdroidserver.common.get_srclib_vcs('nonexistentlib')
 
     def test_getsrclib_not_found(self):
         fdroidserver.common.config = {'sdk_path': '',
@@ -1418,7 +1418,7 @@ class CommonTest(unittest.TestCase):
         fdroidserver.metadata.srclibs = {}
 
         with self.assertRaisesRegex(VCSException, 'srclib SDL not found.'):
-            fdroidserver.common.getsrclib('SDL@release-2.0.3', 'srclib')
+            fdroidserver.common.get_srclib('SDL@release-2.0.3', 'srclib')
 
     def test_getsrclib_gotorevision_raw(self):
         fdroidserver.common.config = {'sdk_path': '',
@@ -1431,7 +1431,7 @@ class CommonTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmpdir, TmpCwd(tmpdir):
             os.makedirs(os.path.join('srclib', 'SDL'))
             with mock.patch('fdroidserver.common.getvcs', return_value=vcs):
-                ret = fdroidserver.common.getsrclib('SDL', 'srclib', raw=True)
+                ret = fdroidserver.common.get_srclib('SDL', 'srclib', raw=True)
                 self.assertEqual(vcs.srclib, ('SDL', None, 'srclib/SDL'))
                 self.assertEqual(ret, vcs)
 
@@ -1452,7 +1452,7 @@ class CommonTest(unittest.TestCase):
             with mock.patch('fdroidserver.common.getvcs', return_value=vcs):
                 with mock.patch('fdroidserver.common.remove_signing_keys', skm):
                     with mock.patch('fdroidserver.common.remove_debuggable_flags', dfm):
-                        ret = fdroidserver.common.getsrclib('ACRA@acra-4.6.2', 'srclib')
+                        ret = fdroidserver.common.get_srclib('ACRA@acra-4.6.2', 'srclib')
                         self.assertEqual(vcs.srclib, ('ACRA', None, 'srclib/ACRA'))
                         vcs.gotorevision.assert_called_once_with('acra-4.6.2', True)
                         skm.assert_called_once_with('srclib/ACRA')

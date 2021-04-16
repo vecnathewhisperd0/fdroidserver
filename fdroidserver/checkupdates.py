@@ -113,7 +113,7 @@ def check_tags(app, pattern):
 
         if app.RepoType == 'srclib':
             build_dir = os.path.join('build', 'srclib', app.Repo)
-            repo_type = common.getsrclibvcs(app.Repo)
+            repo_type = common.get_srclib_vcs(app.Repo)
         else:
             build_dir = os.path.join('build', app.id)
             repo_type = app.RepoType
@@ -125,9 +125,9 @@ def check_tags(app, pattern):
             return None, 'Tags update mode used in git-svn, but the repo was not set up with tags', None
 
         # Set up vcs interface and make sure we have the latest code...
-        vcs = common.getvcs(app.RepoType, app.Repo, build_dir)
+        vcs = common.get_vcs(app.RepoType, app.Repo, build_dir)
 
-        vcs.gotorevision(None)
+        vcs.go_to_revision(None)
 
         last_build = app.get_last_build()
 
@@ -139,7 +139,7 @@ def check_tags(app, pattern):
         h_code = "0"
 
         if repo_type == 'git':
-            tags = vcs.latesttags()
+            tags = vcs.latest_tags()
         else:
             tags = vcs.gettags()
         if not tags:
@@ -159,7 +159,7 @@ def check_tags(app, pattern):
 
         for tag in tags:
             logging.debug("Check tag: '{0}'".format(tag))
-            vcs.gotorevision(tag)
+            vcs.go_to_revision(tag)
 
             for subdir in possible_subdirs(app):
                 if subdir == '.':
@@ -167,7 +167,7 @@ def check_tags(app, pattern):
                 else:
                     root_dir = os.path.join(build_dir, subdir)
                 paths = common.manifest_paths(root_dir, last_build.gradle)
-                version, ver_code, package = common.parse_androidmanifests(paths, app)
+                version, ver_code, package = common.parse_android_manifests(paths, app)
                 if ver_code:
                     logging.debug("Manifest exists in subdir '{0}'. Found version {1} ({2})"
                                   .format(subdir, version, ver_code))
@@ -205,24 +205,24 @@ def check_repo_manifest(app, branch=None):
 
         if app.RepoType == 'srclib':
             build_dir = os.path.join('build', 'srclib', app.Repo)
-            repo_type = common.getsrclibvcs(app.Repo)
+            repo_type = common.get_srclib_vcs(app.Repo)
         else:
             build_dir = os.path.join('build', app.id)
             repo_type = app.RepoType
 
         # Set up vcs interface and make sure we have the latest code...
-        vcs = common.getvcs(app.RepoType, app.Repo, build_dir)
+        vcs = common.get_vcs(app.RepoType, app.Repo, build_dir)
 
         if repo_type == 'git':
             if branch:
                 branch = 'origin/' + branch
-            vcs.gotorevision(branch)
+            vcs.go_to_revision(branch)
         elif repo_type == 'git-svn':
-            vcs.gotorevision(branch)
+            vcs.go_to_revision(branch)
         elif repo_type == 'hg':
-            vcs.gotorevision(branch)
+            vcs.go_to_revision(branch)
         elif repo_type == 'bzr':
-            vcs.gotorevision(None)
+            vcs.go_to_revision(None)
 
         last_build = metadata.Build()
         if len(app.get('Builds', [])) > 0:
@@ -239,7 +239,7 @@ def check_repo_manifest(app, branch=None):
             else:
                 root_dir = os.path.join(build_dir, subdir)
             paths = common.manifest_paths(root_dir, last_build.gradle)
-            version, ver_code, package = common.parse_androidmanifests(paths, app)
+            version, ver_code, package = common.parse_android_manifests(paths, app)
             if ver_code:
                 logging.debug("Manifest exists in subdir '{0}'. Found version {1} ({2})"
                               .format(subdir, version, ver_code))
@@ -266,7 +266,7 @@ def check_repo_trunk(app):
     try:
         if app.RepoType == 'srclib':
             build_dir = os.path.join('build', 'srclib', app.Repo)
-            repo_type = common.getsrclibvcs(app.Repo)
+            repo_type = common.get_srclib_vcs(app.Repo)
         else:
             build_dir = os.path.join('build', app.id)
             repo_type = app.RepoType
@@ -275,11 +275,11 @@ def check_repo_trunk(app):
             return None, 'RepoTrunk update mode only makes sense in git-svn repositories'
 
         # Set up vcs interface and make sure we have the latest code...
-        vcs = common.getvcs(app.RepoType, app.Repo, build_dir)
+        vcs = common.get_vcs(app.RepoType, app.Repo, build_dir)
 
-        vcs.gotorevision(None)
+        vcs.go_to_revision(None)
 
-        ref = vcs.getref()
+        ref = vcs.get_ref()
         return ref, ref
     except VCSException as vcse:
         msg = "VCS error while scanning app {0}: {1}".format(app.id, vcse)
@@ -330,7 +330,7 @@ def try_init_submodules(app, last_build, vcs):
     """
     if last_build.submodules:
         try:
-            vcs.initsubmodules()
+            vcs.init_submodules()
         except NoSubmodulesException:
             logging.info("No submodules present for {}".format(_get_app_name(app)))
 
@@ -360,7 +360,7 @@ def possible_subdirs(app):
 
     for d in dirs_with_manifest(build_dir):
         m_paths = common.manifest_paths(d, last_build.gradle)
-        package = common.parse_androidmanifests(m_paths, app)[2]
+        package = common.parse_android_manifests(m_paths, app)[2]
         if package is not None:
             subdir = os.path.relpath(d, build_dir)
             logging.debug("Adding possible subdir %s" % subdir)
@@ -385,8 +385,8 @@ def fetch_autoname(app, tag):
         build_dir = os.path.join('build', app.id)
 
     try:
-        vcs = common.getvcs(app.RepoType, app.Repo, build_dir)
-        vcs.gotorevision(tag)
+        vcs = common.get_vcs(app.RepoType, app.Repo, build_dir)
+        vcs.go_to_revision(tag)
     except VCSException:
         return None
 

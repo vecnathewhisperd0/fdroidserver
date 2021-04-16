@@ -212,7 +212,7 @@ def main():
                         + '\n' + _('Now set these in config.yml:') + ' '
                         + ', '.join(to_set) + '\n')
     else:
-        password = common.genpassword()
+        password = common.gen_password()
         c = dict(test_config)
         c['keystorepass'] = password
         c['keypass'] = password
@@ -222,7 +222,7 @@ def main():
         common.write_to_config(test_config, 'keypass', password)
         common.write_to_config(test_config, 'repo_keyalias', c['repo_keyalias'])
         common.write_to_config(test_config, 'keydname', c['keydname'])
-        common.genkeystore(c)
+        common.gen_keystore(c)
 
     msg = '\n'
     msg += _('Built repo based in "%s" with this config:') % fdroiddir

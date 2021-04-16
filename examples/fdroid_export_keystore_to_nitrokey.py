@@ -5,7 +5,7 @@
 import os
 from argparse import ArgumentParser
 from fdroidserver import common
-from fdroidserver.common import FDroidPopen
+from fdroidserver.common import fdroid_popen
 from fdroidserver.exception import BuildException
 
 fdroid_summary = "export the repo's keystore file to a NitroKey HSM"
@@ -16,7 +16,7 @@ def run(cmd, error):
             'PIN': config['smartcard_pin'],
             'FDROID_KEY_STORE_PASS': config['keystorepass'],
             'FDROID_KEY_PASS': config['keypass']}
-    p = FDroidPopen(cmd, envs=envs)
+    p = fdroid_popen(cmd, envs=envs)
     if p.returncode != 0:
         raise BuildException(error, p.output)
 

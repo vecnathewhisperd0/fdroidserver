@@ -173,7 +173,7 @@ def main():
                     if not uri.endswith('.apk'):
                         continue
                     _ignored, apkname = os.path.split(uri)
-                    app = knownapks.getapp(apkname)
+                    app = knownapks.get_app(apkname)
                     if app:
                         appid, _ignored = app
                         today['apps'][appid] += 1
@@ -230,7 +230,7 @@ def main():
     for app in metaapps:
         rtype = app.RepoType or 'none'
         if rtype == 'srclib':
-            rtype = common.getsrclibvcs(app.Repo)
+            rtype = common.get_srclib_vcs(app.Repo)
         repotypes[rtype] += 1
     with open(os.path.join(statsdir, 'repotypes.txt'), 'w') as f:
         for rtype, count in most_common_stable(repotypes):
@@ -289,7 +289,7 @@ def main():
 
     # Write list of latest apps added to the repo...
     logging.info("Processing latest apps...")
-    latest = knownapks.getlatest(10)
+    latest = knownapks.get_latest(10)
     with open(os.path.join(statsdir, 'latestapps.txt'), 'w') as f:
         for appid in latest:
             f.write(appid + '\n')

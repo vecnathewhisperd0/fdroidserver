@@ -24,7 +24,7 @@ import time
 
 from . import _
 from . import common
-from .common import FDroidPopen
+from .common import fdroid_popen
 from .exception import FDroidException
 
 config = None
@@ -79,7 +79,7 @@ def main():
                 if 'gpgkey' in config:
                     gpgargs.extend(['--local-user', config['gpgkey']])
                 gpgargs.append(os.path.join(output_dir, filename))
-                p = FDroidPopen(gpgargs)
+                p = fdroid_popen(gpgargs)
                 if p.returncode != 0:
                     raise FDroidException("Signing failed.")
 

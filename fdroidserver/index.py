@@ -40,7 +40,7 @@ from . import common
 from . import metadata
 from . import net
 from . import signindex
-from fdroidserver.common import FDroidPopen, FDroidPopenBytes, load_stats_fdroid_signing_key_fingerprints
+from fdroidserver.common import fdroid_popen, fdroid_popen_bytes, load_stats_fdroid_signing_key_fingerprints
 from fdroidserver.exception import FDroidException, VerificationException
 
 
@@ -931,7 +931,7 @@ def make_v0(apps, apks, repodir, repodict, requestsdict, fdroid_signing_key_fing
 
         # Create a jar of the index...
         jar_output = 'index_unsigned.jar' if common.options.nosign else 'index.jar'
-        p = FDroidPopen(['jar', 'cf', jar_output, 'index.xml'], cwd=repodir)
+        p = fdroid_popen(['jar', 'cf', jar_output, 'index.xml'], cwd=repodir)
         if p.returncode != 0:
             raise FDroidException("Failed to create {0}".format(jar_output))
 
@@ -975,12 +975,12 @@ def extract_pubkey():
     else:
         env_vars = {'LC_ALL': 'C.UTF-8',
                     'FDROID_KEY_STORE_PASS': common.config['keystorepass']}
-        p = FDroidPopenBytes([common.config['keytool'], '-exportcert',
+        p = fdroid_popen_bytes([common.config['keytool'], '-exportcert',
                               '-alias', common.config['repo_keyalias'],
                               '-keystore', common.config['keystore'],
                               '-storepass:env', 'FDROID_KEY_STORE_PASS']
-                             + list(common.config['smartcardoptions']),
-                             envs=env_vars, output=False, stderr_to_stdout=False)
+                               + list(common.config['smartcardoptions']),
+                               envs=env_vars, output=False, stderr_to_stdout=False)
         if p.returncode != 0 or len(p.output) < 20:
             msg = "Failed to get repo pubkey!"
             if common.config['keystore'] == 'NONE':
