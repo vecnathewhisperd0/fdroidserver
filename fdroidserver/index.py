@@ -932,7 +932,7 @@ def make_v0(apps, apks, repodir, repodict, requestsdict, fdroid_signing_key_fing
         # Create a jar of the index...
         jar_output = 'index_unsigned.jar' if common.options.nosign else 'index.jar'
         p = FDroidPopen(['jar', 'cf', jar_output, 'index.xml'], cwd=repodir)
-        if p.returncode != 0:
+        if p.return_code != 0:
             raise FDroidException("Failed to create {0}".format(jar_output))
 
         # Sign the index...
@@ -981,7 +981,7 @@ def extract_pubkey():
                               '-storepass:env', 'FDROID_KEY_STORE_PASS']
                              + list(common.config['smartcardoptions']),
                              envs=env_vars, output=False, stderr_to_stdout=False)
-        if p.returncode != 0 or len(p.output) < 20:
+        if p.return_code != 0 or len(p.output) < 20:
             msg = "Failed to get repo pubkey!"
             if common.config['keystore'] == 'NONE':
                 msg += ' Is your crypto smartcard plugged in?'

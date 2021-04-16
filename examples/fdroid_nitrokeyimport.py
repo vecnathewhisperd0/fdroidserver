@@ -33,7 +33,7 @@ def main():
                      '-deststorepass:env', 'SMARTCARD_PIN',
                      '-J-Djava.security.debug=sunpkcs11'],
                     envs=env_vars)
-    if p.returncode != 0:
+    if p.return_code != 0:
         raise BuildException("Failed to import into HSM!", p.output)
 
 

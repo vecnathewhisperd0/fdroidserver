@@ -18,19 +18,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import locale
+import logging
+import os
+import pkgutil
 import re
 import sys
-import os
-import locale
-import pkgutil
-import logging
+from argparse import ArgumentError
+from collections import OrderedDict
 
 import fdroidserver.common
 import fdroidserver.metadata
 from fdroidserver import _
-from argparse import ArgumentError
-from collections import OrderedDict
-
 
 COMMANDS = OrderedDict([
     ("build", _("Build a package from source")),
@@ -69,10 +68,14 @@ def print_help(available_plugins=None):
     print("")
 
 
-def preparse_plugin(module_name, module_dir):
-    """simple regex based parsing for plugin scripts,
-       so we don't have to import them when we just need the summary,
-       but not plan on executing this particular plugin."""
+def pre_parse_plugin(module_name, module_dir):
+    """Simple regex based parsing for plugin scripts, so we don't have to import them when we just need the summary,
+    but not plan on executing this particular plugin.
+
+    :param module_name:
+    :param module_dir:
+    :return:
+    """
     if '.' in module_name:
         raise ValueError("No '.' allowed in fdroid plugin modules: '{}'"
                          .format(module_name))
@@ -108,20 +111,20 @@ def preparse_plugin(module_name, module_dir):
 
 def find_plugins():
     found_plugins = [{'name': x[1], 'dir': x[0].path} for x in pkgutil.iter_modules() if x[1].startswith('fdroid_')]
-    plugin_infos = {}
+    plugin_info = {}
     for plugin_def in found_plugins:
         command_name = plugin_def['name'][7:]
         try:
-            plugin_infos[command_name] = preparse_plugin(plugin_def['name'],
+            plugin_info[command_name] = pre_parse_plugin(plugin_def['name'],
                                                          plugin_def['dir'])
         except Exception as e:
             # We need to keep module lookup fault tolerant because buggy
             # modules must not prevent fdroidserver from functioning
             if len(sys.argv) > 1 and sys.argv[1] == command_name:
-                # only raise exeption when a user specifies the broken
+                # only raise exception when a user specifies the broken
                 # plugin in explicitly in command line
                 raise e
-    return plugin_infos
+    return plugin_info
 
 
 def main():
@@ -141,11 +144,11 @@ def main():
             sys.exit(1)
         elif command == '--version':
             output = _('no version info found!')
-            cmddir = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
-            moduledir = os.path.realpath(os.path.dirname(fdroidserver.common.__file__) + '/..')
-            if cmddir == moduledir:
+            cmd_dir = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
+            module_dir = os.path.realpath(os.path.dirname(fdroidserver.common.__file__) + '/..')
+            if cmd_dir == module_dir:
                 # running from git
-                os.chdir(cmddir)
+                os.chdir(cmd_dir)
                 if os.path.isdir('.git'):
                     import subprocess
                     try:
@@ -157,7 +160,7 @@ def main():
                                                                          universal_newlines=True)
                 elif os.path.exists('setup.py'):
                     import re
-                    m = re.search(r'''.*[\s,\(]+version\s*=\s*["']([0-9a-z.]+)["'].*''',
+                    m = re.search(r'''.*[\s,(]+version\s*=\s*["']([0-9a-z.]+)["'].*''',
                                   open('setup.py').read(), flags=re.MULTILINE)
                     if m:
                         output = m.group(1) + '\n'
@@ -175,14 +178,14 @@ def main():
     quiet = any(s in sys.argv for s in ['-q', '--quiet'])
 
     # Helpful to differentiate warnings from errors even when on quiet
-    logformat = '%(asctime)s %(levelname)s: %(message)s'
-    loglevel = logging.INFO
+    log_format = '%(asctime)s %(levelname)s: %(message)s'
+    log_level = logging.INFO
     if verbose:
-        loglevel = logging.DEBUG
+        log_level = logging.DEBUG
     elif quiet:
-        loglevel = logging.WARN
+        log_level = logging.WARN
 
-    logging.basicConfig(format=logformat, level=loglevel)
+    logging.basicConfig(format=log_format, level=log_level)
 
     if verbose and quiet:
         logging.critical(_("Conflicting arguments: '--verbose' and '--quiet' "
@@ -198,7 +201,7 @@ def main():
     else:
         mod = __import__(available_plugins[command]['name'], None, None, [command])
 
-    system_langcode, system_encoding = locale.getdefaultlocale()
+    system_lang_code, system_encoding = locale.getdefaultlocale()
     if system_encoding is None or system_encoding.lower() not in ('utf-8', 'utf8'):
         logging.warning(_("Encoding is set to '{enc}' fdroid might run "
                           "into encoding issues. Please set it to 'UTF-8' "

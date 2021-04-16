@@ -250,7 +250,7 @@ class ScannerTest(unittest.TestCase):
                             app, build, vcs,
                             build_dir=testdir, output_dir=testdir,
                             log_dir=None, srclib_dir=None, extlib_dir=None, tmp_dir=None,
-                            force=False, onserver=False, refresh=False
+                            force=False, on_server=False, refresh=False
                         )
         self.assertTrue(os.path.exists('baz.so'))
         self.assertTrue(os.path.exists('foo.aar'))

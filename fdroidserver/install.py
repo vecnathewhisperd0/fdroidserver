@@ -34,7 +34,7 @@ config = None
 
 def devices():
     p = SdkToolsPopen(['adb', "devices"])
-    if p.returncode != 0:
+    if p.return_code != 0:
         raise FDroidException("An error occured when finding devices: %s" % p.output)
     lines = [line for line in p.output.splitlines() if not line.startswith('* ')]
     if len(lines) < 3:

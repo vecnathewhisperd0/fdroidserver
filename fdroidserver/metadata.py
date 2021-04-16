@@ -24,6 +24,7 @@ import re
 import glob
 import logging
 import yaml
+
 try:
     from yaml import CSafeLoader as SafeLoader
 except ImportError:
@@ -104,7 +105,6 @@ yaml_app_field_order = [
     '\n',
     'NoSourceSince',
 ]
-
 
 yaml_app_fields = [x for x in yaml_app_field_order if x != '\n']
 
@@ -466,7 +466,6 @@ def check_metadata(app):
 
 
 def parse_yaml_srclib(metadatapath):
-
     thisinfo = {'RepoType': '',
                 'Repo': '',
                 'Subdir': None,
@@ -684,30 +683,30 @@ def post_metadata_parse(app):
     app['Builds'] = sorted_builds(builds)
 
 
-# Parse metadata for a single application.
-#
-#  'metadatapath' - the filename to read. The "Application ID" aka
-#               "Package Name" for the application comes from this
-#               filename. Pass None to get a blank entry.
-#
-# Returns a dictionary containing all the details of the application. There are
-# two major kinds of information in the dictionary. Keys beginning with capital
-# letters correspond directory to identically named keys in the metadata file.
-# Keys beginning with lower case letters are generated in one way or another,
-# and are not found verbatim in the metadata.
-#
-# Known keys not originating from the metadata are:
-#
-#  'comments'         - a list of comments from the metadata file. Each is
-#                       a list of the form [field, comment] where field is
-#                       the name of the field it preceded in the metadata
-#                       file. Where field is None, the comment goes at the
-#                       end of the file. Alternatively, 'build:version' is
-#                       for a comment before a particular build version.
-#  'descriptionlines' - original lines of description as formatted in the
-#                       metadata file.
-#
+"""
+Parse metadata for a single application.
 
+ 'metadatapath' - the filename to read. The "Application ID" aka
+              "Package Name" for the application comes from this
+              filename. Pass None to get a blank entry.
+
+Returns a dictionary containing all the details of the application. There are
+two major kinds of information in the dictionary. Keys beginning with capital
+letters correspond directory to identically named keys in the metadata file.
+Keys beginning with lower case letters are generated in one way or another,
+and are not found verbatim in the metadata.
+
+Known keys not originating from the metadata are:
+
+ 'comments'         - a list of comments from the metadata file. Each is
+                      a list of the form [field, comment] where field is
+                      the name of the field it preceded in the metadata
+                      file. Where field is None, the comment goes at the
+                      end of the file. Alternatively, 'build:version' is
+                      for a comment before a particular build version.
+ 'descriptionlines' - original lines of description as formatted in the
+                      metadata file.
+"""
 
 bool_true = re.compile(r'([Yy]es|[Tt]rue)')
 bool_false = re.compile(r'([Nn]o|[Ff]alse)')
@@ -815,7 +814,7 @@ def parse_yaml_metadata(mf, app):
                                   "metadata because it is deprecated.")
                                 .format(field=deprecated_field,
                                         metapath=mf.name))
-                del(yamldata[deprecated_field])
+                del (yamldata[deprecated_field])
 
         if yamldata.get('Builds', None):
             for build in yamldata.get('Builds', []):
@@ -869,13 +868,15 @@ def write_yaml(mf, app):
     except ImportError as e:
         raise FDroidException('ruamel.yaml not installed, can not write metadata.') from e
     if not ruamel.yaml.__version__:
-        raise FDroidException('ruamel.yaml.__version__ not accessible. Please make sure a ruamel.yaml >= 0.13 is installed..')
+        raise FDroidException(
+            'ruamel.yaml.__version__ not accessible. Please make sure a ruamel.yaml >= 0.13 is installed..')
     m = re.match(r'(?P<major>[0-9]+)\.(?P<minor>[0-9]+)\.(?P<patch>[0-9]+)(-.+)?',
                  ruamel.yaml.__version__)
     if not m:
         raise FDroidException('ruamel.yaml version malfored, please install an upstream version of ruamel.yaml')
     if int(m.group('major')) < 0 or int(m.group('minor')) < 13:
-        raise FDroidException('currently installed version of ruamel.yaml ({}) is too old, >= 1.13 required.'.format(ruamel.yaml.__version__))
+        raise FDroidException('currently installed version of ruamel.yaml ({}) is too old, >= 1.13 required.'.format(
+            ruamel.yaml.__version__))
     # suiteable version ruamel.yaml imported successfully
 
     _yaml_bools_true = ('y', 'Y', 'yes', 'Yes', 'YES',

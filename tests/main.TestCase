@@ -163,12 +163,12 @@ class MainTest(unittest.TestCase):
 
     def test_preparse_plugin_lookup_bad_name(self):
         self.assertRaises(ValueError,
-                          fdroidserver.__main__.preparse_plugin,
+                          fdroidserver.__main__.pre_parse_plugin,
                           "some.package", "/non/existent/module/path")
 
     def test_preparse_plugin_lookup_bad_path(self):
         self.assertRaises(ValueError,
-                          fdroidserver.__main__.preparse_plugin,
+                          fdroidserver.__main__.pre_parse_plugin,
                           "fake_module_name", "/non/existent/module/path")
 
     def test_preparse_plugin_lookup_summary_missing(self):
@@ -181,7 +181,7 @@ class MainTest(unittest.TestCase):
                 module_dir = p[0][0].path
                 module_name = p[0][1]
                 self.assertRaises(NameError,
-                                  fdroidserver.__main__.preparse_plugin,
+                                  fdroidserver.__main__.pre_parse_plugin,
                                   module_name, module_dir)
 
     def test_preparse_plugin_lookup_module_file(self):
@@ -194,7 +194,7 @@ class MainTest(unittest.TestCase):
                 p = [x for x in pkgutil.iter_modules() if x[1].startswith('fdroid_')]
                 module_path = p[0][0].path
                 module_name = p[0][1]
-                d = fdroidserver.__main__.preparse_plugin(module_name, module_path)
+                d = fdroidserver.__main__.pre_parse_plugin(module_name, module_path)
             self.assertDictEqual(d, {'name': 'fdroid_testy7',
                                      'summary': 'ttt'})
 
@@ -211,7 +211,7 @@ class MainTest(unittest.TestCase):
                 p = [x for x in pkgutil.iter_modules() if x[1].startswith('fdroid_')]
                 module_path = p[0][0].path
                 module_name = p[0][1]
-                d = fdroidserver.__main__.preparse_plugin(module_name, module_path)
+                d = fdroidserver.__main__.pre_parse_plugin(module_name, module_path)
             self.assertDictEqual(d, {'name': 'fdroid_testy8',
                                      'summary': 'ttt'})
 

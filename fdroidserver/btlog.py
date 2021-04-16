@@ -28,48 +28,44 @@
 
 
 import collections
-import defusedxml.minidom
-import git
 import glob
-import os
 import json
 import logging
-import requests
+import os
 import shutil
 import tempfile
 import zipfile
 from argparse import ArgumentParser
+
+import defusedxml.minidom
+import git
+import requests
 
 from . import _
 from . import common
 from . import deploy
 from .exception import FDroidException
 
-
 options = None
 
 
-def make_binary_transparency_log(
-    repodirs, btrepo='binary_transparency', url=None, commit_title='fdroid update'
-):
-    '''Log the indexes in a standalone git repo to serve as a "binary
+def make_binary_transparency_log(repo_dirs, bt_repo='binary_transparency', url=None, commit_title='fdroid update'):
+    """Log the indexes in a standalone git repo to serve as a "binary
     transparency" log.
+    See: https://www.eff.org/deeplinks/2014/02/open-letter-to-tech-companies
+    """
 
-    see: https://www.eff.org/deeplinks/2014/02/open-letter-to-tech-companies
-
-    '''
-
-    logging.info('Committing indexes to ' + btrepo)
-    if os.path.exists(os.path.join(btrepo, '.git')):
-        gitrepo = git.Repo(btrepo)
+    logging.info('Committing indexes to ' + bt_repo)
+    if os.path.exists(os.path.join(bt_repo, '.git')):
+        git_repo = git.Repo(bt_repo)
     else:
-        if not os.path.exists(btrepo):
-            os.mkdir(btrepo)
-        gitrepo = git.Repo.init(btrepo)
+        if not os.path.exists(bt_repo):
+            os.mkdir(bt_repo)
+        git_repo = git.Repo.init(bt_repo)
 
         if not url:
             url = common.config['repo_url'].rstrip('/')
-        with open(os.path.join(btrepo, 'README.md'), 'w') as fp:
+        with open(os.path.join(bt_repo, 'README.md'), 'w') as fp:
             fp.write("""
 # Binary Transparency Log for %s
 
@@ -81,51 +77,51 @@ F-Droid repository was a publicly released file.
 For more info on this idea:
 * https://wiki.mozilla.org/Security/Binary_Transparency
 """ % url[:url.rindex('/')])  # strip '/repo'
-        gitrepo.index.add(['README.md', ])
-        gitrepo.index.commit('add README')
+        git_repo.index.add(['README.md', ])
+        git_repo.index.commit('add README')
 
-    for repodir in repodirs:
-        cpdir = os.path.join(btrepo, repodir)
-        if not os.path.exists(cpdir):
-            os.mkdir(cpdir)
+    for repo_dir in repo_dirs:
+        cp_dir = os.path.join(bt_repo, repo_dir)
+        if not os.path.exists(cp_dir):
+            os.mkdir(cp_dir)
         for f in ('index.xml', 'index-v1.json'):
-            repof = os.path.join(repodir, f)
-            if not os.path.exists(repof):
+            repo_f = os.path.join(repo_dir, f)
+            if not os.path.exists(repo_f):
                 continue
-            dest = os.path.join(cpdir, f)
+            destination = os.path.join(cp_dir, f)
             if f.endswith('.xml'):
-                doc = defusedxml.minidom.parse(repof)
+                doc = defusedxml.minidom.parse(repo_f)
                 output = doc.toprettyxml(encoding='utf-8')
-                with open(dest, 'wb') as f:
-                    f.write(output)
+                with open(destination, 'wb') as file:
+                    file.write(output)
             elif f.endswith('.json'):
-                with open(repof) as fp:
+                with open(repo_f) as fp:
                     output = json.load(fp, object_pairs_hook=collections.OrderedDict)
-                with open(dest, 'w') as fp:
+                with open(destination, 'w') as fp:
                     json.dump(output, fp, indent=2)
-            gitrepo.index.add([repof])
+            git_repo.index.add([repo_f])
         for f in ('index.jar', 'index-v1.jar'):
-            repof = os.path.join(repodir, f)
-            if not os.path.exists(repof):
+            repo_f = os.path.join(repo_dir, f)
+            if not os.path.exists(repo_f):
                 continue
-            dest = os.path.join(cpdir, f)
-            jarin = zipfile.ZipFile(repof, 'r')
-            jarout = zipfile.ZipFile(dest, 'w')
-            for info in jarin.infolist():
+            destination = os.path.join(cp_dir, f)
+            jar_in = zipfile.ZipFile(repo_f, 'r')
+            jar_out = zipfile.ZipFile(destination, 'w')
+            for info in jar_in.infolist():
                 if info.filename.startswith('META-INF/'):
-                    jarout.writestr(info, jarin.read(info.filename))
-            jarout.close()
-            jarin.close()
-            gitrepo.index.add([repof])
+                    jar_out.writestr(info, jar_in.read(info.filename))
+            jar_out.close()
+            jar_in.close()
+            git_repo.index.add([repo_f])
 
         output_files = []
-        for root, dirs, files in os.walk(repodir):
+        for root, dirs, files in os.walk(repo_dir):
             for f in files:
-                output_files.append(os.path.relpath(os.path.join(root, f), repodir))
+                output_files.append(os.path.relpath(os.path.join(root, f), repo_dir))
         output = collections.OrderedDict()
         for f in sorted(output_files):
-            repofile = os.path.join(repodir, f)
-            stat = os.stat(repofile)
+            repo_file = os.path.join(repo_dir, f)
+            stat = os.stat(repo_file)
             output[f] = (
                 stat.st_size,
                 stat.st_ctime_ns,
@@ -134,15 +130,15 @@ For more info on this idea:
                 stat.st_uid,
                 stat.st_gid,
             )
-        fslogfile = os.path.join(cpdir, 'filesystemlog.json')
-        with open(fslogfile, 'w') as fp:
+        fs_log_file = os.path.join(cp_dir, 'filesystemlog.json')
+        with open(fs_log_file, 'w') as fp:
             json.dump(output, fp, indent=2)
-        gitrepo.index.add([os.path.join(repodir, 'filesystemlog.json')])
+        git_repo.index.add([os.path.join(repo_dir, 'filesystemlog.json')])
 
-        for f in glob.glob(os.path.join(cpdir, '*.HTTP-headers.json')):
-            gitrepo.index.add([os.path.join(repodir, os.path.basename(f))])
+        for f in glob.glob(os.path.join(cp_dir, '*.HTTP-headers.json')):
+            git_repo.index.add([os.path.join(repo_dir, os.path.basename(f))])
 
-    gitrepo.index.commit(commit_title)
+    git_repo.index.commit(commit_title)
 
 
 def main():
@@ -174,18 +170,18 @@ def main():
     session = requests.Session()
 
     new_files = False
-    repodirs = ('repo', 'archive')
-    tempdirbase = tempfile.mkdtemp(prefix='.fdroid-btlog-')
-    for repodir in repodirs:
-        # TODO read HTTP headers for etag from git repo
-        tempdir = os.path.join(tempdirbase, repodir)
+    repo_dirs = ('repo', 'archive')
+    temp_dir_base = tempfile.mkdtemp(prefix='.fdroid-btlog-')
+    for repo_dir in repo_dirs:
+        # TODO read HTTP headers for ETag from git repo
+        tempdir = os.path.join(temp_dir_base, repo_dir)
         os.makedirs(tempdir, exist_ok=True)
-        gitrepodir = os.path.join(options.git_repo, repodir)
-        os.makedirs(gitrepodir, exist_ok=True)
+        git_repo_dir = os.path.join(options.git_repo, repo_dir)
+        os.makedirs(git_repo_dir, exist_ok=True)
         for f in ('index.jar', 'index.xml', 'index-v1.jar', 'index-v1.json'):
-            dlfile = os.path.join(tempdir, f)
-            dlurl = options.url + '/' + repodir + '/' + f
-            http_headers_file = os.path.join(gitrepodir, f + '.HTTP-headers.json')
+            dl_file = os.path.join(tempdir, f)
+            dl_url = options.url + '/' + repo_dir + '/' + f
+            http_headers_file = os.path.join(git_repo_dir, f + '.HTTP-headers.json')
 
             headers = {'User-Agent': 'F-Droid 0.102.3'}
             etag = None
@@ -193,21 +189,21 @@ def main():
                 with open(http_headers_file) as fp:
                     etag = json.load(fp)['ETag']
 
-            r = session.head(dlurl, headers=headers, allow_redirects=False)
+            r = session.head(dl_url, headers=headers, allow_redirects=False)
             if r.status_code != 200:
                 logging.debug(
-                    'HTTP Response (' + str(r.status_code) + '), did not download ' + dlurl
+                    'HTTP Response (' + str(r.status_code) + '), did not download ' + dl_url
                 )
                 continue
             if etag and etag == r.headers.get('ETag'):
-                logging.debug('ETag matches, did not download ' + dlurl)
+                logging.debug('ETag matches, did not download ' + dl_url)
                 continue
 
-            r = session.get(dlurl, headers=headers, allow_redirects=False)
+            r = session.get(dl_url, headers=headers, allow_redirects=False)
             if r.status_code == 200:
-                with open(dlfile, 'wb') as f:
+                with open(dl_file, 'wb') as file:
                     for chunk in r:
-                        f.write(chunk)
+                        file.write(chunk)
 
                 dump = dict()
                 for k, v in r.headers.items():
@@ -217,11 +213,11 @@ def main():
                 new_files = True
 
     if new_files:
-        os.chdir(tempdirbase)
-        make_binary_transparency_log(repodirs, options.git_repo, options.url, 'fdroid btlog')
+        os.chdir(temp_dir_base)
+        make_binary_transparency_log(repo_dirs, options.git_repo, options.url, 'fdroid btlog')
     if options.git_remote:
         deploy.push_binary_transparency(options.git_repo, options.git_remote)
-    shutil.rmtree(tempdirbase, ignore_errors=True)
+    shutil.rmtree(temp_dir_base, ignore_errors=True)
 
 
 if __name__ == "__main__":
