@@ -40,7 +40,7 @@ from . import common
 from . import metadata
 from . import net
 from . import signindex
-from fdroidserver.common import fdroid_popen, fdroid_popen_bytes, load_stats_fdroid_signing_key_fingerprints
+from fdroidserver.common import FDroidPopen, FDroidPopenBytes, load_stats_fdroid_signing_key_fingerprints
 from fdroidserver.exception import FDroidException, VerificationException
 
 
@@ -221,13 +221,13 @@ def make_website(apps, repodir, repodict):
   </body>
 </html>
 """.format(autogenerate_comment=autogenerate_comment,
-                description=description,
-                fingerprint=repo_pubkey_fingerprint,
-                icon=icon,
-                link=link,
-                link_fingerprinted=link_fingerprinted,
-                name=name,
-                number_of_apps=str(len(apps))))
+                    description=description,
+                    fingerprint=repo_pubkey_fingerprint,
+                    icon=icon,
+                    link=link,
+                    link_fingerprinted=link_fingerprinted,
+                    name=name,
+                    number_of_apps=str(len(apps))))
 
     css_file = os.path.join(repodir, "index.css")
     if _should_file_be_generated(css_file, autogenerate_comment):
@@ -464,6 +464,7 @@ fieldset select, fieldset input, #reposelect select, #reposelect input {
 
 
 def make_v1(apps, packages, repodir, repodict, requestsdict, fdroid_signing_key_fingerprints):
+
     def _index_encoder_default(obj):
         if isinstance(obj, set):
             return sorted(list(obj))
@@ -549,7 +550,7 @@ def make_v1(apps, packages, repodir, repodict, requestsdict, fdroid_signing_key_
         for k, v in sorted(package.items()):
             if not v:
                 continue
-            if k in ('icon', 'icons', 'icons_src', 'name',):
+            if k in ('icon', 'icons', 'icons_src', 'name', ):
                 continue
             d[k] = v
 
@@ -611,7 +612,7 @@ def v1_sort_packages(packages, fdroid_signing_key_fingerprints):
         if package.get('versionCode', None):
             versionCode = -int(package['versionCode'])
 
-        return (packageName, group, signer, versionCode)
+        return(packageName, group, signer, versionCode)
 
     packages.sort(key=v1_sort_keys)
 
@@ -801,7 +802,7 @@ def make_v0(apps, apks, repodir, repodict, requestsdict, fdroid_signing_key_fing
             first = apklist[i]
             second = apklist[i + 1]
             if first['versionCode'] == second['versionCode'] \
-                    and first['sig'] == second['sig']:
+               and first['sig'] == second['sig']:
                 if first['hash'] == second['hash']:
                     raise FDroidException('"{0}/{1}" and "{0}/{2}" are exact duplicates!'.format(
                         repodir, first['apkName'], second['apkName']))
@@ -920,7 +921,7 @@ def make_v0(apps, apks, repodir, repodict, requestsdict, fdroid_signing_key_fing
         f.write(output)
 
     if 'repo_keyalias' in common.config \
-            or (common.options.nosign and 'repo_pubkey' in common.config):
+       or (common.options.nosign and 'repo_pubkey' in common.config):
 
         if common.options.nosign:
             logging.info(_("Creating unsigned index in preparation for signing"))
@@ -930,8 +931,8 @@ def make_v0(apps, apks, repodir, repodict, requestsdict, fdroid_signing_key_fing
 
         # Create a jar of the index...
         jar_output = 'index_unsigned.jar' if common.options.nosign else 'index.jar'
-        p = fdroid_popen(['jar', 'cf', jar_output, 'index.xml'], cwd=repodir)
-        if p.returncode != 0:
+        p = FDroidPopen(['jar', 'cf', jar_output, 'index.xml'], cwd=repodir)
+        if p.return_code != 0:
             raise FDroidException("Failed to create {0}".format(jar_output))
 
         # Sign the index...
@@ -974,13 +975,13 @@ def extract_pubkey():
     else:
         env_vars = {'LC_ALL': 'C.UTF-8',
                     'FDROID_KEY_STORE_PASS': common.config['keystorepass']}
-        p = fdroid_popen_bytes([common.config['keytool'], '-exportcert',
-                                '-alias', common.config['repo_keyalias'],
-                                '-keystore', common.config['keystore'],
-                                '-storepass:env', 'FDROID_KEY_STORE_PASS']
-                               + list(common.config['smartcardoptions']),
-                               envs=env_vars, output=False, stderr_to_stdout=False)
-        if p.returncode != 0 or len(p.output) < 20:
+        p = FDroidPopenBytes([common.config['keytool'], '-exportcert',
+                              '-alias', common.config['repo_keyalias'],
+                              '-keystore', common.config['keystore'],
+                              '-storepass:env', 'FDROID_KEY_STORE_PASS']
+                             + list(common.config['smartcardoptions']),
+                             envs=env_vars, output=False, stderr_to_stdout=False)
+        if p.return_code != 0 or len(p.output) < 20:
             msg = "Failed to get repo pubkey!"
             if common.config['keystore'] == 'NONE':
                 msg += ' Is your crypto smartcard plugged in?'

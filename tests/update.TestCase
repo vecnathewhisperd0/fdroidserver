@@ -421,7 +421,7 @@ class UpdateTest(unittest.TestCase):
             if line.startswith('Result:'):
                 sig = line[7:].strip()
                 break
-        if p.returncode == 0:
+        if p.return_code == 0:
             return sig
         else:
             return None

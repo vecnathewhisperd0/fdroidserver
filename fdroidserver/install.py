@@ -25,7 +25,7 @@ import logging
 
 from . import _
 from . import common
-from .common import sdk_tools_popen
+from .common import SdkToolsPopen
 from .exception import FDroidException
 
 options = None
@@ -33,8 +33,8 @@ config = None
 
 
 def devices():
-    p = sdk_tools_popen(['adb', "devices"])
-    if p.returncode != 0:
+    p = SdkToolsPopen(['adb', "devices"])
+    if p.return_code != 0:
         raise FDroidException("An error occured when finding devices: %s" % p.output)
     lines = [line for line in p.output.splitlines() if not line.startswith('* ')]
     if len(lines) < 3:
@@ -75,7 +75,7 @@ def main():
         for apkfile in sorted(glob.glob(os.path.join(output_dir, '*.apk'))):
 
             try:
-                appid, vercode = common.published_name_info(apkfile)
+                appid, vercode = common.publishednameinfo(apkfile)
             except FDroidException:
                 continue
             if appid not in apks:
@@ -90,7 +90,7 @@ def main():
 
     else:
 
-        apks = {common.published_name_info(apkfile)[0]: apkfile for apkfile in
+        apks = {common.publishednameinfo(apkfile)[0]: apkfile for apkfile in
                 sorted(glob.glob(os.path.join(output_dir, '*.apk')))}
 
     for appid, apk in apks.items():
@@ -101,7 +101,7 @@ def main():
         logging.info(_("Installing %s...") % apk)
         for dev in devs:
             logging.info(_("Installing '{apkfilename}' on {dev}...").format(apkfilename=apk, dev=dev))
-            p = sdk_tools_popen(['adb', "-s", dev, "install", apk])
+            p = SdkToolsPopen(['adb', "-s", dev, "install", apk])
             fail = ""
             for line in p.output.splitlines():
                 if line.startswith("Failure"):
