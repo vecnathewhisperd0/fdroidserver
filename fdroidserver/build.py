@@ -385,17 +385,17 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
 
             p = FDroidPopen(['sudo', 'DEBIAN_FRONTEND=noninteractive',
                              'bash', '-x', '-c', build.sudo])
-            if p.return_code != 0:
+            if p.returncode != 0:
                 raise BuildException("Error running sudo command for %s:%s" %
                                      (app.id, build.versionName), p.output)
 
         p = FDroidPopen(['sudo', 'passwd', '--lock', 'root'])
-        if p.return_code != 0:
+        if p.returncode != 0:
             raise BuildException("Error locking root account for %s:%s" %
                                  (app.id, build.versionName), p.output)
 
         p = FDroidPopen(['sudo', 'SUDO_FORCE_REMOVE=yes', 'dpkg', '--purge', 'sudo'])
-        if p.return_code != 0:
+        if p.returncode != 0:
             raise BuildException("Error removing sudo for %s:%s" %
                                  (app.id, build.versionName), p.output)
 
@@ -541,7 +541,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
 
         p = FDroidPopen(['bash', '-x', '-c', cmd], cwd=root_dir)
 
-        if p.return_code != 0:
+        if p.returncode != 0:
             raise BuildException("Error running build command for %s:%s" %
                                  (app.id, build.versionName), p.output)
 
@@ -570,7 +570,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
                 # In case the AM.xml read was big, free the memory
                 del manifest_text
             p = FDroidPopen(cmd, cwd=os.path.join(root_dir, d))
-            if p.return_code != 0:
+            if p.returncode != 0:
                 raise BuildException("NDK build failed for %s:%s" % (app.id, build.versionName), p.output)
 
     p = None
@@ -667,7 +667,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
         # expected to fail.
         # Signing will fail if not set by environment vars (cf. p4a docs).
         # But the unsigned APK will be ok.
-        p.return_code = 0
+        p.returncode = 0
 
     elif b_method == 'gradle':
         logging.info("Building Gradle project...")

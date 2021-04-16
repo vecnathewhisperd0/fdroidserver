@@ -84,7 +84,7 @@ def read_fingerprints_from_keystore():
     if config['keystore'] == 'NONE':
         cmd += config['smartcardoptions']
     p = FDroidPopen(cmd, envs=env_vars, output=False)
-    if p.return_code != 0:
+    if p.returncode != 0:
         raise FDroidException('could not read keystore {}'.format(config['keystore']))
 
     realias = re.compile('Alias name: (?P<alias>.+)\n')
@@ -118,7 +118,7 @@ def sign_sig_key_fingerprint_list(jar_file):
     env_vars = {'FDROID_KEY_STORE_PASS': config['keystorepass'],
                 'FDROID_KEY_PASS': config.get('keypass', "")}
     p = common.FDroidPopen(cmd, envs=env_vars)
-    if p.return_code != 0:
+    if p.returncode != 0:
         raise FDroidException("Failed to sign '{}'!".format(jar_file))
 
 
@@ -199,7 +199,7 @@ def create_key_if_not_existing(keyalias):
     if config['keystore'] == 'NONE':
         cmd += config['smartcardoptions']
     p = FDroidPopen(cmd, envs=env_vars)
-    if p.return_code != 0:
+    if p.returncode != 0:
         logging.info("Key does not exist - generating...")
         cmd = [config['keytool'], '-genkey',
                '-keystore', config['keystore'],
@@ -213,7 +213,7 @@ def create_key_if_not_existing(keyalias):
         else:
             cmd += '-keypass:env', 'FDROID_KEY_PASS'
         p = FDroidPopen(cmd, envs=env_vars)
-        if p.return_code != 0:
+        if p.returncode != 0:
             raise BuildException("Failed to generate key", p.output)
         return True
     else:

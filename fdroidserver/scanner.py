@@ -114,7 +114,7 @@ def scan_binary(apkfile):
 
     logging.info(_('Scanning APK with apkanalyzer for known non-free classes.'))
     result = common.SdkToolsPopen(["apkanalyzer", "dex", "packages", "--defined-only", apkfile], output=False)
-    if result.return_code != 0:
+    if result.returncode != 0:
         logging.warning(_('scanner not cleanly run apkanalyzer: %s') % result.output)
     problems = 0
     for suspect, regexp in CODE_SIGNATURES.items():

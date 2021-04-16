@@ -33,14 +33,14 @@ def main():
                      '-deststorepass:env', 'FDROID_KEY_STORE_PASS',
                      '-destkeypass:env', 'FDROID_KEY_PASS'],
                     envs=env_vars)
-    if p.return_code != 0:
+    if p.returncode != 0:
         raise BuildException("Failed to convert to PKCS12!", p.output)
     p = FDroidPopen(['openssl', 'pkcs12', '-in', destkeystore,
                      '-passin', 'env:FDROID_KEY_STORE_PASS', '-nokeys',
                      '-out', exportkeystore,
                      '-passout', 'env:FDROID_KEY_STORE_PASS'],
                     envs=env_vars)
-    if p.return_code != 0:
+    if p.returncode != 0:
         raise BuildException("Failed to convert to PEM!", p.output)
 
 

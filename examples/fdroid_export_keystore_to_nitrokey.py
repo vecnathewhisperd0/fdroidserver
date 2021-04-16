@@ -17,7 +17,7 @@ def run(cmd, error):
             'FDROID_KEY_STORE_PASS': config['keystorepass'],
             'FDROID_KEY_PASS': config['keypass']}
     p = FDroidPopen(cmd, envs=envs)
-    if p.return_code != 0:
+    if p.returncode != 0:
         raise BuildException(error, p.output)
 
 

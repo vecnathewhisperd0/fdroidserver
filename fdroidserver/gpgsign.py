@@ -80,7 +80,7 @@ def main():
                     gpgargs.extend(['--local-user', config['gpgkey']])
                 gpgargs.append(os.path.join(output_dir, filename))
                 p = FDroidPopen(gpgargs)
-                if p.return_code != 0:
+                if p.returncode != 0:
                     raise FDroidException("Signing failed.")
 
                 signed.append(filename)
