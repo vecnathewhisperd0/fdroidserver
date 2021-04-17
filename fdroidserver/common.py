@@ -2978,7 +2978,7 @@ def metadata_find_developer_signature(app_id, versioncode=None):
 
     for sig_dir in app_ver_sig_dirs:
         signs = glob.glob(os.path.join(sig_dir, '*.DSA')) + glob.glob(os.path.join(sig_dir, '*.EC'))\
-                + glob.glob(os.path.join(sig_dir, '*.RSA'))
+            + glob.glob(os.path.join(sig_dir, '*.RSA'))
         if len(signs) > 1:
             raise FDroidException(
                 'ambiguous signatures, please make sure there is only one signature in \'{}\'. (The signature has to '
@@ -3810,16 +3810,16 @@ def is_repo_file(filename):
         and not filename.endswith(b'.idsig')\
         and not filename.endswith(b'.log.gz')\
         and os.path.basename(filename) not in [
-               b'index.css',
-               b'index.jar',
-               b'index_unsigned.jar',
-               b'index.xml',
-               b'index.html',
-               b'index.png',
-               b'index-v1.jar',
-               b'index-v1.json',
-               b'categories.txt',
-           ]
+           b'index.css',
+           b'index.jar',
+           b'index_unsigned.jar',
+           b'index.xml',
+           b'index.html',
+           b'index.png',
+           b'index-v1.jar',
+           b'index-v1.json',
+           b'categories.txt',
+        ]
 
 
 def get_examples_dir():

@@ -318,13 +318,13 @@ class CommonTest(unittest.TestCase):
         build.versionCode = 0xcafe
         build.versionName = 'vCAFE'
 
-        class FakeVcs():
+        class FakeVcs:
             # no need to change to the correct commit here
-            def gotorevision(self, rev, refresh=True):
+            def go_to_revision(self, rev, refresh=True):
                 pass
 
             # no srclib info needed, but it could be added...
-            def getsrclib(self):
+            def get_srclib(self):
                 return None
 
         fdroidserver.common.prepare_source(FakeVcs(), app, build,
@@ -1430,7 +1430,7 @@ class CommonTest(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmpdir, TmpCwd(tmpdir):
             os.makedirs(os.path.join('srclib', 'SDL'))
-            with mock.patch('fdroidserver.common.getvcs', return_value=vcs):
+            with mock.patch('fdroidserver.common.get_vcs', return_value=vcs):
                 ret = fdroidserver.common.get_srclib('SDL', 'srclib', raw=True)
                 self.assertEqual(vcs.srclib, ('SDL', None, 'srclib/SDL'))
                 self.assertEqual(ret, vcs)
@@ -1449,7 +1449,7 @@ class CommonTest(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tmpdir, TmpCwd(tmpdir):
             os.makedirs(os.path.join('srclib', 'ACRA'))
-            with mock.patch('fdroidserver.common.getvcs', return_value=vcs):
+            with mock.patch('fdroidserver.common.get_vcs', return_value=vcs):
                 with mock.patch('fdroidserver.common.remove_signing_keys', skm):
                     with mock.patch('fdroidserver.common.remove_debuggable_flags', dfm):
                         ret = fdroidserver.common.get_srclib('ACRA@acra-4.6.2', 'srclib')
