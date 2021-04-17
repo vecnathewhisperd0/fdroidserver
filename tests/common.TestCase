@@ -257,13 +257,13 @@ class CommonTest(unittest.TestCase):
         build.versionName = teststr
         build.versionCode = testint
 
-        class FakeVcs():
+        class FakeVcs:
             # no need to change to the correct commit here
-            def gotorevision(self, rev, refresh=True):
+            def go_to_revision(self, rev, refresh=True):
                 pass
 
             # no srclib info needed, but it could be added...
-            def getsrclib(self):
+            def get_srclib(self):
                 return None
 
         fdroidserver.common.prepare_source(FakeVcs(), app, build,
