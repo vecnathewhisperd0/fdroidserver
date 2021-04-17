@@ -1454,7 +1454,7 @@ class CommonTest(unittest.TestCase):
                     with mock.patch('fdroidserver.common.remove_debuggable_flags', dfm):
                         ret = fdroidserver.common.get_srclib('ACRA@acra-4.6.2', 'srclib')
                         self.assertEqual(vcs.srclib, ('ACRA', None, 'srclib/ACRA'))
-                        vcs.gotorevision.assert_called_once_with('acra-4.6.2', True)
+                        vcs.go_to_revision.assert_called_once_with('acra-4.6.2', True)
                         skm.assert_called_once_with('srclib/ACRA')
                         dfm.assert_called_once_with('srclib/ACRA')
                         self.assertEqual(ret, ('ACRA', None, 'srclib/ACRA'))
