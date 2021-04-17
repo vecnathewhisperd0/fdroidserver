@@ -335,7 +335,7 @@ def read_config(opts=None):
             if not type(config[k]) in (str, list, tuple):
                 logging.warning(
                     _("'{field}' will be in random order! Use () or [] brackets if order is important!")
-                        .format(field=k))
+                    .format(field=k))
 
     # smartcard_options must be a list since its command line args for Popen
     smartcard_options = config.get('smartcard_options')
@@ -2754,10 +2754,10 @@ def remove_signing_keys(build_dir):
                 logging.info("Cleaned %s of keysigning configs at %s" % (gradle_file, path))
 
         for prop_file in [
-            'project.properties',
-            'build.properties',
-            'default.properties',
-            'ant.properties', ]:
+                'project.properties',
+                'build.properties',
+                'default.properties',
+                'ant.properties', ]:
             if prop_file in files:
                 path = os.path.join(root, prop_file)
 
@@ -2977,9 +2977,8 @@ def metadata_find_developer_signature(app_id, versioncode=None):
                     app_ver_sig_dirs.append(appversigdir)
 
     for sig_dir in app_ver_sig_dirs:
-        signs = glob.glob(os.path.join(sig_dir, '*.DSA')) + \
-                glob.glob(os.path.join(sig_dir, '*.EC')) + \
-                glob.glob(os.path.join(sig_dir, '*.RSA'))
+        signs = glob.glob(os.path.join(sig_dir, '*.DSA')) + glob.glob(os.path.join(sig_dir, '*.EC'))\
+                + glob.glob(os.path.join(sig_dir, '*.RSA'))
         if len(signs) > 1:
             raise FDroidException(
                 'ambiguous signatures, please make sure there is only one signature in \'{}\'. (The signature has to '
@@ -3805,12 +3804,12 @@ def is_repo_file(filename):
     """Whether the file in a repo is a build product to be delivered to users."""
     if isinstance(filename, str):
         filename = filename.encode('utf-8', errors="surrogateescape")
-    return os.path.isfile(filename) \
-           and not filename.endswith(b'.asc') \
-           and not filename.endswith(b'.sig') \
-           and not filename.endswith(b'.idsig') \
-           and not filename.endswith(b'.log.gz') \
-           and os.path.basename(filename) not in [
+    return os.path.isfile(filename)\
+        and not filename.endswith(b'.asc')\
+        and not filename.endswith(b'.sig')\
+        and not filename.endswith(b'.idsig')\
+        and not filename.endswith(b'.log.gz')\
+        and os.path.basename(filename) not in [
                b'index.css',
                b'index.jar',
                b'index_unsigned.jar',

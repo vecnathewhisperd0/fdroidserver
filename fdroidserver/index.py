@@ -221,13 +221,13 @@ def make_website(apps, repodir, repodict):
   </body>
 </html>
 """.format(autogenerate_comment=autogenerate_comment,
-           description=description,
-           fingerprint=repo_pubkey_fingerprint,
-           icon=icon,
-           link=link,
-           link_fingerprinted=link_fingerprinted,
-           name=name,
-           number_of_apps=str(len(apps))))
+                description=description,
+                fingerprint=repo_pubkey_fingerprint,
+                icon=icon,
+                link=link,
+                link_fingerprinted=link_fingerprinted,
+                name=name,
+                number_of_apps=str(len(apps))))
 
     css_file = os.path.join(repodir, "index.css")
     if _should_file_be_generated(css_file, autogenerate_comment):
