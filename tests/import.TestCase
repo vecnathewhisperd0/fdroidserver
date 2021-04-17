@@ -70,9 +70,9 @@ class ImportTest(unittest.TestCase):
                             tmp_importer)
 
             app = fdroidserver.common.get_app_from_url(url)
-            with mock.patch('fdroidserver.common.getvcs',
+            with mock.patch('fdroidserver.common.get_vcs',
                             lambda a, b, c: fdroidserver.common.VCS(url, testdir)):
-                with mock.patch('fdroidserver.common.vcs.gotorevision',
+                with mock.patch('fdroidserver.common.vcs.go_to_revision',
                                 lambda s, rev: None):
                     with mock.patch('shutil.rmtree', lambda a: None):
                         build_dir = import_proxy.clone_to_tmp_dir(app)
