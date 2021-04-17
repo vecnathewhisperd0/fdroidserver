@@ -182,12 +182,12 @@ class BuildTest(unittest.TestCase):
         with open('extlib/android/android-support-v4r11.jar', 'wb') as file:
             file.write(b'PK\x03\x04\x14\x00\x08\x00\x08\x00-\x0eiA\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\t\x00\x04\x00META-INF/\xfe\xca\x00\x00\x03\x00PK\x07\x08\x00\x00\x00\x00\x02\x00\x00\x00\x00\x00\x00\x00')
 
-        class FakeVcs():
+        class FakeVcs:
             # no need to change to the correct commit here
-            def gotorevision(self, rev, refresh=True):
+            def go_to_revision(self, rev, refresh=True):
                 pass
 
-            def getsrclib(self):
+            def get_srclib(self):
                 return None
 
         # Test we trigger a scanner error without extlibs
