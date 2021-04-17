@@ -317,7 +317,7 @@ def force_gradle_build_tools(build_dir, build_tools):
                 continue
             logging.debug("Forcing build-tools %s in %s" % (build_tools, path))
             common.reg_sub_file(r"""(\s*)buildToolsVersion([\s=]+).*""",
-                               r"""\1buildToolsVersion\2'%s'""" % build_tools,
+                                r"""\1buildToolsVersion\2'%s'""" % build_tools,
                                 path)
 
 
@@ -384,7 +384,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
             logging.info("Running 'sudo' commands in %s" % os.getcwd())
 
             p = fdroid_popen(['sudo', 'DEBIAN_FRONTEND=noninteractive',
-                             'bash', '-x', '-c', build.sudo])
+                              'bash', '-x', '-c', build.sudo])
             if p.returncode != 0:
                 raise BuildException("Error running sudo command for %s:%s" %
                                      (app.id, build.versionName), p.output)
@@ -591,11 +591,11 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
         if build.target:
             target = build.target.split('-')[1]
             common.reg_sub_file(r'<platform>[0-9]*</platform>',
-                               r'<platform>%s</platform>' % target,
+                                r'<platform>%s</platform>' % target,
                                 os.path.join(root_dir, 'pom.xml'))
             if '@' in build.maven:
                 common.reg_sub_file(r'<platform>[0-9]*</platform>',
-                                   r'<platform>%s</platform>' % target,
+                                    r'<platform>%s</platform>' % target,
                                     os.path.join(maven_dir, 'pom.xml'))
 
         p = fdroid_popen(mvncmd, cwd=maven_dir)

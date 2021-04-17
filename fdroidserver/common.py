@@ -160,8 +160,8 @@ default_config = {
     'repo_name': "My First F-Droid Repo Demo",
     'repo_icon': "icon.png",
     'repo_description': _(
-        """This is a repository of apps to be used with F-Droid. Applications in this repository are either official 
-        binaries built by the original application developers, or are binaries built from source by the admin of 
+        """This is a repository of apps to be used with F-Droid. Applications in this repository are either official
+        binaries built by the original application developers, or are binaries built from source by the admin of
         f-droid.org using the tools on https://gitlab.com/fdroid."""),
     # type: ignore
     'archive_name': 'My First F-Droid Archive Demo',
@@ -2521,12 +2521,12 @@ def get_apk_id_androguard(apk_file):
 
     This first tries to do quick binary XML parsing to just get the
     values that are needed. It will fallback to full androguard
-    parsing, which is slow, if it can't find the version_name value or
-    version_name is set to a Android String Resource (e.g. an integer
+    parsing, which is slow, if it can't find the versionName value or
+    versionName is set to a Android String Resource (e.g. an integer
     hex value that starts with @).
     """
     if not os.path.exists(apk_file):
-        raise FDroidException(_("Reading packageName/version_code/version_name failed, APK invalid: '{apkfilename}'")
+        raise FDroidException(_("Reading packageName/versionCode/versionName failed, APK invalid: '{apkfilename}'")
                               .format(apkfilename=apk_file))
 
     from androguard.core.bytecodes.axml import AXMLParser, format_value, START_TAG, END_TAG, TEXT, END_DOCUMENT
@@ -2549,12 +2549,12 @@ def get_apk_id_androguard(apk_file):
                         value = format_value(_type, _data, lambda _: axml.getAttributeValue(i))
                         if app_id is None and name == 'package':
                             app_id = value
-                        elif version_code is None and name == 'version_code':
+                        elif version_code is None and name == 'versionCode':
                             if value.startswith('0x'):
                                 version_code = str(int(value, 16))
                             else:
                                 version_code = value
-                        elif version_name is None and name == 'version_name':
+                        elif version_name is None and name == 'versionName':
                             version_name = value
 
                     if axml.getName() == 'manifest':
@@ -3830,21 +3830,21 @@ def is_repo_file(filename):
     if isinstance(filename, str):
         filename = filename.encode('utf-8', errors="surrogateescape")
     return os.path.isfile(filename) \
-        and not filename.endswith(b'.asc') \
-        and not filename.endswith(b'.sig') \
-        and not filename.endswith(b'.idsig') \
-        and not filename.endswith(b'.log.gz') \
-        and os.path.basename(filename) not in [
-            b'index.css',
-            b'index.jar',
-            b'index_unsigned.jar',
-            b'index.xml',
-            b'index.html',
-            b'index.png',
-            b'index-v1.jar',
-            b'index-v1.json',
-            b'categories.txt',
-        ]
+           and not filename.endswith(b'.asc') \
+           and not filename.endswith(b'.sig') \
+           and not filename.endswith(b'.idsig') \
+           and not filename.endswith(b'.log.gz') \
+           and os.path.basename(filename) not in [
+               b'index.css',
+               b'index.jar',
+               b'index_unsigned.jar',
+               b'index.xml',
+               b'index.html',
+               b'index.png',
+               b'index-v1.jar',
+               b'index-v1.json',
+               b'categories.txt',
+           ]
 
 
 def get_examples_dir():
