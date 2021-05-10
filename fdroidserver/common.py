@@ -1498,6 +1498,8 @@ def fetch_real_name(app_dir, flavours):
         result = retrieve_string_singleline(app_dir, label)
         if result:
             result = result.strip()
+            if result.startswith('${'):
+                return None
         return result
     return None
 
