@@ -184,7 +184,13 @@ def status_update_json(apps, apks):
                         failedBuilds[appid].append(build.versionCode)
         if validapks == 0:
             output['noPackages'].append(appid)
-        if not gotcurrentver:
+        if (
+            app.get("CurrentVersionCode")
+            and not app.get("Disabled")
+            and int(app["ArchivePolicy"][:-9]) > 0 if app.get("ArchivePolicy") else True
+            and app.get("UpdateCheckMode") != "None"
+            and not gotcurrentver
+        ):
             output['needsUpdate'].append(appid)
         if app.get('UpdateCheckMode') == 'None' and not app.get('Disabled'):
             output['noUpdateCheck'].append(appid)
