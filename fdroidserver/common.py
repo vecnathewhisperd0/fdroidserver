@@ -4299,6 +4299,12 @@ NDKS = [
         "url": "https://dl.google.com/android/repository/android-ndk-r21d-linux-x86_64.zip"
     },
     {
+        "release": "r21e",
+        "revision": "21.4.7075529",
+        "sha256": "ad7ce5467e18d40050dc51b8e7affc3e635c85bd8c59be62de32352328ed467e",
+        "url": "https://dl.google.com/android/repository/android-ndk-r21e-linux-x86_64.zip"
+    },
+    {
         "release": "r22",
         "revision": "22.0.7026061",
         "sha256": "d37fc69cd81e5660234a686e20adef39bc0244086e4d66525a40af771c020718",
