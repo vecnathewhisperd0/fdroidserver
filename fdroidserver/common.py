@@ -106,6 +106,7 @@ ANDROID_PLUGIN_REGEX = re.compile(r'''\s*(:?apply plugin:|id)\(?\s*['"](android|
 
 SETTINGS_GRADLE_REGEX = re.compile(r'settings\.gradle(?:\.kts)?')
 GRADLE_SUBPROJECT_REGEX = re.compile(r'''['"]:([^'"]+)['"]''')
+GRADLE_NDK_VERSION_REGEX = re.compile(r"""\n\s*ndkVersion\s*[= ]?\s*['"]([1-9][0-9]\.[0-9]+\.[0-9]{7}[^'" ]*)['"]\s*\n""")
 
 MAX_VERSION_CODE = 0x7fffffff  # Java's Integer.MAX_VALUE (2147483647)
 
@@ -4243,6 +4244,11 @@ def get_ndk_version(ndk_path):
     elif os.path.exists(release_txt):
         with open(release_txt) as fp:
             return fp.read().split('-')[0]
+
+
+def detect_ndk_in_gradle(source_dir):
+    """Returns a list of ndkVersion entries parsed from the app's gradle files"""
+    GRADLE_NDK_VERSION_REGEX
 
 
 def auto_install_ndk(build):

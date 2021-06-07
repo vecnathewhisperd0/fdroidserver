@@ -2008,6 +2008,153 @@ class CommonTest(unittest.TestCase):
             fdroidserver.common.metadata_find_developer_signing_files(appid, vc),
         )
 
+    def test_gradle_ndk_version_regex(self):
+        """Test whether the regex cleanly matches valid texts"""
+        self.assertEqual(
+            ['21.3.6528147'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\n\tndkVersion "21.3.6528147"\n"""
+            ),
+        )
+        self.assertEqual(
+            ['21.0.6113669'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\n\tndkVersion '21.0.6113669'\n"""
+            ),
+        )
+        self.assertEqual(
+            ['21.3.6528147'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\n\tndkVersion '21.3.6528147'\n"""
+            ),
+        )
+        self.assertEqual(
+            ['21.3.6528147'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\n        ndkVersion '21.3.6528147'\n"""
+            ),
+        )
+        self.assertEqual(
+            ['16.1.4479499'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\n    ndkVersion "16.1.4479499"\n"""
+            ),
+        )
+        self.assertEqual(
+            ['20.1.5948944'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\n    ndkVersion "20.1.5948944"\n"""
+            ),
+        )
+        self.assertEqual(
+            ['21.3.6528147'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\n    ndkVersion "21.3.6528147"\n"""
+            ),
+        )
+        self.assertEqual(
+            ['21.4.7075529'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\n    ndkVersion "21.4.7075529"\n"""
+            ),
+        )
+        self.assertEqual(
+            ['22.1.7171670'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\n    ndkVersion "22.1.7171670"\n"""
+            ),
+        )
+        self.assertEqual(
+            ['21.0.6113669'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\n    ndkVersion '21.0.6113669'\n"""
+            ),
+        )
+        self.assertEqual(
+            ['21.3.6528147'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\n    ndkVersion '21.3.6528147'\n"""
+            ),
+        )
+        self.assertEqual(
+            ['21.4.7075529'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\n    ndkVersion '21.4.7075529'\n"""
+            ),
+        )
+        self.assertEqual(
+            ['22.0.7026061'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\n    ndkVersion '22.0.7026061'\n"""
+            ),
+        )
+        self.assertEqual(
+            ['22.1.7171670'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\n    ndkVersion '22.1.7171670'\n"""
+            ),
+        )
+        self.assertEqual(
+            ['21.3.6528147'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\n    ndkVersion = "21.3.6528147"\n"""
+            ),
+        )
+        self.assertEqual(
+            ['21.3.6528147'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\n  ndkVersion = "21.3.6528147"\n"""
+            ),
+        )
+        self.assertEqual(
+            ['21.3.6528147'],
+            fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(
+                """\nndkVersion "21.3.6528147"\n"""
+            ),
+        )
+
+        # unsupported formats that reference ndkVersion
+        for s in [
+            """\n                + " Realm JNI must be compiled with the version ${project.ndkVersion} of NDK.")\n""",
+            """\n        System.setProperty("design.codeux.ndkVersion", "21.0.6113669")\n""",
+            """\n        System.setProperty("design.codeux.ndkVersion", rootProject.getProperty("design.codeux.ndkVersion"))\n""",
+            """\n    ndkVersion '23.0.7123448 rc1'\n"""
+            """\n    ndkVersion '23.0.7196353 rc2'\n"""
+            """\n    ndkVersion = Config.Android.ndk\n""",
+            """\n    ndkVersion = vers.ndk\n"""
+            """\n    // ndkVersion "20.1.5948944"\n""",
+            """\n    // ndkVersion '20.0.5594570' //  "21.0.6113669"\n""",
+            """\n        println project.ext.build.ndkVersion\n""",
+            """\n    if (detectedNdkVersion != project.ndkVersion) {\n""",
+            """\n    if (rootProject.hasProperty('design.codeux.ndkVersion')) {\n""",
+            """\n    ndkVersion System.getProperty("design.codeux.ndkVersion", "21.0.6113669")""",
+            """\n    ndkVersion rootProject.ext.build.ndkVersion\n""",
+            """\n    ndkVersion "21.1.6352462" */\n""",
+            """\n    //ndkVersion '22.1.7171670'""",
+            """\n //   ndkVersion '22.1.7171670'""",
+            """\n//    ndkVersion '22.1.7171670'""",
+            """\n//    println("Setting ndkVersion")""",
+            """\n//ndkVersion "21.3.6528147"\n""",
+            """\nif (System.getProperty("design.codeux.ndkVersion") == null) {""",
+            """\nprintln("ndkVersion: ${System.getProperty("design.codeux.ndkVersion")}")""",
+            """\n        ndkVersion: "21.3.6528147", // Keep it in sync in TC Dockerfile.""",
+            '',
+            '\nndkVersion\n',
+        ]:
+            self.assertEqual(
+                [], fdroidserver.common.GRADLE_NDK_VERSION_REGEX.findall(s)
+            )
+
+    def test_detect_ndk_in_gradle(self):
+        """Test finding the NDK version in the gradle files"""
+        print('GO!')
+
+        f = Path(self.basedir) / Path(
+            'source-files/realm/react-native/android/build.gradle'
+        )
+        print(f, f.exists())
+        self.assertEqual([], fdroidserver.common.detect_ndk_in_gradle(f))
+
     def test_auto_install_ndk(self):
         """Test all possible field data types for build.ndk"""
         build = fdroidserver.metadata.Build()
