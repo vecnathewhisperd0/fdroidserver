@@ -4132,11 +4132,6 @@ def _install_ndk(ndk):
 """Derived from https://gitlab.com/fdroid/android-sdk-transparency-log/-/blob/master/checksums.json"""
 NDKS = [
     {
-        "release": "r10e",
-        "sha256": "ee5f405f3b57c4f5c3b3b8b5d495ae12b660e03d2112e4ed5c728d349f1e520c",
-        "url": "https://dl.google.com/android/repository/android-ndk-r10e-linux-x86_64.zip"
-    },
-    {
         "release": "r11",
         "revision": "11.0.2655954",
         "sha256": "59ab44f7ee6201df4381844736fdc456134c7f7660151003944a3017a0dcce97",
