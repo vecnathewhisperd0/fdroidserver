@@ -133,9 +133,10 @@ def main():
             # we are in GitLab CI
             repo_git_base = os.getenv('CI_PROJECT_PATH') + NIGHTLY
             clone_url = os.getenv('CI_PROJECT_URL') + NIGHTLY
-            repo_base = clone_url + '/raw/master/fdroid'
+            repo_base = clone_url + '/raw/master/fdroid' # TODO does this need the /-/ too?
             servergitmirror = 'git@' + urlparse(clone_url).netloc + ':' + repo_git_base
             deploy_key_url = clone_url + '/settings/repository'
+            # TODO new URL /-/settings/repository#js-deploy-keys-settings
             git_user_name = os.getenv('GITLAB_USER_NAME')
             git_user_email = os.getenv('GITLAB_USER_EMAIL')
         elif 'TRAVIS_REPO_SLUG' in os.environ:
