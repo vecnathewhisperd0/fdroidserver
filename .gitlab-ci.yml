@@ -204,7 +204,7 @@ lint_format_safety_bandit_checks:
 lint_mypy:
   image: python:3.9-buster
   script:
-    - pip install mypy
+    - pip install mypy types-PyYAML types-requests types-pkg_resources types-paramiko
     - pip install -e .[test]
     # exclude vendored file
     - mypy --exclude fdroidserver/apksigcopier.py
