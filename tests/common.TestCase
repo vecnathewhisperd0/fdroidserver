@@ -2062,13 +2062,7 @@ class CommonTest(unittest.TestCase):
     def test_vcs_git_latesttags(self):
         vcs = fdroidserver.common.vcs_git(None, None)
         popenmock = mock.Mock()
-        popenmock.output = """
- (HEAD, tag: 8.9.5, origin/master, origin/HEAD, master)
- (tag: 8.9.4)
- (tag: 8,9,3)
- (origin/feature/cast)
- (tag: 8.6.3)
-"""
+        popenmock.output = "8.9.5\n8.9.4\n8.6.3\n8,9,3"
         with mock.patch(
             'fdroidserver.common.FDroidPopen', lambda a, **b: popenmock
         ) as _ignored, mock.patch(
