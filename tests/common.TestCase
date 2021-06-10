@@ -2065,6 +2065,7 @@ class CommonTest(unittest.TestCase):
         popenmock.output = """
  (HEAD, tag: 8.9.5, origin/master, origin/HEAD, master)
  (tag: 8.9.4)
+ (tag: 8,9,3)
  (origin/feature/cast)
  (tag: 8.6.3)
 """
@@ -2075,7 +2076,7 @@ class CommonTest(unittest.TestCase):
         ) as _ignored:
             _ignored  # silence the linters
             tags = vcs.latesttags()
-            self.assertEqual(tags, ['8.9.5', '8.9.4', '8.6.3'])
+            self.assertEqual(tags, ['8.9.5', '8.9.4', '8.6.3', '8,9,3'])
 
 
 if __name__ == "__main__":
