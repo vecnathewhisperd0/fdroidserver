@@ -205,7 +205,7 @@ def check_tags(app, pattern):
             else:
                 for subdir in possible_subdirs(app):
                     root_dir = build_dir / subdir
-                    paths = common.manifest_paths(root_dir, last_build.gradle)
+                    paths = common.manifest_paths(root_dir)
                     version, vercode, _package = common.parse_androidmanifests(paths, app)
                     if version == 'Unknown' or version == 'Ignore':
                         version = tag
@@ -278,7 +278,7 @@ def check_repomanifest(app, branch=None):
         hcode = "0"
         for subdir in possible_subdirs(app):
             root_dir = build_dir / subdir
-            paths = common.manifest_paths(root_dir, last_build.gradle)
+            paths = common.manifest_paths(root_dir)
             version, vercode, package = common.parse_androidmanifests(paths, app)
             if vercode:
                 logging.debug("Manifest exists in subdir '{0}'. Found version {1} ({2})"
@@ -394,10 +394,8 @@ def possible_subdirs(app):
     else:
         build_dir = Path('build') / app.id
 
-    last_build = app.get_last_build()
-
     for d in dirs_with_manifest(build_dir):
-        m_paths = common.manifest_paths(d, last_build.gradle)
+        m_paths = common.manifest_paths(d)
         package = common.parse_androidmanifests(m_paths, app)[2]
         if package is not None:
             subdir = d.relative_to(build_dir)
@@ -430,13 +428,11 @@ def fetch_autoname(app, tag):
     except VCSException:
         return None
 
-    last_build = app.get_last_build()
-
     logging.debug("...fetch auto name from " + str(build_dir))
     new_name = None
     for subdir in possible_subdirs(app):
         root_dir = build_dir / subdir
-        new_name = common.fetch_real_name(root_dir, last_build.gradle)
+        new_name = common.fetch_real_name(root_dir)
         if new_name is not None:
             break
     commitmsg = None

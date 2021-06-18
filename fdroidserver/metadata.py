@@ -768,7 +768,7 @@ def parse_metadata(metadatapath):
                 root_dir = Path(build.subdir)
             else:
                 root_dir = Path('.')
-            paths = common.manifest_paths(root_dir, build.gradle)
+            paths = common.manifest_paths(root_dir)
             _ignored, _ignored, app.id = common.parse_androidmanifests(paths, app)
 
     return app
