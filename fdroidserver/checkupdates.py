@@ -155,6 +155,7 @@ def check_tags(app, pattern):
         for tag in tags:
             logging.debug("Check tag: '{0}'".format(tag))
             vcs.gotorevision(tag)
+            vercode = None
 
             if app.UpdateCheckData:
                 filecode, codeex, filever, verex = app.UpdateCheckData.split('|')
@@ -191,27 +192,20 @@ def check_tags(app, pattern):
                     m = re.search(verex, filecontent)
                     if m:
                         version = m.group(1)
-
-                logging.debug("UpdateCheckData found version {0} ({1})"
-                              .format(version, vercode))
-                i_vercode = common.version_code_string_to_int(vercode)
-                if i_vercode > common.version_code_string_to_int(hcode):
-                    htag = tag
-                    hcode = str(i_vercode)
-                    hver = version
             else:
                 paths = common.manifest_paths(build_dir)
                 if paths:
                     version, vercode, _package = common.parse_androidmanifests(paths, app)
                     if version == 'Unknown' or version == 'Ignore':
                         version = tag
-                    if vercode:
-                        logging.debug("Found version {0} ({1})" .format(version, vercode))
-                        i_vercode = common.version_code_string_to_int(vercode)
-                        if i_vercode > common.version_code_string_to_int(hcode):
-                            htag = tag
-                            hcode = str(i_vercode)
-                            hver = version
+
+            if vercode:
+                logging.debug("Found version {0} ({1})" .format(version, vercode))
+                i_vercode = common.version_code_string_to_int(vercode)
+                if i_vercode > common.version_code_string_to_int(hcode):
+                    htag = tag
+                    hcode = str(i_vercode)
+                    hver = version
 
         if hver:
             try:
