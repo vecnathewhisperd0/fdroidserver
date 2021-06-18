@@ -3889,6 +3889,10 @@ def string_is_integer(string):
 
 def version_code_string_to_int(vercode):
     """Convert an version code string of any base into an int."""
+    # TODO: Remove this in Python3.6
+    # manually PIP515
+    if sys.version_info < (3, 6):
+        vercode = vercode.replace('_', '')
     try:
         return int(vercode, 0)
     except ValueError:
