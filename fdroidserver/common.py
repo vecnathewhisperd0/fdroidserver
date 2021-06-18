@@ -1697,7 +1697,6 @@ def parse_androidmanifests(paths, app):
 
         if path.endswith('.gradle') or path.endswith('.gradle.kts'):
             with open(path, 'r', encoding='utf-8') as f:
-                android_plugin_file = False
                 inside_flavour_group = 0
                 inside_required_flavour = 0
                 for line in f:
@@ -1742,7 +1741,7 @@ def parse_androidmanifests(paths, app):
 
                             matches = vcsearch_g(line)
                             if matches:
-                                vercode = matches.group(1)
+                                vercode = version_code_string_to_int(matches.group(1))
 
                         if inside_required_flavour > 0:
                             if '{' in line:
@@ -1778,18 +1777,7 @@ def parse_androidmanifests(paths, app):
                         if not vercode:
                             matches = vcsearch_g(line)
                             if matches:
-                                vercode = matches.group(1)
-                    if not android_plugin_file and ANDROID_PLUGIN_REGEX.match(line):
-                        android_plugin_file = True
-            if android_plugin_file:
-                if package:
-                    max_package = package
-                if version:
-                    max_version = version
-                if vercode:
-                    max_vercode = vercode
-                if max_package and max_version and max_vercode:
-                    break
+                                vercode = version_code_string_to_int(matches.group(1))
         else:
             try:
                 xml = parse_xml(path)
@@ -1804,7 +1792,7 @@ def parse_androidmanifests(paths, app):
                 if XMLNS_ANDROID + "versionCode" in xml.attrib:
                     a = xml.attrib[XMLNS_ANDROID + "versionCode"]
                     if string_is_integer(a):
-                        vercode = a
+                        vercode = version_code_string_to_int(a)
             except Exception:
                 logging.warning(_("Problem with xml at '{path}'").format(path=path))
 
@@ -1843,6 +1831,9 @@ def parse_androidmanifests(paths, app):
             raise FDroidException(msg)
         elif not is_strict_application_id(max_package):
             logging.warning(msg)
+
+    if max_vercode is not None:
+        max_vercode = str(max_vercode)
 
     return (max_version, max_vercode, max_package)
 
