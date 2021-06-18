@@ -17,7 +17,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import os
 import re
 import urllib.request
 import urllib.error
@@ -31,7 +30,6 @@ from distutils.version import LooseVersion
 import logging
 import copy
 import urllib.parse
-from pathlib import Path
 
 from . import _
 from . import common
@@ -110,11 +108,10 @@ def check_tags(app, pattern):
     try:
 
         if app.RepoType == 'srclib':
-            build_dir = Path('build/srclib') / app.Repo
             repotype = common.getsrclibvcs(app.Repo)
         else:
-            build_dir = Path('build') / app.id
             repotype = app.RepoType
+        build_dir = common.get_build_dir(app)
 
         if repotype not in ('git', 'git-svn', 'hg', 'bzr'):
             return (None, 'Tags update mode only works for git, hg, bzr and git-svn repositories currently', None)
@@ -203,15 +200,13 @@ def check_tags(app, pattern):
                     hcode = str(i_vercode)
                     hver = version
             else:
-                for subdir in possible_subdirs(app):
-                    root_dir = build_dir / subdir
-                    paths = common.manifest_paths(root_dir)
+                paths = common.manifest_paths(build_dir)
+                if paths:
                     version, vercode, _package = common.parse_androidmanifests(paths, app)
                     if version == 'Unknown' or version == 'Ignore':
                         version = tag
                     if vercode:
-                        logging.debug("Manifest exists in subdir '{0}'. Found version {1} ({2})"
-                                      .format(subdir, version, vercode))
+                        logging.debug("Found version {0} ({1})" .format(version, vercode))
                         i_vercode = common.version_code_string_to_int(vercode)
                         if i_vercode > common.version_code_string_to_int(hcode):
                             htag = tag
@@ -247,11 +242,10 @@ def check_repomanifest(app, branch=None):
     try:
 
         if app.RepoType == 'srclib':
-            build_dir = Path('build/srclib') / app.Repo
             repotype = common.getsrclibvcs(app.Repo)
         else:
-            build_dir = Path('build') / app.id
             repotype = app.RepoType
+        build_dir = common.get_build_dir(app)
 
         # Set up vcs interface and make sure we have the latest code...
         vcs = common.getvcs(app.RepoType, app.Repo, build_dir)
@@ -276,13 +270,11 @@ def check_repomanifest(app, branch=None):
         hpak = None
         hver = None
         hcode = "0"
-        for subdir in possible_subdirs(app):
-            root_dir = build_dir / subdir
-            paths = common.manifest_paths(root_dir)
+        paths = common.manifest_paths(build_dir)
+        if paths:
             version, vercode, package = common.parse_androidmanifests(paths, app)
             if vercode:
-                logging.debug("Manifest exists in subdir '{0}'. Found version {1} ({2})"
-                              .format(subdir, version, vercode))
+                logging.debug("Found version {0} ({1})".format(version, vercode))
                 i_vercode = common.version_code_string_to_int(vercode)
                 if i_vercode > common.version_code_string_to_int(hcode):
                     hpak = package
@@ -307,11 +299,10 @@ def check_repotrunk(app):
 
     try:
         if app.RepoType == 'srclib':
-            build_dir = Path('build/srclib') / app.Repo
             repotype = common.getsrclibvcs(app.Repo)
         else:
-            build_dir = Path('build') / app.id
             repotype = app.RepoType
+        build_dir = common.get_build_dir(app)
 
         if repotype not in ('git-svn', ):
             return (None, 'RepoTrunk update mode only makes sense in git-svn repositories')
@@ -375,34 +366,6 @@ def try_init_submodules(app, last_build, vcs):
             logging.info("No submodules present for {}".format(_getappname(app)))
 
 
-# Return all directories under startdir that contain any of the manifest
-# files, and thus are probably an Android project.
-def dirs_with_manifest(startdir):
-    # TODO: Python3.6: Accepts a path-like object.
-    for root, _dirs, files in os.walk(str(startdir)):
-        if any(m in files for m in [
-                'AndroidManifest.xml', 'pom.xml', 'build.gradle', 'build.gradle.kts']):
-            yield Path(root)
-
-
-# Tries to find a new subdir starting from the root build_dir. Returns said
-# subdir relative to the build dir if found, None otherwise.
-def possible_subdirs(app):
-
-    if app.RepoType == 'srclib':
-        build_dir = Path('build/srclib') / app.Repo
-    else:
-        build_dir = Path('build') / app.id
-
-    for d in dirs_with_manifest(build_dir):
-        m_paths = common.manifest_paths(d)
-        package = common.parse_androidmanifests(m_paths, app)[2]
-        if package is not None:
-            subdir = d.relative_to(build_dir)
-            logging.debug("Adding possible subdir %s" % subdir)
-            yield subdir
-
-
 def _getappname(app):
     return common.get_app_display_name(app)
 
@@ -417,10 +380,7 @@ def fetch_autoname(app, tag):
        or app.UpdateCheckName == "Ignore":
         return None
 
-    if app.RepoType == 'srclib':
-        build_dir = Path('build/srclib') / app.Repo
-    else:
-        build_dir = Path('build') / app.id
+    build_dir = common.get_build_dir(app)
 
     try:
         vcs = common.getvcs(app.RepoType, app.Repo, build_dir)
@@ -429,12 +389,7 @@ def fetch_autoname(app, tag):
         return None
 
     logging.debug("...fetch auto name from " + str(build_dir))
-    new_name = None
-    for subdir in possible_subdirs(app):
-        root_dir = build_dir / subdir
-        new_name = common.fetch_real_name(root_dir)
-        if new_name is not None:
-            break
+    new_name = common.fetch_real_name(build_dir)
     commitmsg = None
     if new_name:
         logging.debug("...got autoname '" + new_name + "'")
