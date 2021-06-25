@@ -54,14 +54,19 @@ except ImportError:
 def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
     """Do a build on the builder vm.
 
-    :param app: app metadata dict
-    :param build:
-    :param vcs: version control system controller object
-    :param build_dir: local source-code checkout of app
-    :param output_dir: target folder for the build result
-    :param force:
+    Parameters
+    ----------
+    app
+        app metadata dict
+    build
+    vcs
+        version control system controller object
+    build_dir
+        local source-code checkout of app
+    output_dir
+        target folder for the build result
+    force
     """
-
     global buildserverid
 
     try:
@@ -319,7 +324,7 @@ def force_gradle_build_tools(build_dir, build_tools):
 
 
 def transform_first_char(string, method):
-    """Uses method() on the first character of string."""
+    """Use method() on the first character of string."""
     if len(string) == 0:
         return string
     if len(string) == 1:
@@ -332,11 +337,10 @@ def add_failed_builds_entry(failed_builds, appid, build, entry):
 
 
 def get_metadata_from_apk(app, build, apkfile):
-    """get the required metadata from the built APK
+    """Get the required metadata from the built APK.
 
-    versionName is allowed to be a blank string, i.e. ''
+    VersionName is allowed to be a blank string, i.e. ''
     """
-
     appid, versionCode, versionName = common.get_apk_id(apkfile)
     native_code = common.get_native_code(apkfile)
 
@@ -827,23 +831,29 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
 def trybuild(app, build, build_dir, output_dir, log_dir, also_check_dir,
              srclib_dir, extlib_dir, tmp_dir, repo_dir, vcs, test,
              server, force, onserver, refresh):
+    """Build a particular version of an application, if it needs building.
+
+    Parameters
+    ----------
+    output_dir
+        The directory where the build output will go.
+        Usually this is the 'unsigned' directory.
+    repo_dir
+        The repo directory - used for checking if the build is necessary.
+    also_check_dir
+        An additional location for checking if the build
+        is necessary (usually the archive repo)
+    test
+        True if building in test mode, in which case the build will
+        always happen, even if the output already exists. In test mode, the
+        output directory should be a temporary location, not any of the real
+        ones.
+
+    Returns
+    -------
+    Boolean
+        True if the build was done, False if it wasn't necessary.
     """
-    Build a particular version of an application, if it needs building.
-
-    :param output_dir: The directory where the build output will go. Usually
-       this is the 'unsigned' directory.
-    :param repo_dir: The repo directory - used for checking if the build is
-       necessary.
-    :param also_check_dir: An additional location for checking if the build
-       is necessary (usually the archive repo)
-    :param test: True if building in test mode, in which case the build will
-       always happen, even if the output already exists. In test mode, the
-       output directory should be a temporary location, not any of the real
-       ones.
-
-    :returns: True if the build was done, False if it wasn't necessary.
-    """
-
     dest_file = common.get_release_filename(app, build)
 
     dest = os.path.join(output_dir, dest_file)
@@ -876,7 +886,7 @@ def trybuild(app, build, build_dir, output_dir, log_dir, also_check_dir,
 
 
 def force_halt_build(timeout):
-    """Halt the currently running Vagrant VM, to be called from a Timer"""
+    """Halt the currently running Vagrant VM, to be called from a Timer."""
     logging.error(_('Force halting build after {0} sec timeout!').format(timeout))
     timeout_event.set()
     vm = vmtools.get_build_vm('builder')
@@ -884,8 +894,13 @@ def force_halt_build(timeout):
 
 
 def parse_commandline():
-    """Parse the command line. Returns options, parser."""
+    """Parse the command line.
 
+    Returns
+    -------
+    options
+    parser
+    """
     parser = argparse.ArgumentParser(usage="%(prog)s [options] [APPID[:VERCODE] [APPID[:VERCODE] ...]]")
     common.setup_global_opts(parser)
     parser.add_argument("appid", nargs='*', help=_("application ID with optional versionCode in the form APPID[:VERCODE]"))

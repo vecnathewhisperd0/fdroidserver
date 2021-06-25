@@ -248,8 +248,8 @@ def get_lastbuild(builds):
     return lastbuild
 
 
-def check_update_check_data_url(app):
-    """UpdateCheckData must have a valid HTTPS URL to protect checkupdates runs"""
+def check_update_check_data_url(app):  # noqa: D403
+    """UpdateCheckData must have a valid HTTPS URL to protect checkupdates runs."""
     if app.UpdateCheckData and app.UpdateCheckMode == 'HTTP':
         urlcode, codeex, urlver, verex = app.UpdateCheckData.split('|')
         for url in (urlcode, urlver):
@@ -503,7 +503,7 @@ def check_format(app):
 
 
 def check_license_tag(app):
-    '''Ensure all license tags contain only valid/approved values'''
+    """Ensure all license tags contain only valid/approved values."""
     if config['lint_licenses'] is None:
         return
     if app.License not in config['lint_licenses']:
@@ -555,8 +555,7 @@ def check_extlib_dir(apps):
 
 
 def check_app_field_types(app):
-    """Check the fields have valid data types"""
-
+    """Check the fields have valid data types."""
     for field in app.keys():
         v = app.get(field)
         t = metadata.fieldtype(field)
@@ -599,7 +598,7 @@ def check_app_field_types(app):
 
 
 def check_for_unsupported_metadata_files(basedir=""):
-    """Checks whether any non-metadata files are in metadata/"""
+    """Check whether any non-metadata files are in metadata/."""
     basedir = Path(basedir)
     global config
 
@@ -633,8 +632,7 @@ def check_for_unsupported_metadata_files(basedir=""):
 
 
 def check_current_version_code(app):
-    """Check that the CurrentVersionCode is currently available"""
-
+    """Check that the CurrentVersionCode is currently available."""
     archive_policy = app.get('ArchivePolicy')
     if archive_policy and archive_policy.split()[0] == "0":
         return

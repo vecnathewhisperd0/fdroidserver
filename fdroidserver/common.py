@@ -215,7 +215,7 @@ def _add_java_paths_to_config(pathlist, thisconfig):
 
 
 def fill_config_defaults(thisconfig):
-    """Fill in the global config dict with relevant defaults
+    """Fill in the global config dict with relevant defaults.
 
     For config values that have a path that can be expanded, e.g. an
     env var or a ~/, this will store the original value using "_orig"
@@ -325,7 +325,7 @@ def regsub_file(pattern, repl, path):
 
 
 def read_config(opts=None):
-    """Read the repository config
+    """Read the repository config.
 
     The config is read from config_file, which is in the current
     directory when any of the repo management commands are used. If
@@ -480,7 +480,6 @@ def parse_human_readable_size(size):
 
 def assert_config_keystore(config):
     """Check weather keystore is configured correctly and raise exception if not."""
-
     nosigningkey = False
     if 'repo_keyalias' not in config:
         nosigningkey = True
@@ -507,14 +506,19 @@ def assert_config_keystore(config):
 
 
 def find_apksigner(config):
-    """Searches for the best version apksigner and adds it to the config
+    """Search for the best version apksigner and adds it to the config.
 
     Returns the best version of apksigner following this algorithm:
+
     * use config['apksigner'] if set
     * try to find apksigner in path
     * find apksigner in build-tools starting from newest installed
       going down to MINIMUM_APKSIGNER_BUILD_TOOLS_VERSION
-    :return: path to apksigner or None if no version is found
+
+    Returns
+    -------
+    str
+        path to apksigner or None if no version is found
 
     """
     command = 'apksigner'
@@ -546,8 +550,7 @@ def find_apksigner(config):
 
 
 def find_sdk_tools_cmd(cmd):
-    '''find a working path to a tool from the Android SDK'''
-
+    """Find a working path to a tool from the Android SDK."""
     tooldirs = []
     if config is not None and 'sdk_path' in config and os.path.exists(config['sdk_path']):
         # try to find a working path to this command, in all the recent possible paths
@@ -579,7 +582,7 @@ def find_sdk_tools_cmd(cmd):
 
 
 def test_aapt_version(aapt):
-    '''Check whether the version of aapt is new enough'''
+    """Check whether the version of aapt is new enough."""
     output = subprocess.check_output([aapt, 'version'], universal_newlines=True)
     if output is None or output == '':
         logging.error(_("'{path}' failed to execute!").format(path=aapt))
@@ -629,19 +632,26 @@ def test_sdk_exists(thisconfig):
 
 
 def get_local_metadata_files():
-    '''get any metadata files local to an app's source repo
+    """Get any metadata files local to an app's source repo.
 
     This tries to ignore anything that does not count as app metdata,
     including emacs cruft ending in ~
 
-    '''
+    """
     return glob.glob('.fdroid.[a-jl-z]*[a-rt-z]')
 
 
 def read_pkg_args(appid_versionCode_pairs, allow_vercodes=False):
-    """
-    :param appids: arguments in the form of multiple appid:[vc] strings
-    :returns: a dictionary with the set of vercodes specified for each package
+    """No summary.
+
+    Parameters
+    ----------
+    appids
+        arguments in the form of multiple appid:[vc] strings
+
+    Returns
+    -------
+    a dictionary with the set of vercodes specified for each package
     """
     vercodes = {}
     if not appid_versionCode_pairs:
@@ -672,8 +682,15 @@ def get_metadata_files(vercodes):
     """
     Build a list of metadata files and raise an exception for invalid appids.
 
-    :param vercodes: version codes as returned by read_pkg_args()
-    :returns: a list of corresponding metadata/*.yml files
+    Parameters
+    ----------
+    vercodes
+        version codes as returned by read_pkg_args()
+
+    Returns
+    -------
+    List
+        a list of corresponding metadata/*.yml files
     """
     found_invalid = False
     metadatafiles = []
@@ -690,7 +707,7 @@ def get_metadata_files(vercodes):
 
 
 def read_app_args(appid_versionCode_pairs, allapps, allow_vercodes=False):
-    """Build a list of App instances for processing
+    """Build a list of App instances for processing.
 
     On top of what read_pkg_args does, this returns the whole app
     metadata, but limiting the builds list to the builds matching the
@@ -699,7 +716,6 @@ def read_app_args(appid_versionCode_pairs, allapps, allow_vercodes=False):
     returned.
 
     """
-
     vercodes = read_pkg_args(appid_versionCode_pairs, allow_vercodes)
 
     if not vercodes:
@@ -739,7 +755,7 @@ def read_app_args(appid_versionCode_pairs, allapps, allow_vercodes=False):
 
 
 def get_extension(filename):
-    """get name and extension of filename, with extension always lower case"""
+    """Get name and extension of filename, with extension always lower case."""
     base, ext = os.path.splitext(filename)
     if not ext:
         return base, ''
@@ -764,13 +780,15 @@ apk_release_filename_with_sigfp = re.compile(r'(?P<appid>[a-zA-Z0-9_\.]+)_(?P<ve
 
 
 def apk_parse_release_filename(apkname):
-    """Parses the name of an APK file according the F-Droids APK naming
-    scheme and returns the tokens.
+    """Parse the name of an APK file according the F-Droids APK naming scheme.
 
     WARNING: Returned values don't necessarily represent the APKs actual
     properties, the are just paresed from the file name.
 
-    :returns: A triplet containing (appid, versionCode, signer), where appid
+    Returns
+    -------
+    Tuple
+        A triplet containing (appid, versionCode, signer), where appid
         should be the package name, versionCode should be the integer
         represion of the APKs version and signer should be the first 7 hex
         digists of the sha256 signing key fingerprint which was used to sign
@@ -803,8 +821,7 @@ def getsrcname(app, build):
 
 
 def get_build_dir(app):
-    '''get the dir that this app will be built in'''
-
+    """Get the dir that this app will be built in."""
     if app.RepoType == 'srclib':
         return Path('build/srclib') / app.Repo
 
@@ -819,7 +836,7 @@ class Encoder(json.JSONEncoder):
 
 
 def setup_status_output(start_timestamp):
-    """Create the common output dictionary for public status updates"""
+    """Create the common output dictionary for public status updates."""
     output = {
         'commandLine': sys.argv,
         'startTimestamp': int(time.mktime(start_timestamp) * 1000),
@@ -855,7 +872,7 @@ def write_running_status_json(output):
 
 
 def write_status_json(output, pretty=False, name=None):
-    """Write status out as JSON, and rsync it to the repo server"""
+    """Write status out as JSON, and rsync it to the repo server."""
     status_dir = os.path.join('repo', 'status')
     if not os.path.exists(status_dir):
         os.makedirs(status_dir)
@@ -872,13 +889,12 @@ def write_status_json(output, pretty=False, name=None):
 
 
 def get_head_commit_id(git_repo):
-    """Get git commit ID for HEAD as a str
-    """
+    """Get git commit ID for HEAD as a str."""
     return git_repo.head.commit.hexsha
 
 
 def setup_vcs(app):
-    '''checkout code from VCS and return instance of vcs and the build dir'''
+    """Checkout code from VCS and return instance of vcs and the build dir."""
     build_dir = get_build_dir(app)
     # TODO: Remove this
     build_dir = str(build_dir)
@@ -955,7 +971,9 @@ class vcs:
         return None
 
     def gotorevision(self, rev, refresh=True):
-        """Take the local repository to a clean version of the given
+        """Take the local repository to a clean version of the given revision.
+
+        Take the local repository to a clean version of the given
         revision, which is specificed in the VCS's native
         format. Beforehand, the repository can be dirty, or even
         non-existent. If the repository does already exist locally, it
@@ -964,7 +982,6 @@ class vcs:
         you are cloning a clean copy of the repo - otherwise it must
         specify a valid revision.
         """
-
         if self.clone_failed:
             raise VCSException(_("Downloading the repository already failed once, not trying again."))
 
@@ -1013,7 +1030,9 @@ class vcs:
             raise exc
 
     def gotorevisionx(self, rev):  # pylint: disable=unused-argument
-        """Derived classes need to implement this.
+        """No summary.
+
+        Derived classes need to implement this.
 
         It's called once basic checking has been performed.
         """
@@ -1034,15 +1053,15 @@ class vcs:
         return rtags
 
     def latesttags(self):
-        """Get a list of all the known tags, sorted from newest to oldest"""
+        """Get a list of all the known tags, sorted from newest to oldest."""
         raise VCSException('latesttags not supported for this vcs type')
 
     def getref(self, revname=None):
-        """Get current commit reference (hash, revision, etc)"""
+        """Get current commit reference (hash, revision, etc)."""
         raise VCSException('getref not supported for this vcs type')
 
     def getsrclib(self):
-        """Returns the srclib (name, path) used in setting up the current revision, or None."""
+        """Return the srclib (name, path) used in setting up the current revision, or None."""
         return self.srclib
 
 
@@ -1055,7 +1074,7 @@ class vcs_git(vcs):
         return ['git', '--version']
 
     def git(self, args, envs=dict(), cwd=None, output=True):
-        '''Prevent git fetch/clone/submodule from hanging at the username/password prompt
+        """Prevent git fetch/clone/submodule from hanging at the username/password prompt.
 
         While fetch/pull/clone respect the command line option flags,
         it seems that submodule commands do not.  They do seem to
@@ -1064,7 +1083,7 @@ class vcs_git(vcs):
         sticks.
 
         Also, because of CVE-2017-1000117, block all SSH URLs.
-        '''
+        """
         #
         # supported in git >= 2.3
         git_config = [
@@ -1089,13 +1108,14 @@ class vcs_git(vcs):
                            envs=envs, cwd=cwd, output=output)
 
     def checkrepo(self):
-        """If the local directory exists, but is somehow not a git repository,
+        """No summary.
+
+        If the local directory exists, but is somehow not a git repository,
         git will traverse up the directory tree until it finds one
         that is (i.e.  fdroidserver) and then we'll proceed to destroy
         it!  This is called as a safety check.
 
         """
-
         p = FDroidPopen(['git', 'rev-parse', '--show-toplevel'], cwd=self.local, output=False)
         result = p.output.rstrip()
         if Path(result) != Path(self.local).resolve():
@@ -1191,8 +1211,9 @@ class vcs_git(vcs):
     tag_format = re.compile(r'tag: ([^) ]*)')
 
     def latesttags(self):
-        """Returns a list of latest tags
-        the definition is a little blurry here, Android does not care for the
+        """Return a list of latest tags.
+
+        The definition is a little blurry here, Android does not care for the
         version name of an app as normally used as the tag name so versions do
         not need to follow strverscmp() or similar. Also they can be rather
         arbitrary so git tag --sort=-version:refname does not work. On the other side
@@ -1235,7 +1256,9 @@ class vcs_gitsvn(vcs):
         return ['git', 'svn', '--version']
 
     def checkrepo(self):
-        """If the local directory exists, but is somehow not a git repository,
+        """No summary.
+
+        If the local directory exists, but is somehow not a git repository,
         git will traverse up the directory tree until it finds one that
         is (i.e.  fdroidserver) and then we'll proceed to destory it!
         This is called as a safety check.
@@ -1247,7 +1270,7 @@ class vcs_gitsvn(vcs):
             raise VCSException('Repository mismatch')
 
     def git(self, args, envs=dict(), cwd=None, output=True):
-        '''Prevent git fetch/clone/submodule from hanging at the username/password prompt
+        """Prevent git fetch/clone/submodule from hanging at the username/password prompt.
 
         AskPass is set to /bin/true to let the process try to connect
         without a username/password.
@@ -1256,7 +1279,7 @@ class vcs_gitsvn(vcs):
         (supported in git >= 2.3).  This protects against
         CVE-2017-1000117.
 
-        '''
+        """
         git_config = [
             '-c', 'core.askpass=/bin/true',
             '-c', 'core.sshCommand=/bin/false',
@@ -1454,7 +1477,7 @@ class vcs_bzr(vcs):
         return ['bzr', '--version']
 
     def bzr(self, args, envs=dict(), cwd=None, output=True):
-        '''Prevent bzr from ever using SSH to avoid security vulns'''
+        """Prevent bzr from ever using SSH to avoid security vulns."""
         envs.update({
             'BZR_SSH': 'false',
         })
@@ -1538,8 +1561,7 @@ def retrieve_string_singleline(app_dir, string, xmlfiles=None):
 
 
 def manifest_paths(app_dir, flavours):
-    '''Return list of existing files that will be used to find the highest vercode'''
-
+    """Return list of existing files that will be used to find the highest vercode."""
     # TODO: Remove this in Python3.6
     app_dir = str(app_dir)
     possible_manifests = \
@@ -1560,7 +1582,7 @@ def manifest_paths(app_dir, flavours):
 
 
 def fetch_real_name(app_dir, flavours):
-    '''Retrieve the package name. Returns the name, or None if not found.'''
+    """Retrieve the package name. Returns the name, or None if not found."""
     # TODO: Remove this in Python3.6
     app_dir = str(app_dir)
     for path in manifest_paths(app_dir, flavours):
@@ -1637,8 +1659,8 @@ def app_matches_packagename(app, package):
 
 
 def parse_androidmanifests(paths, app):
-    """
-    Extract some information from the AndroidManifest.xml at the given path.
+    """Extract some information from the AndroidManifest.xml at the given path.
+
     Returns (version, vercode, package), any or all of which might be None.
     All values returned are strings.
 
@@ -1646,7 +1668,6 @@ def parse_androidmanifests(paths, app):
     this code assumes the files use UTF-8.
     https://sites.google.com/a/android.com/tools/knownissues/encoding
     """
-
     ignoreversions = app.UpdateCheckIgnore
     ignoresearch = re.compile(ignoreversions).search if ignoreversions else None
 
@@ -1827,7 +1848,7 @@ def parse_androidmanifests(paths, app):
 
 
 def is_valid_package_name(name):
-    """Check whether name is a valid fdroid package name
+    """Check whether name is a valid fdroid package name.
 
     APKs and manually defined package names must use a valid Java
     Package Name.  Automatically generated package names for non-APK
@@ -1839,7 +1860,7 @@ def is_valid_package_name(name):
 
 
 def is_strict_application_id(name):
-    """Check whether name is a valid Android Application ID
+    """Check whether name is a valid Android Application ID.
 
     The Android ApplicationID is basically a Java Package Name, but
     with more restrictive naming rules:
@@ -1848,6 +1869,8 @@ def is_strict_application_id(name):
     * Each segment must start with a letter.
     * All characters must be alphanumeric or an underscore [a-zA-Z0-9_].
 
+    References
+    ----------
     https://developer.android.com/studio/build/application-id
 
     """
@@ -1868,7 +1891,7 @@ def get_all_gradle_and_manifests(build_dir):
 
 
 def get_gradle_subdir(build_dir, paths):
-    """get the subdir where the gradle build is based"""
+    """Get the subdir where the gradle build is based."""
     first_gradle_dir = None
     for path in paths:
         if not first_gradle_dir:
@@ -1947,7 +1970,6 @@ def get_app_from_url(url):
     match urlparse().
 
     """
-
     parsed = urllib.parse.urlparse(url)
     invalid_url = False
     if not parsed.scheme or not parsed.path:
@@ -2106,21 +2128,31 @@ gradle_version_regex = re.compile(r"[^/]*'com\.android\.tools\.build:gradle:([^\
 
 
 def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, onserver=False, refresh=True):
-    """ Prepare the source code for a particular build
+    """Prepare the source code for a particular build.
 
-    :param vcs: the appropriate vcs object for the application
-    :param app: the application details from the metadata
-    :param build: the build details from the metadata
-    :param build_dir: the path to the build directory, usually 'build/app.id'
-    :param srclib_dir: the path to the source libraries directory, usually 'build/srclib'
-    :param extlib_dir: the path to the external libraries directory, usually 'build/extlib'
+    Parameters
+    ----------
+    vcs
+        the appropriate vcs object for the application
+    app
+        the application details from the metadata
+    build
+        the build details from the metadata
+    build_dir
+        the path to the build directory, usually 'build/app.id'
+    srclib_dir
+        the path to the source libraries directory, usually 'build/srclib'
+    extlib_dir
+        the path to the external libraries directory, usually 'build/extlib'
 
-    Returns the (root, srclibpaths) where:
-    :param root: is the root directory, which may be the same as 'build_dir' or may
-                 be a subdirectory of it.
-    :param srclibpaths: is information on the srclibs being used
+    Returns
+    -------
+    root
+        is the root directory, which may be the same as 'build_dir' or may
+        be a subdirectory of it.
+    srclibpaths
+        is information on the srclibs being used
     """
-
     # Optionally, the actual app source can be in a subdirectory
     if build.subdir:
         root_dir = os.path.join(build_dir, build.subdir)
@@ -2357,7 +2389,7 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, onserver=
 
 
 def getpaths_map(build_dir, globpaths):
-    """Extend via globbing the paths from a field and return them as a map from original path to resulting paths"""
+    """Extend via globbing the paths from a field and return them as a map from original path to resulting paths."""
     paths = dict()
     for p in globpaths:
         p = p.strip()
@@ -2370,7 +2402,7 @@ def getpaths_map(build_dir, globpaths):
 
 
 def getpaths(build_dir, globpaths):
-    """Extend via globbing the paths from a field and return them as a set"""
+    """Extend via globbing the paths from a field and return them as a set."""
     paths_map = getpaths_map(build_dir, globpaths)
     paths = set()
     for k, v in paths_map.items():
@@ -2384,7 +2416,7 @@ def natural_key(s):
 
 
 def check_system_clock(dt_obj, path):
-    """Check if system clock is updated based on provided date
+    """Check if system clock is updated based on provided date.
 
     If an APK has files newer than the system time, suggest updating
     the system clock.  This is useful for offline systems, used for
@@ -2401,20 +2433,19 @@ def check_system_clock(dt_obj, path):
 
 
 class KnownApks:
-    """permanent store of existing APKs with the date they were added
+    """Permanent store of existing APKs with the date they were added.
 
     This is currently the only way to permanently store the "updated"
     date of APKs.
     """
 
     def __init__(self):
-        '''Load filename/date info about previously seen APKs
+        """Load filename/date info about previously seen APKs.
 
         Since the appid and date strings both will never have spaces,
         this is parsed as a list from the end to allow the filename to
         have any combo of spaces.
-        '''
-
+        """
         self.path = os.path.join('stats', 'known_apks.txt')
         self.apks = {}
         if os.path.isfile(self.path):
@@ -2451,10 +2482,14 @@ class KnownApks:
                 f.write(line + '\n')
 
     def recordapk(self, apkName, app, default_date=None):
-        '''
-        Record an APK (if it's new, otherwise does nothing)
-        Returns the date it was added as a datetime instance
-        '''
+        """
+        Record an APK (if it's new, otherwise does nothing).
+
+        Returns
+        -------
+        datetime
+          the date it was added as a datetime instance.
+        """
         if apkName not in self.apks:
             if default_date is None:
                 default_date = datetime.utcnow()
@@ -2464,8 +2499,9 @@ class KnownApks:
         return added
 
     def getapp(self, apkname):
-        """Look up information - given the 'apkname', returns (app id, date added/None).
+        """Look up information - given the 'apkname'.
 
+        Returns (app id, date added/None).
         Or returns None for an unknown apk.
         """
         if apkname in self.apks:
@@ -2473,7 +2509,7 @@ class KnownApks:
         return None
 
     def getlatest(self, num):
-        """Get the most recent 'num' apps added to the repo, as a list of package ids with the most recent first"""
+        """Get the most recent 'num' apps added to the repo, as a list of package ids with the most recent first."""
         apps = {}
         for apk, app in self.apks.items():
             appid, added = app
@@ -2490,15 +2526,14 @@ class KnownApks:
 
 
 def get_file_extension(filename):
-    """get the normalized file extension, can be blank string but never None"""
+    """Get the normalized file extension, can be blank string but never None."""
     if isinstance(filename, bytes):
         filename = filename.decode('utf-8')
     return os.path.splitext(filename)[1].lower()[1:]
 
 
 def use_androguard():
-    """Report if androguard is available, and config its debug logging"""
-
+    """Report if androguard is available, and config its debug logging."""
     try:
         import androguard
         if use_androguard.show_path:
@@ -2524,13 +2559,12 @@ def _get_androguard_APK(apkfile):
 
 
 def ensure_final_value(packageName, arsc, value):
-    """Ensure incoming value is always the value, not the resid
+    """Ensure incoming value is always the value, not the resid.
 
     androguard will sometimes return the Android "resId" aka
     Resource ID instead of the actual value.  This checks whether
     the value is actually a resId, then performs the Android
     Resource lookup as needed.
-
     """
     if value:
         returnValue = value
@@ -2546,12 +2580,16 @@ def ensure_final_value(packageName, arsc, value):
 
 
 def is_apk_and_debuggable(apkfile):
-    """Returns True if the given file is an APK and is debuggable
+    """Return True if the given file is an APK and is debuggable.
 
     Parse only <application android:debuggable=""> from the APK.
 
-    :param apkfile: full path to the APK to check"""
+    Parameters
+    ----------
+    apkfile
+        full path to the APK to check
 
+    """
     if get_file_extension(apkfile) != 'apk':
         return False
     from androguard.core.bytecodes.axml import AXMLParser, format_value, START_TAG
@@ -2583,8 +2621,16 @@ def get_apk_id(apkfile):
     APK, aapt still can.  So aapt is also used as the final fallback
     method.
 
-    :param apkfile: path to an APK file.
-    :returns: triplet (appid, version code, version name)
+    Parameters
+    ----------
+    apkfile
+        path to an APK file.
+
+    Returns
+    -------
+    appid
+    version code
+    version name
 
     """
     try:
@@ -2596,7 +2642,7 @@ def get_apk_id(apkfile):
 
 
 def get_apk_id_androguard(apkfile):
-    """Read (appid, versionCode, versionName) from an APK
+    """Read (appid, versionCode, versionName) from an APK.
 
     This first tries to do quick binary XML parsing to just get the
     values that are needed.  It will fallback to full androguard
@@ -2662,8 +2708,10 @@ def get_apk_id_aapt(apkfile):
 
 
 def get_native_code(apkfile):
-    """aapt checks if there are architecture folders under the lib/ folder
-    so we are simulating the same behaviour"""
+    """Aapt checks if there are architecture folders under the lib/ folder.
+
+    We are simulating the same behaviour.
+    """
     arch_re = re.compile("^lib/(.*)/.*$")
     archset = set()
     with ZipFile(apkfile) as apk:
@@ -2697,12 +2745,19 @@ def FDroidPopenBytes(commands, cwd=None, envs=None, output=True, stderr_to_stdou
     """
     Run a command and capture the possibly huge output as bytes.
 
-    :param commands: command and argument list like in subprocess.Popen
-    :param cwd: optionally specifies a working directory
-    :param envs: a optional dictionary of environment variables and their values
-    :returns: A PopenResult.
-    """
+    Parameters
+    ----------
+    commands
+        command and argument list like in subprocess.Popen
+    cwd
+        optionally specifies a working directory
+    envs
+        a optional dictionary of environment variables and their values
 
+    Returns
+    -------
+    A PopenResult.
+    """
     global env
     if env is None:
         set_FDroidPopen_env()
@@ -2772,10 +2827,18 @@ def FDroidPopen(commands, cwd=None, envs=None, output=True, stderr_to_stdout=Tru
     """
     Run a command and capture the possibly huge output as a str.
 
-    :param commands: command and argument list like in subprocess.Popen
-    :param cwd: optionally specifies a working directory
-    :param envs: a optional dictionary of environment variables and their values
-    :returns: A PopenResult.
+    Parameters
+    ----------
+    commands
+        command and argument list like in subprocess.Popen
+    cwd
+        optionally specifies a working directory
+    envs
+        a optional dictionary of environment variables and their values
+
+    Returns
+    -------
+    A PopenResult.
     """
     result = FDroidPopenBytes(commands, cwd, envs, output, stderr_to_stdout)
     result.output = result.output.decode('utf-8', 'ignore')
@@ -2865,13 +2928,12 @@ def remove_signing_keys(build_dir):
 
 
 def set_FDroidPopen_env(build=None):
-    '''
-    set up the environment variables for the build environment
+    """Set up the environment variables for the build environment.
 
     There is only a weak standard, the variables used by gradle, so also set
     up the most commonly used environment variables for SDK and NDK.  Also, if
     there is no locale set, this will set the locale (e.g. LANG) to en_US.UTF-8.
-    '''
+    """
     global env, orig_path
 
     if env is None:
@@ -2951,8 +3013,14 @@ def signer_fingerprint_short(cert_encoded):
     Extracts the first 7 hexadecimal digits of sha256 signing-key fingerprint
     for a given pkcs7 signature.
 
-    :param cert_encoded: Contents of an APK signing certificate.
-    :returns: shortened signing-key fingerprint.
+    Parameters
+    ----------
+    cert_encoded
+        Contents of an APK signing certificate.
+
+    Returns
+    -------
+    shortened signing-key fingerprint.
     """
     return signer_fingerprint(cert_encoded)[:7]
 
@@ -2963,14 +3031,19 @@ def signer_fingerprint(cert_encoded):
     Extracts hexadecimal sha256 signing-key fingerprint string
     for a given pkcs7 signature.
 
-    :param: Contents of an APK signature.
-    :returns: shortened signature fingerprint.
+    Parameters
+    ----------
+    Contents of an APK signature.
+
+    Returns
+    -------
+    shortened signature fingerprint.
     """
     return hashlib.sha256(cert_encoded).hexdigest()
 
 
 def get_first_signer_certificate(apkpath):
-    """Get the first signing certificate from the APK,  DER-encoded"""
+    """Get the first signing certificate from the APK, DER-encoded."""
     certs = None
     cert_encoded = None
     with zipfile.ZipFile(apkpath, 'r') as apk:
@@ -3005,10 +3078,15 @@ def apk_signer_fingerprint(apk_path):
     Extracts hexadecimal sha256 signing-key fingerprint string
     for a given APK.
 
-    :param apk_path: path to APK
-    :returns: signature fingerprint
-    """
+    Parameters
+    ----------
+    apk_path
+        path to APK
 
+    Returns
+    -------
+    signature fingerprint
+    """
     cert_encoded = get_first_signer_certificate(apk_path)
     if not cert_encoded:
         return None
@@ -3021,14 +3099,20 @@ def apk_signer_fingerprint_short(apk_path):
     Extracts the first 7 hexadecimal digits of sha256 signing-key fingerprint
     for a given pkcs7 APK.
 
-    :param apk_path: path to APK
-    :returns: shortened signing-key fingerprint
+    Parameters
+    ----------
+    apk_path
+        path to APK
+
+    Returns
+    -------
+    shortened signing-key fingerprint
     """
     return apk_signer_fingerprint(apk_path)[:7]
 
 
 def metadata_get_sigdir(appid, vercode=None):
-    """Get signature directory for app"""
+    """Get signature directory for app."""
     if vercode:
         return os.path.join('metadata', appid, 'signatures', str(vercode))
     else:
@@ -3036,14 +3120,16 @@ def metadata_get_sigdir(appid, vercode=None):
 
 
 def metadata_find_developer_signature(appid, vercode=None):
-    """Tries to find the developer signature for given appid.
+    """Try to find the developer signature for given appid.
 
     This picks the first signature file found in metadata an returns its
     signature.
 
-    :returns: sha256 signing key fingerprint of the developer signing key.
-        None in case no signature can not be found."""
-
+    Returns
+    -------
+    sha256 signing key fingerprint of the developer signing key.
+    None in case no signature can not be found.
+    """
     # fetch list of dirs for all versions of signatures
     appversigdirs = []
     if vercode:
@@ -3072,18 +3158,27 @@ def metadata_find_developer_signature(appid, vercode=None):
 
 
 def metadata_find_signing_files(appid, vercode):
-    """Gets a list of signed manifests and signatures.
+    """Get a list of signed manifests and signatures.
 
-    https://docs.oracle.com/javase/tutorial/deployment/jar/intro.html
-    https://source.android.com/security/apksigning/v2
-    https://source.android.com/security/apksigning/v3
+    Parameters
+    ----------
+    appid
+        app id string
+    vercode
+        app version code
 
-    :param appid: app id string
-    :param vercode: app version code
-    :returns: a list of 4-tuples for each signing key with following paths:
+    Returns
+    -------
+    List
+        of 4-tuples for each signing key with following paths:
         (signature_file, signature_block_file, manifest, v2_files), where v2_files
         is either a (apk_signing_block_offset_file, apk_signing_block_file) pair or None
 
+    References
+    ----------
+    * https://docs.oracle.com/javase/tutorial/deployment/jar/intro.html
+    * https://source.android.com/security/apksigning/v2
+    * https://source.android.com/security/apksigning/v3
     """
     ret = []
     sigdir = metadata_get_sigdir(appid, vercode)
@@ -3111,7 +3206,10 @@ def metadata_find_signing_files(appid, vercode):
 def metadata_find_developer_signing_files(appid, vercode):
     """Get developer signature files for specified app from metadata.
 
-    :returns: a list of 4-tuples for each signing key with following paths:
+    Returns
+    -------
+    List
+        of 4-tuples for each signing key with following paths:
         (signature_file, signature_block_file, manifest, v2_files), where v2_files
         is either a (apk_signing_block_offset_file, apk_signing_block_file) pair or None
 
@@ -3124,12 +3222,13 @@ def metadata_find_developer_signing_files(appid, vercode):
 
 
 class ClonedZipInfo(zipfile.ZipInfo):
-    """Hack to allow fully cloning ZipInfo instances
+    """Hack to allow fully cloning ZipInfo instances.
 
     The zipfile library has some bugs that prevent it from fully
     cloning ZipInfo entries.  https://bugs.python.org/issue43547
 
     """
+
     def __init__(self, zinfo):
         self.original = zinfo
         for k in self.__slots__:
@@ -3154,11 +3253,14 @@ def apk_has_v1_signatures(apkfile):
 
 
 def apk_strip_v1_signatures(signed_apk, strip_manifest=False):
-    """Removes signatures from APK.
+    """Remove signatures from APK.
 
-    :param signed_apk: path to APK file.
-    :param strip_manifest: when set to True also the manifest file will
-        be removed from the APK.
+    Parameters
+    ----------
+    signed_apk
+        path to APK file.
+    strip_manifest
+        when set to True also the manifest file will be removed from the APK.
     """
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp_apk = os.path.join(tmpdir, 'tmp.apk')
@@ -3177,10 +3279,12 @@ def apk_strip_v1_signatures(signed_apk, strip_manifest=False):
 
 
 def _zipalign(unsigned_apk, aligned_apk):
-    """run 'zipalign' using standard flags used by Gradle Android Plugin
+    """Run 'zipalign' using standard flags used by Gradle Android Plugin.
 
     -p was added in build-tools-23.0.0
 
+    References
+    ----------
     https://developer.android.com/studio/publish/app-signing#sign-manually
     """
     p = SdkToolsPopen(['zipalign', '-v', '-p', '4', unsigned_apk, aligned_apk])
@@ -3189,43 +3293,62 @@ def _zipalign(unsigned_apk, aligned_apk):
 
 
 def apk_implant_signatures(apkpath, outpath, manifest):
-    """Implants a signature from metadata into an APK.
+    """Implant a signature from metadata into an APK.
 
     Note: this changes there supplied APK in place. So copy it if you
     need the original to be preserved.
 
-    https://docs.oracle.com/javase/tutorial/deployment/jar/intro.html
-    https://source.android.com/security/apksigning/v2
-    https://source.android.com/security/apksigning/v3
+    Parameters
+    ----------
+    apkpath
+        location of the unsigned apk
+    outpath
+        location of the output apk
 
-    :param apkpath: location of the unsigned apk
-    :param outpath: location of the output apk
+    References
+    ----------
+    * https://docs.oracle.com/javase/tutorial/deployment/jar/intro.html
+    * https://source.android.com/security/apksigning/v2
+    * https://source.android.com/security/apksigning/v3
+
     """
-
     sigdir = os.path.dirname(manifest)  # FIXME
     apksigcopier.do_patch(sigdir, apkpath, outpath, v1_only=None)
 
 
 def apk_extract_signatures(apkpath, outdir):
-    """Extracts a signature files from APK and puts them into target directory.
+    """Extract a signature files from APK and puts them into target directory.
 
-    https://docs.oracle.com/javase/tutorial/deployment/jar/intro.html
-    https://source.android.com/security/apksigning/v2
-    https://source.android.com/security/apksigning/v3
+    Parameters
+    ----------
+    apkpath
+        location of the apk
+    outdir
+        older where the extracted signature files will be stored
 
-    :param apkpath: location of the apk
-    :param outdir: folder where the extracted signature files will be stored
+    References
+    ----------
+    * https://docs.oracle.com/javase/tutorial/deployment/jar/intro.html
+    * https://source.android.com/security/apksigning/v2
+    * https://source.android.com/security/apksigning/v3
 
     """
     apksigcopier.do_extract(apkpath, outdir, v1_only=None)
 
 
 def get_min_sdk_version(apk):
-    """
-    This wraps the androguard function to always return and int and fall back to 1
-    if we can't get a valid minsdk version
-    :param apk: androguard APK object
-    :return: minsdk as int
+    """Wrap the androguard function to always return and int.
+
+    Fall back to 1 if we can't get a valid minsdk version.
+
+    Parameters
+    ----------
+    apk
+        androguard APK object
+
+    Returns
+    -------
+    minsdk: int
     """
     try:
         return int(apk.get_min_sdk_version())
@@ -3234,7 +3357,7 @@ def get_min_sdk_version(apk):
 
 
 def sign_apk(unsigned_path, signed_path, keyalias):
-    """Sign and zipalign an unsigned APK, then save to a new file, deleting the unsigned
+    """Sign and zipalign an unsigned APK, then save to a new file, deleting the unsigned.
 
     NONE is a Java keyword used to configure smartcards as the
     keystore.  Otherwise, the keystore is a local file.
@@ -3281,7 +3404,7 @@ def sign_apk(unsigned_path, signed_path, keyalias):
 
 
 def verify_apks(signed_apk, unsigned_apk, tmp_dir, v1_only=None):
-    """Verify that two apks are the same
+    """Verify that two apks are the same.
 
     One of the inputs is signed, the other is unsigned. The signature metadata
     is transferred from the signed to the unsigned apk, and then apksigner is
@@ -3289,15 +3412,22 @@ def verify_apks(signed_apk, unsigned_apk, tmp_dir, v1_only=None):
     the unsigned one.  If the APK given as unsigned actually does have a
     signature, it will be stripped out and ignored.
 
-    :param signed_apk: Path to a signed APK file
-    :param unsigned_apk: Path to an unsigned APK file expected to match it
-    :param tmp_dir: Path to directory for temporary files
-    :param v1_only: True for v1-only signatures, False for v1 and v2 signatures,
-                    or None for autodetection
-    :returns: None if the verification is successful, otherwise a string
-              describing what went wrong.
-    """
+    Parameters
+    ----------
+    signed_apk
+        Path to a signed APK file
+    unsigned_apk
+        Path to an unsigned APK file expected to match it
+    tmp_dir
+        Path to directory for temporary files
+    v1_only
+        True for v1-only signatures, False for v1 and v2 signatures,
+        or None for autodetection
 
+    Returns
+    -------
+    None if the verification is successful, otherwise a string describing what went wrong.
+    """
     if not verify_apk_signature(signed_apk):
         logging.info('...NOT verified - {0}'.format(signed_apk))
         return 'verification of signed APK failed'
@@ -3328,16 +3458,18 @@ def verify_apks(signed_apk, unsigned_apk, tmp_dir, v1_only=None):
 
 
 def verify_jar_signature(jar):
-    """Verifies the signature of a given JAR file.
+    """Verify the signature of a given JAR file.
 
     jarsigner is very shitty: unsigned JARs pass as "verified"! So
     this has to turn on -strict then check for result 4, since this
     does not expect the signature to be from a CA-signed certificate.
 
-    :raises: VerificationException() if the JAR's signature could not be verified
+    Raises
+    ------
+    VerificationException
+        If the JAR's signature could not be verified.
 
     """
-
     error = _('JAR signature failed to verify: {path}').format(path=jar)
     try:
         output = subprocess.check_output([config['jarsigner'], '-strict', '-verify', jar],
@@ -3351,13 +3483,16 @@ def verify_jar_signature(jar):
 
 
 def verify_apk_signature(apk, min_sdk_version=None):
-    """verify the signature on an APK
+    """Verify the signature on an APK.
 
     Try to use apksigner whenever possible since jarsigner is very
     shitty: unsigned APKs pass as "verified"!  Warning, this does
     not work on JARs with apksigner >= 0.7 (build-tools 26.0.1)
 
-    :returns: boolean whether the APK was verified
+    Returns
+    -------
+    Boolean
+        whether the APK was verified
     """
     if set_command_in_config('apksigner'):
         args = [config['apksigner'], 'verify']
@@ -3385,7 +3520,7 @@ def verify_apk_signature(apk, min_sdk_version=None):
 
 
 def verify_old_apk_signature(apk):
-    """verify the signature on an archived APK, supporting deprecated algorithms
+    """Verify the signature on an archived APK, supporting deprecated algorithms.
 
     F-Droid aims to keep every single binary that it ever published.  Therefore,
     it needs to be able to verify APK signatures that include deprecated/removed
@@ -3398,10 +3533,12 @@ def verify_old_apk_signature(apk):
     file permissions while in use.  That should prevent a bad actor
     from changing the settings during operation.
 
-    :returns: boolean whether the APK was verified
+    Returns
+    -------
+    Boolean
+        whether the APK was verified
 
     """
-
     _java_security = os.path.join(os.getcwd(), '.java.security')
     if os.path.exists(_java_security):
         os.remove(_java_security)
@@ -3436,13 +3573,14 @@ apk_badchars = re.compile('''[/ :;'"]''')
 
 
 def compare_apks(apk1, apk2, tmp_dir, log_dir=None):
-    """Compare two apks
+    """Compare two apks.
 
-    Returns None if the APK content is the same (apart from the signing key),
+    Returns
+    -------
+    None if the APK content is the same (apart from the signing key),
     otherwise a string describing what's different, or what went wrong when
     trying to do the comparison.
     """
-
     if not log_dir:
         log_dir = tmp_dir
 
@@ -3497,11 +3635,12 @@ def compare_apks(apk1, apk2, tmp_dir, log_dir=None):
 
 
 def set_command_in_config(command):
-    '''Try to find specified command in the path, if it hasn't been
-    manually set in config.yml.  If found, it is added to the config
+    """Try to find specified command in the path, if it hasn't been manually set in config.yml.
+
+    If found, it is added to the config
     dict.  The return value says whether the command is available.
 
-    '''
+    """
     if command in config:
         return True
     else:
@@ -3513,8 +3652,7 @@ def set_command_in_config(command):
 
 
 def find_command(command):
-    '''find the full path of a command, or None if it can't be found in the PATH'''
-
+    """Find the full path of a command, or None if it can't be found in the PATH."""
     def is_exe(fpath):
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
@@ -3533,7 +3671,7 @@ def find_command(command):
 
 
 def genpassword():
-    '''generate a random password for when generating keys'''
+    """Generate a random password for when generating keys."""
     h = hashlib.sha256()
     h.update(os.urandom(16))  # salt
     h.update(socket.getfqdn().encode('utf-8'))
@@ -3542,9 +3680,15 @@ def genpassword():
 
 
 def genkeystore(localconfig):
-    """
-    Generate a new key with password provided in :param localconfig and add it to new keystore
-    :return: hexed public key, public key fingerprint
+    """Generate a new key with password provided in localconfig and add it to new keystore.
+
+    Parameters
+    ----------
+    localconfig
+
+    Returns
+    -------
+    hexed public key, public key fingerprint
     """
     logging.info('Generating a new key in "' + localconfig['keystore'] + '"...')
     keystoredir = os.path.dirname(localconfig['keystore'])
@@ -3599,22 +3743,24 @@ def genkeystore(localconfig):
 
 
 def get_cert_fingerprint(pubkey):
-    """
-    Generate a certificate fingerprint the same way keytool does it
-    (but with slightly different formatting)
-    """
+    """Generate a certificate fingerprint the same way keytool does it (but with slightly different formatting)."""
     digest = hashlib.sha256(pubkey).digest()
     ret = [' '.join("%02X" % b for b in bytearray(digest))]
     return " ".join(ret)
 
 
 def get_certificate(signature_block_file):
-    """Extracts a DER certificate from JAR Signature's "Signature Block File".
+    """Extract a DER certificate from JAR Signature's "Signature Block File".
 
-    :param signature_block_file: file bytes (as string) representing the
-    certificate, as read directly out of the APK/ZIP
+    Parameters
+    ----------
+    signature_block_file
+        file bytes (as string) representing the
+        certificate, as read directly out of the APK/ZIP
 
-    :return: A binary representation of the certificate's public key,
+    Returns
+    -------
+    A binary representation of the certificate's public key,
     or None in case of error
 
     """
@@ -3635,7 +3781,10 @@ def get_certificate(signature_block_file):
 def load_stats_fdroid_signing_key_fingerprints():
     """Load signing-key fingerprints stored in file generated by fdroid publish.
 
-    :returns: dict containing the signing-key fingerprints.
+    Returns
+    -------
+    dict
+        containing the signing-key fingerprints.
     """
     jar_file = os.path.join('stats', 'publishsigkeys.jar')
     if not os.path.isfile(jar_file):
@@ -3661,15 +3810,20 @@ def load_stats_fdroid_signing_key_fingerprints():
 
 
 def write_to_config(thisconfig, key, value=None, config_file=None):
-    '''write a key/value to the local config.yml or config.py
+    """Write a key/value to the local config.yml or config.py.
 
     NOTE: only supports writing string variables.
 
-    :param thisconfig: config dictionary
-    :param key: variable name in config to be overwritten/added
-    :param value: optional value to be written, instead of fetched
+    Parameters
+    ----------
+    thisconfig
+        config dictionary
+    key
+        variable name in config to be overwritten/added
+    value
+        optional value to be written, instead of fetched
         from 'thisconfig' dictionary.
-    '''
+    """
     if value is None:
         origkey = key + '_orig'
         value = thisconfig[origkey] if origkey in thisconfig else thisconfig[key]
@@ -3743,7 +3897,7 @@ def string_is_integer(string):
 
 
 def version_code_string_to_int(vercode):
-    """Convert an version code string of any base into an int"""
+    """Convert an version code string of any base into an int."""
     try:
         return int(vercode, 0)
     except ValueError:
@@ -3751,7 +3905,7 @@ def version_code_string_to_int(vercode):
 
 
 def get_app_display_name(app):
-    """get a human readable name for the app for logging and sorting
+    """Get a human readable name for the app for logging and sorting.
 
     When trying to find a localized name, this first tries en-US since
     that his the historical language used for sorting.
@@ -3771,14 +3925,14 @@ def get_app_display_name(app):
 
 
 def local_rsync(options, fromdir, todir):
-    '''Rsync method for local to local copying of things
+    """Rsync method for local to local copying of things.
 
     This is an rsync wrapper with all the settings for safe use within
     the various fdroidserver use cases. This uses stricter rsync
     checking on all files since people using offline mode are already
     prioritizing security above ease and speed.
 
-    '''
+    """
     rsyncargs = ['rsync', '--recursive', '--safe-links', '--times', '--perms',
                  '--one-file-system', '--delete', '--chmod=Da+rx,Fa-x,a+r,u+w']
     if not options.no_checksum:
@@ -3795,13 +3949,17 @@ def local_rsync(options, fromdir, todir):
 def deploy_build_log_with_rsync(appid, vercode, log_content):
     """Upload build log of one individual app build to an fdroid repository.
 
-    :param appid: package name for dientifying to which app this log belongs.
-    :param vercode: version of the app to which this build belongs.
-    :param log_content: Content of the log which is about to be posted.
-                        Should be either a string or bytes. (bytes will
-                        be decoded as 'utf-8')
+    Parameters
+    ----------
+    appid
+        package name for dientifying to which app this log belongs.
+    vercode
+        version of the app to which this build belongs.
+    log_content
+        Content of the log which is about to be posted.
+        Should be either a string or bytes. (bytes will
+        be decoded as 'utf-8')
     """
-
     if not log_content:
         logging.warning(_('skip deploying full build logs: log content is empty'))
         return
@@ -3823,8 +3981,7 @@ def deploy_build_log_with_rsync(appid, vercode, log_content):
 
 
 def rsync_status_file_to_repo(path, repo_subdir=None):
-    """Copy a build log or status JSON to the repo using rsync"""
-
+    """Copy a build log or status JSON to the repo using rsync."""
     if not config.get('deploy_process_logs', False):
         logging.debug(_('skip deploying full build logs: not enabled in config'))
         return
@@ -3858,8 +4015,7 @@ def rsync_status_file_to_repo(path, repo_subdir=None):
 
 
 def get_per_app_repos():
-    '''per-app repos are dirs named with the packageName of a single app'''
-
+    """Per-app repos are dirs named with the packageName of a single app."""
     # Android packageNames are Java packages, they may contain uppercase or
     # lowercase letters ('A' through 'Z'), numbers, and underscores
     # ('_'). However, individual package name parts may only start with
@@ -3881,7 +4037,7 @@ def get_per_app_repos():
 
 
 def is_repo_file(filename):
-    '''Whether the file in a repo is a build product to be delivered to users'''
+    """Whether the file in a repo is a build product to be delivered to users."""
     if isinstance(filename, str):
         filename = filename.encode('utf-8', errors="surrogateescape")
     return os.path.isfile(filename) \
@@ -3903,7 +4059,7 @@ def is_repo_file(filename):
 
 
 def get_examples_dir():
-    '''Return the dir where the fdroidserver example files are available'''
+    """Return the dir where the fdroidserver example files are available."""
     examplesdir = None
     tmp = os.path.dirname(sys.argv[0])
     if os.path.basename(tmp) == 'bin':
@@ -3926,16 +4082,14 @@ def get_examples_dir():
 
 
 def get_wiki_timestamp(timestamp=None):
-    """Return current time in the standard format for posting to the wiki"""
-
+    """Return current time in the standard format for posting to the wiki."""
     if timestamp is None:
         timestamp = time.gmtime()
     return time.strftime("%Y-%m-%d %H:%M:%SZ", timestamp)
 
 
 def get_android_tools_versions():
-    '''get a list of the versions of all installed Android SDK/NDK components'''
-
+    """Get a list of the versions of all installed Android SDK/NDK components."""
     global config
     sdk_path = config['sdk_path']
     if sdk_path[-1] != '/':
@@ -3958,7 +4112,7 @@ def get_android_tools_versions():
 
 
 def get_android_tools_version_log():
-    '''get a list of the versions of all installed Android SDK/NDK components'''
+    """Get a list of the versions of all installed Android SDK/NDK components."""
     log = '== Installed Android Tools ==\n\n'
     components = get_android_tools_versions()
     for name, version in sorted(components):
@@ -3968,9 +4122,7 @@ def get_android_tools_version_log():
 
 
 def get_git_describe_link():
-    """Get a link to the current fdroiddata commit, to post to the wiki
-
-    """
+    """Get a link to the current fdroiddata commit, to post to the wiki."""
     try:
         output = subprocess.check_output(['git', 'describe', '--always', '--dirty', '--abbrev=0'],
                                          universal_newlines=True).strip()
@@ -4015,7 +4167,7 @@ def calculate_math_string(expr):
 
 
 def force_exit(exitvalue=0):
-    """force exit when thread operations could block the exit
+    """Force exit when thread operations could block the exit.
 
     The build command has to use some threading stuff to handle the
     timeout and locks.  This seems to prevent the command from
@@ -4050,7 +4202,7 @@ def run_yamllint(path, indent=0):
 
 
 def sha256sum(filename):
-    '''Calculate the sha256 of the given file'''
+    """Calculate the sha256 of the given file."""
     sha = hashlib.sha256()
     with open(filename, 'rb') as f:
         while True:
@@ -4062,7 +4214,7 @@ def sha256sum(filename):
 
 
 def sha256base64(filename):
-    '''Calculate the sha256 of the given file as URL-safe base64'''
+    """Calculate the sha256 of the given file as URL-safe base64."""
     hasher = hashlib.sha256()
     with open(filename, 'rb') as f:
         while True:
@@ -4074,7 +4226,7 @@ def sha256base64(filename):
 
 
 def get_ndk_version(ndk_path):
-    """Get the version info from the metadata in the NDK package
+    """Get the version info from the metadata in the NDK package.
 
     Since r11, the info is nice and easy to find in
     sources.properties.  Before, there was a kludgey format in
@@ -4094,7 +4246,7 @@ def get_ndk_version(ndk_path):
 
 
 def auto_install_ndk(build):
-    """auto-install the NDK in the build, this assumes its in a buildserver guest VM
+    """Auto-install the NDK in the build, this assumes its in a buildserver guest VM.
 
     Download, verify, and install the NDK version as specified via the
     "ndk:" field in the build entry.  As it uncompresses the zipball,
@@ -4132,11 +4284,10 @@ def auto_install_ndk(build):
 
 
 def _install_ndk(ndk):
-    """Install specified NDK if it is not already installed
+    """Install specified NDK if it is not already installed.
 
     Parameters
     ----------
-
     ndk
         The NDK version to install, either in "release" form (r21e) or
         "revision" form (21.4.7075529).
@@ -4378,7 +4529,7 @@ NDKS = [
 
 
 def handle_retree_error_on_windows(function, path, excinfo):
-    """Python can't remove a readonly file on Windows so chmod first"""
+    """Python can't remove a readonly file on Windows so chmod first."""
     if function in (os.unlink, os.rmdir, os.remove) and excinfo[0] == PermissionError:
         os.chmod(path, stat.S_IWRITE)
         function(path)
