@@ -1562,32 +1562,21 @@ def retrieve_string_singleline(app_dir, string, xmlfiles=None):
     return retrieve_string(app_dir, string, xmlfiles).replace('\n', ' ').strip()
 
 
-def manifest_paths(app_dir, flavours):
+def manifest_paths(app_dir):
     """Return list of existing files that will be used to find the highest vercode."""
-    # TODO: Remove this in Python3.6
-    app_dir = str(app_dir)
-    possible_manifests = \
-        [os.path.join(app_dir, 'AndroidManifest.xml'),
-         os.path.join(app_dir, 'src', 'main', 'AndroidManifest.xml'),
-         os.path.join(app_dir, 'src', 'AndroidManifest.xml'),
-         os.path.join(app_dir, 'build.gradle'),
-         os.path.join(app_dir, 'build-extras.gradle'),
-         os.path.join(app_dir, 'build.gradle.kts')]
 
-    for flavour in flavours:
-        if flavour == 'yes':
-            continue
-        possible_manifests.append(
-            os.path.join(app_dir, 'src', flavour, 'AndroidManifest.xml'))
-
-    return [path for path in possible_manifests if os.path.isfile(path)]
+    manifests = ['AndroidManifest.xml', 'build.gradle', 'build-extras.gradle',
+                 'build.gradle.kts']
+    # TODO: Python3.6: Accepts a path-like object.
+    return [os.path.join(root, f) for root, _dirs, files in
+            os.walk(str(app_dir)) for f in files if f in manifests]
 
 
-def fetch_real_name(app_dir, flavours):
+def fetch_real_name(app_dir):
     """Retrieve the package name. Returns the name, or None if not found."""
     # TODO: Remove this in Python3.6
     app_dir = str(app_dir)
-    for path in manifest_paths(app_dir, flavours):
+    for path in manifest_paths(app_dir):
         if not path.endswith('.xml') or not os.path.isfile(path):
             continue
         logging.debug("fetch_real_name: Checking manifest at " + path)
@@ -2253,10 +2242,7 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, onserver=
         with open(path, 'w', encoding='iso-8859-1') as f:
             f.write(props)
 
-    flavours = []
     if build.build_method() == 'gradle':
-        flavours = build.gradle
-
         if build.target:
             n = build.target.split('-')[1]
             build_gradle = os.path.join(root_dir, "build.gradle")
@@ -2275,7 +2261,7 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, onserver=
     # Insert version code and number into the manifest if necessary
     if build.forceversion:
         logging.info("Changing the version name")
-        for path in manifest_paths(root_dir, flavours):
+        for path in manifest_paths(root_dir):
             if not os.path.isfile(path):
                 continue
             if path.endswith('.xml'):
@@ -2289,7 +2275,7 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, onserver=
 
     if build.forcevercode:
         logging.info("Changing the version code")
-        for path in manifest_paths(root_dir, flavours):
+        for path in manifest_paths(root_dir):
             if not os.path.isfile(path):
                 continue
             if path.endswith('.xml'):
