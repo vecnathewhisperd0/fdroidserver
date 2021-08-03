@@ -252,16 +252,16 @@ def fill_config_defaults(thisconfig):
     if thisconfig['java_paths'] is None:
         thisconfig['java_paths'] = dict()
         pathlist = []
-        pathlist += glob.glob('/usr/lib/jvm/j*[16-9]*')
-        pathlist += glob.glob('/usr/java/jdk1.[16-9]*')
-        pathlist += glob.glob('/System/Library/Java/JavaVirtualMachines/1.[16-9][0-9]?.0.jdk')
-        pathlist += glob.glob('/Library/Java/JavaVirtualMachines/*jdk*[0-9]*')
-        pathlist += glob.glob('/opt/oracle-jdk-*1.[0-9]*')
-        pathlist += glob.glob('/opt/icedtea-*[0-9]*')
+        pathlist += sorted(glob.glob('/usr/lib/jvm/j*[16-9]*'))
+        pathlist += sorted(glob.glob('/usr/java/jdk1.[16-9]*'))
+        pathlist += sorted(glob.glob('/System/Library/Java/JavaVirtualMachines/1.[16-9][0-9]?.0.jdk'))
+        pathlist += sorted(glob.glob('/Library/Java/JavaVirtualMachines/*jdk*[0-9]*'))
+        pathlist += sorted(glob.glob('/opt/oracle-jdk-*1.[0-9]*'))
+        pathlist += sorted(glob.glob('/opt/icedtea-*[0-9]*'))
         if os.getenv('JAVA_HOME') is not None:
             pathlist.append(os.getenv('JAVA_HOME'))
         if os.getenv('PROGRAMFILES') is not None:
-            pathlist += glob.glob(os.path.join(os.getenv('PROGRAMFILES'), 'Java', 'jdk1.[16-9][0-9]?.*'))
+            pathlist += sorted(glob.glob(os.path.join(os.getenv('PROGRAMFILES'), 'Java', 'jdk1.[16-9][0-9]?.*')))
         _add_java_paths_to_config(pathlist, thisconfig)
 
     for java_version in ('14', '13', '12', '11', '10', '9', '8', '7'):
@@ -303,7 +303,7 @@ def fill_config_defaults(thisconfig):
 
     ndk_dir = os.path.join(thisconfig['sdk_path'], 'ndk')
     if os.path.exists(ndk_dir):
-        for ndk in glob.glob(os.path.join(ndk_dir, '*')):
+        for ndk in sorted(glob.glob(os.path.join(ndk_dir, '*'))):
             version = get_ndk_version(ndk)
             if version not in ndk_paths:
                 ndk_paths[version] = ndk
@@ -640,7 +640,7 @@ def get_local_metadata_files():
     including emacs cruft ending in ~
 
     """
-    return glob.glob('.fdroid.[a-jl-z]*[a-rt-z]')
+    return sorted(glob.glob('.fdroid.[a-jl-z]*[a-rt-z]'))
 
 
 def read_pkg_args(appid_versionCode_pairs, allow_vercodes=False):
@@ -1902,7 +1902,7 @@ def get_gradle_subdir(build_dir, paths):
             first_gradle_dir = path.parent.relative_to(build_dir)
         if path.exists() and SETTINGS_GRADLE_REGEX.match(str(path.name)):
             for m in GRADLE_SUBPROJECT_REGEX.finditer(path.read_text(encoding='utf-8')):
-                for f in (path.parent / m.group(1)).glob('build.gradle*'):
+                for f in sorted((path.parent / m.group(1)).glob('build.gradle*')):
                     with f.open(encoding='utf-8') as fp:
                         for line in fp.readlines():
                             if ANDROID_PLUGIN_REGEX.match(line):
@@ -2399,7 +2399,7 @@ def getpaths_map(build_dir, globpaths):
         p = p.strip()
         full_path = os.path.join(build_dir, p)
         full_path = os.path.normpath(full_path)
-        paths[p] = [r[len(build_dir) + 1:] for r in glob.glob(full_path)]
+        paths[p] = [r[len(build_dir) + 1:] for r in sorted(glob.glob(full_path))]
         if not paths[p]:
             raise FDroidException("glob path '%s' did not match any files/dirs" % p)
     return paths
@@ -3148,7 +3148,7 @@ def metadata_find_developer_signature(appid, vercode=None):
                     appversigdirs.append(appversigdir)
 
     for sigdir in appversigdirs:
-        signature_block_files = (
+        signature_block_files = sorted(
             glob.glob(os.path.join(sigdir, '*.DSA'))
             + glob.glob(os.path.join(sigdir, '*.EC'))
             + glob.glob(os.path.join(sigdir, '*.RSA'))
@@ -3186,7 +3186,7 @@ def metadata_find_signing_files(appid, vercode):
     """
     ret = []
     sigdir = metadata_get_sigdir(appid, vercode)
-    signature_block_files = (
+    signature_block_files = sorted(
         glob.glob(os.path.join(sigdir, '*.DSA'))
         + glob.glob(os.path.join(sigdir, '*.EC'))
         + glob.glob(os.path.join(sigdir, '*.RSA'))
@@ -4067,8 +4067,7 @@ def get_examples_dir():
     examplesdir = None
     tmp = os.path.dirname(sys.argv[0])
     if os.path.basename(tmp) == 'bin':
-        egg_links = glob.glob(os.path.join(tmp, '..',
-                                           'local/lib/python3.*/site-packages/fdroidserver.egg-link'))
+        egg_links = sorted(glob.glob(os.path.join(tmp, '..', 'local/lib/python3.*/site-packages/fdroidserver.egg-link')))
         if egg_links:
             # installed from local git repo
             examplesdir = os.path.join(open(egg_links[0]).readline().rstrip(), 'examples')
@@ -4330,7 +4329,7 @@ def _install_ndk(ndk):
                 zipfp.extract(info.filename, path=ndk_base)
                 os.chmod(os.path.join(ndk_base, info.filename), 0o644)  # nosec bandit B103
     os.remove(zipball)
-    for extracted in glob.glob(os.path.join(ndk_base, '*')):
+    for extracted in sorted(glob.glob(os.path.join(ndk_base, '*'))):
         version = get_ndk_version(extracted)
         if os.path.basename(extracted) != version:
             ndk_dir = os.path.join(ndk_base, version)

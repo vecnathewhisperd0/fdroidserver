@@ -270,8 +270,7 @@ def update_serverwebroot(serverwebroot, repo_section):
     # upload "current version" symlinks if requested
     if config['make_current_version_link'] and repo_section == 'repo':
         links_to_upload = []
-        for f in glob.glob('*.apk') \
-                + glob.glob('*.apk.asc') + glob.glob('*.apk.sig'):
+        for f in sorted(glob.glob('*.apk') + glob.glob('*.apk.asc') + glob.glob('*.apk.sig')):
             if os.path.islink(f):
                 links_to_upload.append(f)
         if len(links_to_upload) > 0:

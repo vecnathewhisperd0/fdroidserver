@@ -503,7 +503,7 @@ def resize_all_icons(repodirs):
         for density in screen_densities:
             icon_dir = get_icon_dir(repodir, density)
             icon_glob = os.path.join(icon_dir, '*.png')
-            for iconpath in glob.glob(icon_glob):
+            for iconpath in sorted(glob.glob(icon_glob)):
                 resize_icon(iconpath, density)
 
 
@@ -699,7 +699,7 @@ def insert_obbs(repodir, apps, apks):
     obbs = []
     java_Integer_MIN_VALUE = -pow(2, 31)
     currentPackageNames = apps.keys()
-    for f in glob.glob(os.path.join(repodir, '*.obb')):
+    for f in sorted(glob.glob(os.path.join(repodir, '*.obb'))):
         obbfile = os.path.basename(f)
         # obbfile looks like: [main|patch].<expansion-version>.<package-name>.obb
         chunks = obbfile.split('.')
@@ -948,7 +948,7 @@ def insert_funding_yml_donation_links(apps):
         if not os.path.isdir(sourcedir):
             continue
         for f in ([os.path.join(sourcedir, 'FUNDING.yml'), ]
-                  + glob.glob(os.path.join(sourcedir, '.github', 'FUNDING.yml'))):
+                  + sorted(glob.glob(os.path.join(sourcedir, '.github', 'FUNDING.yml')))):
             if not os.path.isfile(f):
                 continue
             data = None
@@ -1155,10 +1155,10 @@ def insert_localized_app_metadata(apps):
     See also our documentation page:
     https://f-droid.org/en/docs/All_About_Descriptions_Graphics_and_Screenshots/#in-the-apps-build-metadata-in-an-fdroiddata-collection
     """
-    sourcedirs = glob.glob(os.path.join('build', '[A-Za-z]*', 'src', '[A-Za-z]*', 'fastlane', 'metadata', 'android', '[a-z][a-z]*'))
-    sourcedirs += glob.glob(os.path.join('build', '[A-Za-z]*', 'fastlane', 'metadata', 'android', '[a-z][a-z]*'))
-    sourcedirs += glob.glob(os.path.join('build', '[A-Za-z]*', 'metadata', '[a-z][a-z]*'))
-    sourcedirs += glob.glob(os.path.join('metadata', '[A-Za-z]*', '[a-z][a-z]*'))
+    sourcedirs = sorted(glob.glob(os.path.join('build', '[A-Za-z]*', 'src', '[A-Za-z]*', 'fastlane', 'metadata', 'android', '[a-z][a-z]*')))
+    sourcedirs += sorted(glob.glob(os.path.join('build', '[A-Za-z]*', 'fastlane', 'metadata', 'android', '[a-z][a-z]*')))
+    sourcedirs += sorted(glob.glob(os.path.join('build', '[A-Za-z]*', 'metadata', '[a-z][a-z]*')))
+    sourcedirs += sorted(glob.glob(os.path.join('metadata', '[A-Za-z]*', '[a-z][a-z]*')))
 
     for srcd in sorted(sourcedirs):
         if not os.path.isdir(srcd):
@@ -1220,7 +1220,7 @@ def insert_localized_app_metadata(apps):
                     if locale == 'images':
                         locale = segments[-2]
                         destdir = os.path.join('repo', packageName, locale)
-                    for f in glob.glob(os.path.join(root, d, '*.*')):
+                    for f in sorted(glob.glob(os.path.join(root, d, '*.*'))):
                         _ignored, extension = common.get_extension(f)
                         if extension in ALLOWED_EXTENSIONS:
                             screenshotdestdir = os.path.join(destdir, d)
@@ -2397,7 +2397,7 @@ def main():
     mismatch_errors = ''
     for appid in appid_has_apks:
         if appid in appid_has_repo_files:
-            appid_files = ', '.join(glob.glob(os.path.join('repo', appid + '_[0-9]*.*')))
+            appid_files = ', '.join(sorted(glob.glob(os.path.join('repo', appid + '_[0-9]*.*'))))
             mismatch_errors += (_('{appid} has both APKs and files: {files}')
                                 .format(appid=appid, files=appid_files)) + '\n'
     if mismatch_errors:
