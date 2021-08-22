@@ -319,6 +319,8 @@ def fill_config_defaults(thisconfig):
                     ndk_paths[ndkdict['release']] = ndk_paths.pop(k)
                     break
 
+    find_gpg_and_gpgv(thisconfig)
+
 
 def regsub_file(pattern, repl, path):
     with open(path, 'rb') as f:
@@ -514,6 +516,16 @@ def assert_config_keystore(config):
     if nosigningkey:
         raise FDroidException("This command requires a signing key, "
                               + "you can create one using: fdroid update --create-key")
+
+
+def find_gpg_and_gpgv(config):
+    for command in ('gpg', 'gpgv'):
+        if command not in config:
+            tmp = find_command(command)
+            if tmp is not None:
+                config[command] = tmp
+            else:
+                logging.warning(_('{} not found! Cannot verify git tags'.format(command)))
 
 
 def find_apksigner(config):
@@ -920,22 +932,23 @@ def setup_vcs(app):
         remote = os.getcwd()
     else:
         remote = app.Repo
-    vcs = getvcs(app.RepoType, remote, build_dir)
+    signing_key = metadata_get_source_signing_key(app.id)
+    vcs = getvcs(app.RepoType, remote, build_dir, signing_key)
 
     return vcs, build_dir
 
 
-def getvcs(vcstype, remote, local):
+def getvcs(vcstype, remote, local, signing_key=None):
     # TODO: Remove this in Python3.6
     local = str(local)
     if vcstype == 'git':
-        return vcs_git(remote, local)
+        return vcs_git(remote, local, signing_key)
     if vcstype == 'git-svn':
-        return vcs_gitsvn(remote, local)
+        return vcs_gitsvn(remote, local, signing_key)
     if vcstype == 'hg':
-        return vcs_hg(remote, local)
+        return vcs_hg(remote, local, signing_key)
     if vcstype == 'bzr':
-        return vcs_bzr(remote, local)
+        return vcs_bzr(remote, local, signing_key)
     if vcstype == 'srclib':
         if local != os.path.join('build', 'srclib', remote):
             raise VCSException("Error: srclib paths are hard-coded!")
@@ -953,7 +966,7 @@ def getsrclibvcs(name):
 
 class vcs:
 
-    def __init__(self, remote, local):
+    def __init__(self, remote, local, signing_key=None):
 
         # TODO: Remove this in Python3.6
         local = str(local)
@@ -970,6 +983,7 @@ class vcs:
 
         self.remote = remote
         self.local = local
+        self.signing_key = signing_key
         self.clone_failed = False
         self.refreshed = False
         self.srclib = None
@@ -1077,6 +1091,28 @@ class vcs:
     def getsrclib(self):
         """Return the srclib (name, path) used in setting up the current revision, or None."""
         return self.srclib
+
+    def make_keyring(self):
+        """
+        Create a temporary GnuPG keyring from self.signing_key.
+
+        Returns (gpghome_tmp_dir, keyring_tmp_dir).
+        """
+        if not self.signing_key:
+            return
+        if not getattr(self, "_keyring", None):
+            logging.debug("Creating GnuPG keyring from {}".format(self.signing_key))
+            self._gpghome = tempfile.TemporaryDirectory()
+            self._keyring = os.path.join(self._gpghome.name, 'trustedkeys.gpg')
+            cmd = [
+                config['gpg'], '--homedir', self._gpghome.name,
+                '--no-options', '-q', '--batch', '--no-default-keyring',
+                '--output', self._keyring, '--dearmor', self.signing_key
+            ]
+            p = FDroidPopen(cmd, output=False)
+            if p.returncode != 0:
+                raise VCSException('gpg command to create keyring failed', p.output)
+        return self._gpghome.name, self._keyring
 
 
 class vcs_git(vcs):
@@ -1190,6 +1226,7 @@ class vcs_git(vcs):
         p = FDroidPopen(['git', 'checkout', '-f', rev], cwd=self.local, output=False)
         if p.returncode != 0:
             raise VCSException(_("Git checkout of '%s' failed") % rev, p.output)
+        self.verify_signature(rev)
         # Get rid of any uncontrolled files left behind
         p = FDroidPopen(['git', 'clean', '-dffx'], cwd=self.local, output=False)
         if p.returncode != 0:
@@ -1259,6 +1296,66 @@ class vcs_git(vcs):
         if p.returncode != 0:
             return None
         return p.output.strip()
+
+    _pgp_tag_signature = re.compile(r'^(.*?\n)(-----BEGIN PGP SIGNATURE-----\n.*)$', re.S)
+    _pgp_commit_signature = re.compile(r'^(.*?\n)gpgsig (-----BEGIN PGP SIGNATURE-----\n.*?\n'
+                                       r' -----END PGP SIGNATURE-----\n)(.*)$', re.S)
+    _git_describe_long = re.compile(r'^(.*?)-0-g([0-9a-f]{7,40})$')
+
+    def verify_signature(self, rev):
+        """Verify git tag (if self.signing_key)."""
+        if not self.signing_key:
+            return
+        gpghome, keyring = self.make_keyring()
+
+        # get commit hash
+        p = FDroidPopen(['git', 'rev-parse', '--verify', rev], cwd=self.local, output=False)
+        if p.returncode != 0:
+            raise VCSException('git rev-parse failed', p.output)
+        commit = p.output.strip()
+
+        # rev = {tag}-0-g{commit} | {commit} | {tag}
+        m = self._git_describe_long.match(rev)
+        if m and commit.startswith(m.group(2)):
+            tag = m.group(1)
+        elif not commit.startswith(rev):
+            tag = rev
+        else:
+            tag = None
+
+        # get signed tag/commit
+        p = FDroidPopen(['git', 'cat-file', '-p', tag or commit], cwd=self.local, output=False)
+        if p.returncode != 0:
+            raise VCSException('git cat-file failed', p.output)
+
+        if tag:
+            # get tag signature
+            m = self._pgp_tag_signature.match(p.output)
+            if not m:
+                raise VCSException('Tag {} is not signed'.format(tag))
+        else:
+            # get commit signature
+            m = self._pgp_commit_signature.match(p.output)
+            if not m:
+                raise VCSException('Commit {} is not signed'.format(commit))
+
+        # verify signature
+        with tempfile.TemporaryDirectory() as tmpdir:
+            txt = os.path.join(tmpdir, 'txt')
+            sig = os.path.join(tmpdir, 'sig')
+            with open(txt, 'w') as fh:
+                fh.write(m.group(1))
+                if not tag:
+                    fh.write(m.group(3))
+            with open(sig, 'w') as fh:
+                fh.write(m.group(2))
+            cmd = [config['gpgv'], '--homedir', gpghome, '--keyring', keyring, sig, txt]
+            p = FDroidPopen(cmd, output=False)
+            if p.returncode != 0:
+                raise VCSException('OpenPGP signature did not verify', p.output)
+
+        logging.debug("Successfully verified {} using {}"
+                      .format(tag or commit, self.signing_key))
 
 
 class vcs_gitsvn(vcs):
@@ -3125,6 +3222,12 @@ def apk_signer_fingerprint_short(apk_path):
     shortened signing-key fingerprint
     """
     return apk_signer_fingerprint(apk_path)[:7]
+
+
+def metadata_get_source_signing_key(appid):
+    """Get upstream source signing key for app."""
+    keyfile = os.path.join('metadata', appid, 'source-signing-key.asc')
+    return keyfile if os.path.exists(keyfile) else None
 
 
 def metadata_get_sigdir(appid, vercode=None):
