@@ -54,7 +54,7 @@ ssh_channel = None
 
 
 # Note that 'force' here also implies test mode.
-def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
+def build_server(app, build, output_dir, log_dir, force, refresh):
     """Do a build on the builder vm.
 
     Parameters
@@ -63,10 +63,6 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
         The metadata of the app to build.
     build
         The build of the app to build.
-    vcs
-        The version control system controller object of the app.
-    build_dir
-        The local source-code checkout directory of the app.
     output_dir
         The target folder for the build result.
     log_dir
@@ -210,10 +206,6 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
                 srclibpaths.append(
                     common.getsrclib(lib, 'build/srclib', basepath=True, prepare=False))
 
-        # If one was used for the main source, add that too.
-        basesrclib = vcs.getsrclib()
-        if basesrclib:
-            srclibpaths.append(basesrclib)
         for name, number, lib in srclibpaths:
             logging.info("Sending srclib '%s'" % lib)
             ftp.chdir(posixpath.join(homedir, 'build', 'srclib'))
@@ -230,9 +222,19 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
             else:
                 raise BuildException(_('cannot find required srclibs: "{path}"')
                                      .format(path=srclibsfile))
+
+        vcs, build_dir = common.setup_vcs(app)
+        # When using server mode, still keep a local cache of the repo, by
+        # grabbing the source now.
+        vcs.gotorevision(build.commit, refresh)
+
+        # Initialise submodules if required
+        if build.submodules:
+            vcs.initsubmodules()
+
         # Copy the main app source code
         # (no need if it's a srclib)
-        if (not basesrclib) and os.path.exists(build_dir):
+        if os.path.exists(build_dir):
             ftp.chdir(posixpath.join(homedir, 'build'))
             fv = '.fdroidvcs-' + app.id
             ftp.put(os.path.join('build', fv), fv)
@@ -411,7 +413,7 @@ def get_metadata_from_apk(app, build, apkfile):
     return versionCode, versionName
 
 
-def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, extlib_dir, tmp_dir, force, onserver, refresh):
+def build_local(app, build, output_dir, log_dir, srclib_dir, extlib_dir, tmp_dir, force, onserver, refresh):
     """Do a build locally.
 
     Parameters
@@ -420,10 +422,6 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
         The metadata of the app to build.
     build
         The build of the app to build.
-    vcs
-        The version control system controller object of the app.
-    build_dir
-        The local source-code checkout directory of the app.
     output_dir
         The target folder for the build result.
     log_dir
@@ -513,6 +511,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
                             % (app.id, build.versionName, build.sudo))
 
     # Prepare the source code...
+    vcs, build_dir = common.setup_vcs(app)
     root_dir, srclibpaths = common.prepare_source(vcs, app, build,
                                                   build_dir, srclib_dir,
                                                   extlib_dir, onserver, refresh)
@@ -858,8 +857,8 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
                     os.path.join(output_dir, tarname))
 
 
-def trybuild(app, build, build_dir, output_dir, log_dir, also_check_dir,
-             srclib_dir, extlib_dir, tmp_dir, repo_dir, vcs, test,
+def trybuild(app, build, output_dir, log_dir, also_check_dir,
+             srclib_dir, extlib_dir, tmp_dir, repo_dir, test,
              server, force, onserver, refresh):
     """Build a particular version of an application, if it needs building.
 
@@ -929,17 +928,9 @@ def trybuild(app, build, build_dir, output_dir, log_dir, also_check_dir,
         build.versionName, build.versionCode, app.id))
 
     if server:
-        # When using server mode, still keep a local cache of the repo, by
-        # grabbing the source now.
-        vcs.gotorevision(build.commit, refresh)
-
-        # Initialise submodules if required
-        if build.submodules:
-            vcs.initsubmodules()
-
-        build_server(app, build, vcs, build_dir, output_dir, log_dir, force)
+        build_server(app, build, output_dir, log_dir, force, refresh)
     else:
-        build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, extlib_dir, tmp_dir, force, onserver, refresh)
+        build_local(app, build, output_dir, log_dir, srclib_dir, extlib_dir, tmp_dir, force, onserver, refresh)
     return True
 
 
@@ -1171,9 +1162,6 @@ def main():
     endtime = time.time() + 72 * 60 * 60
     max_build_time_reached = False
     for appid, app in apps.items():
-
-        first = True
-
         for build in app.get('Builds', []):
             if time.time() > endtime:
                 max_build_time_reached = True
@@ -1194,18 +1182,10 @@ def main():
 
             tools_version_log = ''
             try:
-
-                # For the first build of a particular app, we need to set up
-                # the source repo. We can reuse it on subsequent builds, if
-                # there are any.
-                if first:
-                    vcs, build_dir = common.setup_vcs(app)
-                    first = False
-
                 logging.debug("Checking %s:%s" % (appid, build.versionCode))
-                if trybuild(app, build, build_dir, output_dir, log_dir,
+                if trybuild(app, build, output_dir, log_dir,
                             also_check_dir, srclib_dir, extlib_dir,
-                            tmp_dir, repo_dir, vcs, options.test,
+                            tmp_dir, repo_dir, options.test,
                             options.server, options.force,
                             options.onserver, options.refresh):
                     toolslog = os.path.join(log_dir,
