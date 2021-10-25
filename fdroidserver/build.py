@@ -256,6 +256,8 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
             cmdline += ' --no-tarball'
         if (options.scan_binary or config.get('scan_binary')) and not options.skipscan:
             cmdline += ' --scan-binary'
+        if options.debug:
+            cmdline += ' --debug'
         cmdline += " %s:%s" % (app.id, build.versionCode)
         ssh_channel.exec_command('bash --login -c "' + cmdline + '"')  # nosec B601 inputs are sanitized
 
@@ -320,8 +322,12 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
     finally:
         # Suspend the build server.
         vm = vmtools.get_build_vm('builder')
-        logging.info('destroying buildserver after build')
-        vm.destroy()
+        if options.debug:
+            vm.suspend()
+            logging.warning('buildserver suspended')
+        else:
+            logging.info('destroying buildserver after build')
+            vm.destroy()
 
         # deploy logfile to repository web server
         if output:
@@ -493,15 +499,16 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
                 raise BuildException("Error running sudo command for %s:%s" %
                                      (app.id, build.versionName), p.output)
 
-        p = FDroidPopen(['sudo', 'passwd', '--lock', 'root'])
-        if p.returncode != 0:
-            raise BuildException("Error locking root account for %s:%s" %
-                                 (app.id, build.versionName), p.output)
+        if not options.debug:
+            p = FDroidPopen(['sudo', 'passwd', '--lock', 'root'])
+            if p.returncode != 0:
+                raise BuildException("Error locking root account for %s:%s" %
+                                     (app.id, build.versionName), p.output)
 
-        p = FDroidPopen(['sudo', 'SUDO_FORCE_REMOVE=yes', 'dpkg', '--purge', 'sudo'])
-        if p.returncode != 0:
-            raise BuildException("Error removing sudo for %s:%s" %
-                                 (app.id, build.versionName), p.output)
+            p = FDroidPopen(['sudo', 'SUDO_FORCE_REMOVE=yes', 'dpkg', '--purge', 'sudo'])
+            if p.returncode != 0:
+                raise BuildException("Error removing sudo for %s:%s" %
+                                     (app.id, build.versionName), p.output)
 
         log_path = os.path.join(log_dir,
                                 common.get_toolsversion_logname(app, build))
@@ -989,6 +996,8 @@ def parse_commandline():
                         help=_("Test mode - put output in the tmp directory only, and always build, even if the output already exists."))
     parser.add_argument("--server", action="store_true", default=False,
                         help=_("Use build server"))
+    parser.add_argument("--debug", action="store_true", default=False,
+                        help=_("Don't remove sudo and keep VM running after build (useful for debugging)."))
     # this option is internal API for telling fdroid that
     # it's running inside a buildserver vm.
     parser.add_argument("--on-server", dest="onserver", action="store_true", default=False,
@@ -1078,6 +1087,8 @@ def main():
 
     if config['build_server_always']:
         options.server = True
+    if options.debug and not (options.server or options.onserver):
+        parser.error("option %s: Using --debug only works with --server" % "debug")
 
     log_dir = 'logs'
     if not os.path.isdir(log_dir):
