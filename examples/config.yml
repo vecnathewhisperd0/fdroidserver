@@ -268,6 +268,18 @@
 # awssecretkey: {env: awssecretkey}
 
 
+# To deploy to IPFS you need the ipfs command line utility in $PATH and have a
+# `ipfs daemon` running. To serve the repo permanently, you either need to keep
+# the daemon running or use a pinning service.
+#
+# You can specify a ipnfs key per repo section. Make sure to generate the keys
+# before the first run, using: `ipfs key gen <key>`.
+#
+# ipfs:
+#   repo: fdroid
+#   archive: fdroid_archive
+
+
 # If you want to force 'fdroid server' to use a non-standard serverwebroot.
 # This will allow you to have 'serverwebroot' entries which do not end in
 # '/fdroid'. (Please note that some client features expect repository URLs

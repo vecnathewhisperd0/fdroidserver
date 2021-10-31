@@ -328,6 +328,22 @@ def sync_from_localcopy(repo_section, local_copy_dir):
         push_binary_transparency(offline_copy, online_copy)
 
 
+def update_ipfs(repo_section, ipns_key):
+    """Upload using the CLI tool ipfs."""
+    logging.debug(
+        _('adding {section} to ipfs and publish with ipns key {key}').format(
+            section=repo_section, key=ipns_key
+        )
+    )
+
+    final_hash = subprocess.check_output(
+        ['ipfs', 'add', '-r', '-Q', repo_section], text=True
+    ).strip()
+    subprocess.check_call(
+        ['ipfs', 'name', 'publish', '--key', ipns_key, '/ipfs/{}'.format(final_hash)]
+    )
+
+
 def update_localcopy(repo_section, local_copy_dir):
     """Copy data from offline to the "local copy dir" filesystem.
 
@@ -795,10 +811,11 @@ def main():
             and not config.get('androidobservatory') \
             and not config.get('binary_transparency_remote') \
             and not config.get('virustotal_apikey') \
+            and not config.get('ipfs') \
             and local_copy_dir is None:
         logging.warning(_('No option set! Edit your config.yml to set at least one of these:')
                         + '\nserverwebroot, servergitmirrors, local_copy_dir, awsbucket, '
-                        + 'virustotal_apikey, androidobservatory, or binary_transparency_remote')
+                        + 'virustotal_apikey, androidobservatory, binary_transparency_remote, or ipfs')
         sys.exit(1)
 
     repo_sections = ['repo']
@@ -831,6 +848,8 @@ def main():
             upload_to_android_observatory(repo_section)
         if config.get('virustotal_apikey'):
             upload_to_virustotal(repo_section, config.get('virustotal_apikey'))
+        if config.get('ipfs', {}).get(repo_section):
+            update_ipfs(repo_section, config.get('ipfs')[repo_section])
 
     binary_transparency_remote = config.get('binary_transparency_remote')
     if binary_transparency_remote:

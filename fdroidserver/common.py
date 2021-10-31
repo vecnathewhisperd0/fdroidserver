@@ -467,7 +467,7 @@ def read_config(opts=None):
             for k, v in dictvalue.items():
                 new[str(k)] = v
             config[configname] = new
-        elif configname in ('ndk_paths', 'java_paths', 'char_limits', 'keyaliases'):
+        elif configname in ('ndk_paths', 'java_paths', 'char_limits', 'keyaliases', 'ipfs'):
             continue
         elif isinstance(dictvalue, dict):
             for k, v in dictvalue.items():
