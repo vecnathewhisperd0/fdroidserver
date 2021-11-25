@@ -328,19 +328,25 @@ def sync_from_localcopy(repo_section, local_copy_dir):
         push_binary_transparency(offline_copy, online_copy)
 
 
-def update_ipfs(repo_section, ipns_key):
+def update_ipfs(repo_section):
     """Upload using the CLI tool ipfs."""
+    logging.debug(_('adding {section} to ipfs').format(section=repo_section))
+
+    return subprocess.check_output(
+        ['ipfs', 'add', '-r', '-Q', repo_section], text=True
+    ).strip()
+
+
+def update_ipns(ipfs_hash, ipns_key):
+    """Update ipns using the CLI tool ipfs."""
     logging.debug(
-        _('adding {section} to ipfs and publish with ipns key {key}').format(
-            section=repo_section, key=ipns_key
+        _('publish {ipfs_hash} with ipns key {key}').format(
+            ipfs_hash=ipfs_hash, key=ipns_key
         )
     )
 
-    final_hash = subprocess.check_output(
-        ['ipfs', 'add', '-r', '-Q', repo_section], text=True
-    ).strip()
     subprocess.check_call(
-        ['ipfs', 'name', 'publish', '--key', ipns_key, '/ipfs/{}'.format(final_hash)]
+        ['ipfs', 'name', 'publish', '--key', ipns_key, '/ipfs/{}'.format(ipfs_hash)]
     )
 
 
@@ -686,6 +692,32 @@ def upload_apk_to_virustotal(virustotal_apikey, packageName, apkName, hash,
     return outputfilename
 
 
+def upload_to_estuary(repo_section, apikey):
+    """Publish repo to https://estuary.tech/."""
+    import requests
+    from requests_toolbelt.multipart.encoder import MultipartEncoder
+
+    session = requests.Session()
+    index_hash = ""
+    for root, dirs, files in os.walk(os.path.join(os.getcwd(), repo_section)):
+        for name in files:
+            file_to_upload = os.path.join(root, name)
+            logging.debug(' uploading "' + file_to_upload + '"...')
+            data = MultipartEncoder({'data': (name, open(file_to_upload, 'rb'))})
+            headers = {"Authorization": "Bearer {}".format(apikey), 'Content-Type': data.content_type}
+            response = session.post(
+                "https://shuttle-4.estuary.tech/content/add",
+                headers=headers,
+                data=data
+            )
+            if not response.ok:
+                logging.error(_("Failed to upload {} to Estuary".format(file_to_upload)))
+                return
+            if name == "index-v1.jar":
+                index_hash = response.json()["cid"]
+    return index_hash
+
+
 def push_binary_transparency(git_repo_path, git_remote):
     """Push the binary transparency git repo to the specifed remote.
 
@@ -812,10 +844,12 @@ def main():
             and not config.get('binary_transparency_remote') \
             and not config.get('virustotal_apikey') \
             and not config.get('ipfs') \
+            and not config.get('estuary_apikey') \
             and local_copy_dir is None:
         logging.warning(_('No option set! Edit your config.yml to set at least one of these:')
                         + '\nserverwebroot, servergitmirrors, local_copy_dir, awsbucket, '
-                        + 'virustotal_apikey, androidobservatory, binary_transparency_remote, or ipfs')
+                        + 'virustotal_apikey, androidobservatory, binary_transparency_remote, '
+                        + 'ipfs, or estuary_apikey')
         sys.exit(1)
 
     repo_sections = ['repo']
@@ -831,6 +865,7 @@ def main():
         repo_sections.append('unsigned')
 
     for repo_section in repo_sections:
+        ipfs_hash = ""
         if local_copy_dir is not None:
             if config['sync_from_local_copy_dir']:
                 sync_from_localcopy(repo_section, local_copy_dir)
@@ -848,8 +883,12 @@ def main():
             upload_to_android_observatory(repo_section)
         if config.get('virustotal_apikey'):
             upload_to_virustotal(repo_section, config.get('virustotal_apikey'))
-        if config.get('ipfs', {}).get(repo_section):
-            update_ipfs(repo_section, config.get('ipfs')[repo_section])
+        if config.get("ipfs"):
+            ipfs_hash = update_ipfs(repo_section)
+        if config.get("estuary_apikey"):
+            ipfs_hash = upload_to_estuary(repo_section, config.get("estuary_apikey"))
+        if ipfs_hash and config.get("ipns", {}).get(repo_section):
+            update_ipns(ipfs_hash, config.get("ipns")[repo_section])
 
     binary_transparency_remote = config.get('binary_transparency_remote')
     if binary_transparency_remote:
