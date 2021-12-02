@@ -454,6 +454,15 @@ def main():
     os_env['VAGRANT_DISABLE_VBOXSYMLINKCREATE'] = '1'
     v.env = os_env
 
+    if config['vm_provider'] == 'docker':
+        logging.debug('Docker does not use a basebox.')
+        # Docker provider does not use box but a Dockerfile
+        config['basebox'] = 'PLACEHOLDER'
+
+        def docker_box_list():
+            return [type('', (object,), {"provider": "docker", "name": config['basebox']})()]
+        v.box_list = docker_box_list
+
     if options.verbosity >= 2:
         tail = fdroidserver.tail.Tail(logfilename)
         tail.start()
@@ -484,11 +493,11 @@ def main():
             yaml.dump(config, f)
 
     # Check if selected provider is supported
-    if config['vm_provider'] not in ['libvirt', 'virtualbox']:
+    if config['vm_provider'] not in ['docker', 'libvirt', 'virtualbox']:
         logging.critical("Currently selected VM provider '{vm_provider}' "
                          "is not supported. (please choose from: "
-                         "virtualbox, libvirt)"
-                         .format(vm_provider=config['cm_provider']))
+                         "docker, libvirt, virtualbox)"
+                         .format(vm_provider=config['vm_provider']))
         sys.exit(1)
     # Check if selected basebox is available
     available_boxes_by_provider = [x.name for x in v.box_list() if x.provider == config['vm_provider']]
@@ -618,7 +627,11 @@ if __name__ == '__main__':
             virt = subprocess.check_output('/usr/bin/systemd-detect-virt').strip().decode('utf-8')
         except subprocess.CalledProcessError:
             virt = 'none'
-        if virt == 'qemu' or virt == 'kvm' or virt == 'bochs':
+
+        if shutil.which('docker'):
+            logging.info('Defaulting to Docker since it is installed')
+            config['vm_provider'] = 'docker'
+        elif virt == 'qemu' or virt == 'kvm' or virt == 'bochs':
             logging.info('Running in a VM guest, defaulting to QEMU/KVM via libvirt')
             config['vm_provider'] = 'libvirt'
         elif virt != 'none':

@@ -1,0 +1,63 @@
+#!/usr/bin/env python3
+
+# http://www.drdobbs.com/testing/unit-testing-with-python/240165163
+
+import inspect
+import json
+import logging
+import os
+import sys
+import tarfile
+import tempfile
+import unittest
+
+
+localmodule = os.path.realpath(
+    os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())), '..')
+)
+print('localmodule: ' + localmodule)
+if localmodule not in sys.path:
+    sys.path.insert(0, localmodule)
+
+from fdroidserver import vmtools
+
+
+class VmtoolsTest(unittest.TestCase):
+    '''fdroidserver/vmtools.py'''
+
+    def setUp(self):
+        logging.basicConfig(level=logging.DEBUG)
+        self.basedir = os.path.join(localmodule, 'tests')
+        self.tmpdir = os.path.abspath(os.path.join(self.basedir, '..', '.testfiles'))
+        if not os.path.exists(self.tmpdir):
+            os.makedirs(self.tmpdir)
+        os.chdir(self.basedir)
+
+    def test_write_docker_box(self):
+        testdir = tempfile.mkdtemp(
+            prefix=inspect.currentframe().f_code.co_name, dir=self.tmpdir
+        )
+        os.chdir(testdir)
+        docker_box = 'docker.box'
+        self.assertFalse(os.path.exists(docker_box), docker_box + " should not exist")
+        vmtools.DockerBuildVm._write_docker_box(docker_box)
+
+        expected = ['Vagrantfile', 'info.json', 'metadata.json']
+        with tarfile.open(docker_box) as tar:
+            self.assertEqual(expected, tar.getnames())  # reproducible order
+            for f in expected:
+                tar.extract(f)
+                self.assertTrue(os.path.getsize(f) > 0, f + " should not be 0")
+                if f.endswith('.json'):
+                    with open(f) as fp:
+                        data = json.load(fp)
+                    self.assertTrue(isinstance(data, dict), "JSON should be a dict")
+        self.assertTrue(os.path.exists(docker_box), docker_box + " should exist")
+
+
+if __name__ == "__main__":
+    os.chdir(os.path.dirname(__file__))
+
+    newSuite = unittest.TestSuite()
+    newSuite.addTest(unittest.makeSuite(VmtoolsTest))
+    unittest.main(failfast=False)
