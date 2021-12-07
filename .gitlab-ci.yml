@@ -552,14 +552,10 @@ docker:
   script:
     - apk add --no-cache
           ansible
-          build-base
-          ca-certificates
           curl
           fuse
           gcc
           gcompat
-          libxml2-dev
-          libxslt-dev
           libarchive-tools
           make
           musl-dev
@@ -578,7 +574,7 @@ docker:
           unzip
 
     - python3 -m ensurepip
-    - $pip install -e .[makebuildserver]
+    - $pip install clint defusedxml docker GitPython python-vagrant 'pyasn1-modules<0.3,>=0.2.1' qrcode
 
     - git clone --depth=1 --branch v2.2.19 https://github.com/hashicorp/vagrant.git
     - cd vagrant
