@@ -582,6 +582,10 @@ docker:
     - bundle --binstubs exec
     - export PATH="$PATH:$PWD/exec"
 
+    # TODO get these from bullseye-backports
+    - vagrant plugin install docker-api
+    - vagrant plugin install vagrant-communicator-docker
+
     - cd $CI_PROJECT_DIR
     - echo 'vm_provider = "docker"' > makebuildserver.config.py
     - ./makebuildserver --verbose --skip-cache-update
