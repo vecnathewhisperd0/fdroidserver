@@ -275,7 +275,7 @@ class Build(dict):
         self.scandelete = []
         self.build = ''
         self.buildjni = []
-        self.ndk = None
+        self.ndk = []
         self.preassemble = []
         self.gradleprops = []
         self.antcommands = []
@@ -325,8 +325,9 @@ class Build(dict):
     def ndk_path(self) -> str:
         """Return the path string of the first configured NDK or an empty string."""
         ndk = self.ndk
-        if isinstance(ndk, list):
-            ndk = self.ndk[0]
+        if not ndk:
+            return ''
+        ndk = ndk[0]
         path = common.config['ndk_paths'].get(ndk)
         if path and not isinstance(path, str):
             raise TypeError('NDK path is not string')
@@ -364,6 +365,7 @@ flagtypes = {
     'novcheck': TYPE_BOOL,
     'antifeatures': TYPE_STRINGMAP,
     'timeout': TYPE_INT,
+    'ndk': TYPE_LIST,
 }
 
 
