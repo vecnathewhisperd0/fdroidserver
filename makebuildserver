@@ -452,6 +452,10 @@ def main():
     # https://phoenhex.re/2018-03-25/not-a-vagrant-bug
     os_env = os.environ.copy()
     os_env['VAGRANT_DISABLE_VBOXSYMLINKCREATE'] = '1'
+    if options.verbosity > 0:
+        os_env['VAGRANT_LOG'] = 'info'
+    else:
+        os_env['VAGRANT_LOG'] = 'warn'
     v.env = os_env
 
     if config['vm_provider'] == 'docker':
