@@ -109,6 +109,7 @@ packages="
  python-magic
  python-pip
  python-setuptools
+ python3-argcomplete
  python3-asn1crypto/stretch-backports
  python3-defusedxml
  python3-git
@@ -146,3 +147,9 @@ update-java-alternatives --set $highestjava
 
 # configure headless openjdk to work without gtk accessability dependencies
 sed -i -e 's@\(assistive_technologies=org.GNOME.Accessibility.AtkWrapper\)@#\1@' /etc/java-8-openjdk/accessibility.properties
+
+# TODO use apt-get install once using bullseye-backports
+curl https://snapshot.debian.org/archive/debian-ports/20211219T023100Z/pool/main/s/sdkmanager/sdkmanager_0.4.1-1_all.deb > sdkmanager.deb
+echo "1aaf3cead6cc3be585534ec955af9614997132aece9463ef9da44003f458f5a1  sdkmanager.deb" > sdkmanager.deb.sha256
+sha256sum -c sdkmanager.deb.sha256
+dpkg -i sdkmanager.deb
