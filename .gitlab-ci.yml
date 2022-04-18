@@ -246,6 +246,7 @@ black:
         tests/metadata.TestCase
         tests/ndk-release-checksums.py
         tests/rewritemeta.TestCase
+        tests/vmtools.TestCase
 
 
 fedora_latest:
@@ -556,6 +557,7 @@ docker:
       - .gitlab-ci.yml
       - makebuildserver
       - buildserver/*
+      - fdroidserver/vmtools.py
   image: docker:git
   services:
     - docker:dind
@@ -563,8 +565,45 @@ docker:
     TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
     RELEASE_IMAGE: $CI_REGISTRY_IMAGE:buildserver
   script:
-    - cd buildserver
-    - docker build -t $TEST_IMAGE --build-arg GIT_REV_PARSE_HEAD=$(git rev-parse HEAD) .
-    - docker tag $TEST_IMAGE $RELEASE_IMAGE
+    - apk add --no-cache
+          ansible
+          curl
+          fuse
+          gcc
+          gcompat
+          libarchive-tools
+          make
+          musl-dev
+          py3-asn1
+          py3-asn1crypto
+          py3-pillow
+          py3-requests
+          py3-wheel
+          py3-yaml
+          python3
+          python3-dev
+          ruby-bundler
+          ruby-dev
+          ruby-full
+          squashfs-tools
+          unzip
+
+    - python3 -m ensurepip
+    - $pip install clint defusedxml docker GitPython python-vagrant 'pyasn1-modules<0.3,>=0.2.1' qrcode
+
+    - git clone --depth=1 --branch v2.2.19 https://github.com/hashicorp/vagrant.git
+    - cd vagrant
+    - bundle install
+    - bundle --binstubs exec
+    - export PATH="$PATH:$PWD/exec"
+
+    # TODO get these from bullseye-backports
+    - vagrant plugin install docker-api
+    - vagrant plugin install vagrant-communicator-docker
+
+    - cd $CI_PROJECT_DIR
+    - echo 'vm_provider = "docker"' > makebuildserver.config.py
+    - ./makebuildserver --verbose --skip-cache-update
+    - docker tag buildserver:buildserver_default $RELEASE_IMAGE
     - echo $CI_BUILD_TOKEN | docker login -u gitlab-ci-token --password-stdin registry.gitlab.com
     - docker push $RELEASE_IMAGE

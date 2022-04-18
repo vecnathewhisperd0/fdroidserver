@@ -17,6 +17,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from os.path import isdir, isfile, basename, abspath, expanduser
+import gzip
+import io
 import os
 import math
 import json
@@ -112,16 +114,25 @@ def get_build_vm(srvdir, provider=None):
         elif provider == 'virtualbox':
             logging.debug('build vm provider \'virtualbox\' selected')
             return VirtualboxBuildVm(abssrvdir)
+        elif provider == 'docker':
+            logging.debug('build vm provider \'docker\' selected')
+            return DockerBuildVm(abssrvdir)
         else:
             logging.warning('build vm provider not supported: \'%s\'', provider)
 
     # try guessing provider from installed software
+    docker_installed = shutil.which('docker') is not None
     kvm_installed = shutil.which('kvm') is not None
     kvm_installed |= shutil.which('qemu') is not None
     kvm_installed |= shutil.which('qemu-kvm') is not None
     vbox_installed = shutil.which('VBoxHeadless') is not None
     if kvm_installed and vbox_installed:
         logging.debug('both kvm and vbox are installed.')
+    elif docker_installed:
+        logging.debug(
+            'docker is the sole installed and supported vagrant provider, selecting \'docker\''
+        )
+        return DockerBuildVm(abssrvdir)
     elif kvm_installed:
         logging.debug(
             'libvirt is the sole installed and supported vagrant provider, selecting \'libvirt\''
@@ -150,11 +161,20 @@ def get_build_vm(srvdir, provider=None):
     has_vbox_machine = (
         isdir(vagrant_virtualbox_path) and len(os.listdir(vagrant_virtualbox_path)) > 0
     )
+    vagrant_docker_path = os.path.join(
+        abssrvdir, '.vagrant', 'machines', 'default', 'docker'
+    )
+    has_docker_machine = (
+        isdir(vagrant_docker_path) and len(os.listdir(vagrant_docker_path)) > 0
+    )
     if has_libvirt_machine and has_vbox_machine:
         logging.info(
             'build vm provider lookup found virtualbox and libvirt, defaulting to \'virtualbox\''
         )
         return VirtualboxBuildVm(abssrvdir)
+    elif has_docker_machine:
+        logging.debug('build vm provider lookup found \'docker\'')
+        return DockerBuildVm(abssrvdir)
     elif has_libvirt_machine:
         logging.debug('build vm provider lookup found \'libvirt\'')
         return LibvirtBuildVm(abssrvdir)
@@ -613,3 +633,100 @@ class VirtualboxBuildVm(FDroidBuildVm):
             raise FDroidBuildVmException("could not load snapshot "
                                          "'fdroidclean' for vm '%s'"
                                          % (self.srvname)) from e
+
+
+class DockerBuildVm(FDroidBuildVm):
+    def __init__(self, srvdir):
+        self.provider = 'docker'
+        super().__init__(srvdir)
+        import docker
+
+        # committing a 16GB image takes a while, wait up to a day
+        self.client = docker.from_env(timeout=86400)
+
+    def package(self, output=None):
+        repository = basename(self.srvdir)
+        filters = {'name': self.srvname}
+        for container in self.client.containers.list(all=True, filters=filters):
+            logging.debug('Committing image tag for %s', container.name)
+            container.commit(repository, tag=self.srvname)
+            self._write_docker_box(output)
+            return
+
+        raise FDroidBuildVmException(
+            'could not find docker container %s to package' % self.srvname
+        )
+
+    @staticmethod
+    def _write_docker_box(filename):
+        """Write out files to turn a local Docker tag into a Vagrant box"""
+        gz = gzip.GzipFile(filename, 'wb', mtime=0)  # make reproducible by zeroing
+        with tarfile.open(fileobj=gz, mode="w") as tar:
+            vagrantfile = textwrap.dedent(
+                """\
+                    Vagrant.configure("2") do |config|
+                      config.vm.provider :docker do |docker, override|
+                        docker.image = "buildserver_default"
+                      end
+                    end
+                """
+            ).encode()
+            tarinfo = tarfile.TarInfo('Vagrantfile')
+            tarinfo.size = len(vagrantfile)
+            with io.BytesIO(vagrantfile) as fp:
+                tar.addfile(tarinfo, fp)
+
+            info_json = {
+                "Author": "F-Droid",
+                "Website": "https://f-droid.org/",
+                "Artifacts": "https://vagrantcloud.com/fdroid/",
+                "Repository": "https://gitlab.com/fdroid/fdroidserver/",
+                "Description": "F-Droid buildserver VM for running production release builds.",
+            }
+            tarinfo = tarfile.TarInfo('info.json')
+            buf = json.dumps(info_json, indent=2).encode()
+            tarinfo.size = len(buf)
+            with io.BytesIO(buf) as fp:
+                tar.addfile(tarinfo, fp)
+
+            metadata_json = b"""{"provider": "docker"}"""
+            tarinfo = tarfile.TarInfo('metadata.json')
+            tarinfo.size = len(metadata_json)
+            with io.BytesIO(metadata_json) as fp:
+                tar.addfile(tarinfo, fp)
+        gz.close()
+
+    def snapshot_create(self, snapshot_name):
+        logging.info("creating snapshot '%s' for vm '%s'", snapshot_name, self.srvname)
+        try:
+            raise subprocess.CalledProcessError("IMPLEMENT ME")
+        except subprocess.CalledProcessError as e:
+            raise FDroidBuildVmException(
+                'could not create snapshot ' 'of docker vm %s' % self.srvname
+            ) from e
+
+    def snapshot_list(self):
+        snapshots = []
+        for container in self.client.containers.list():
+            if container.name.startswith(self.srvname):
+                snapshots.append(container.name)
+        return snapshots
+
+    def snapshot_exists(self, snapshot_name):
+        import docker  # silence pyflakes
+
+        try:
+            return self.client.containers.get(snapshot_name) is not None
+        except docker.errors.NotFound:
+            pass
+        return False
+
+    def snapshot_revert(self, snapshot_name):
+        logging.info("reverting vm '%s' to snapshot '%s'", self.srvname, snapshot_name)
+        for container in self.client.containers.list():
+            if container.name.startswith(self.srvname):
+                container.remove(force=True)
+                return
+        raise FDroidBuildVmException(
+            "could not remove container for '%s'" % (self.srvname)
+        )

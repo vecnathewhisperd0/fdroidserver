@@ -50,6 +50,20 @@ Vagrant.configure("2") do |config|
     end
     config.vm.synced_folder './', '/vagrant', type: synced_folder_type,
                             SharedFoldersEnableSymlinksCreate: false
+  elsif configfile["vm_provider"] == "docker"
+    if Vagrant.has_plugin?("vagrant-communicator-docker")
+      puts "Using vagrant-communicator-docker instead of SSH"
+      config.vm.communicator = 'docker'
+    end
+    config.vm.provider :docker do |docker|
+      docker.build_dir = "."
+      docker.remains_running = true
+      docker.has_ssh = true
+
+      # Docker provider does not use box but a Dockerfile
+      config.vm.box = nil
+    end
+    synced_folder_type = nil # let Vagrant choose
   else
     abort("No supported VM Provider found, set vm_provider in Vagrantfile.yaml!")
   end

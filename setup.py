@@ -121,6 +121,7 @@ setup(
     ],
     extras_require={
         'test': ['pyjks', 'html5print'],
+        'makebuildserver': ['docker', 'python-vagrant'],
         'docs': [
             'sphinx',
             'numpydoc',
