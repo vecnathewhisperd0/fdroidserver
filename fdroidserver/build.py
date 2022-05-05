@@ -808,7 +808,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
                                  % (version, vercode, build.versionName,
                                     build.versionCode))
         if (options.scan_binary or config.get('scan_binary')) and not options.skipscan:
-            if scanner.scan_binary(src):
+            if scanner.scan_binary(src, build=build):
                 raise BuildException("Found blocklisted packages in final apk!")
 
     # Copy the unsigned APK to our destination directory for further

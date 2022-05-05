@@ -40,6 +40,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: vlc-android
   submodules: false
@@ -79,6 +80,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: vlc-android
   submodules: false
@@ -118,6 +120,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: vlc-android
   submodules: false
@@ -157,6 +160,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: vlc-android
   submodules: false
@@ -194,6 +198,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@7c52aacbe
   subdir: vlc-android
@@ -232,6 +237,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@7c52aacbe
   subdir: vlc-android
@@ -270,6 +276,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@7c52aacbe
   subdir: vlc-android
@@ -308,6 +315,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@7c52aacbe
   subdir: vlc-android
@@ -345,6 +353,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@31ffb20309264994
   subdir: vlc-android
@@ -382,6 +391,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@31ffb20309264994
   subdir: vlc-android
@@ -419,6 +429,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@37e886d113b8b567c15208579fb2f
   subdir: vlc-android
@@ -456,6 +467,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@37e886d113b8b567c15208579fb2f
   subdir: vlc-android
@@ -493,6 +505,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@052600173f376ff58ff04d53746961a2
   subdir: vlc-android
@@ -530,6 +543,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@052600173f376ff58ff04d53746961a2
   subdir: vlc-android
@@ -567,6 +581,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@27f4799
   subdir: vlc-android
@@ -604,6 +619,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@27f4799
   subdir: vlc-android
@@ -641,6 +657,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@9e1c6ff
   subdir: vlc-android
@@ -678,6 +695,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@9e1c6ff
   subdir: vlc-android
@@ -715,6 +733,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@57cd36b
   subdir: vlc-android
@@ -752,6 +771,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@57cd36b
   subdir: vlc-android
@@ -789,6 +809,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@57cd36b
   subdir: vlc-android
@@ -826,6 +847,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@f2db364
   subdir: vlc-android
@@ -863,6 +885,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@f2db364
   subdir: vlc-android
@@ -900,6 +923,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@f2db364
   subdir: vlc-android
@@ -937,6 +961,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@e731dc23a4f8ef6782c7cc2236bbbf41c034dad1
   subdir: vlc-android
@@ -974,6 +999,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@e731dc23a4f8ef6782c7cc2236bbbf41c034dad1
   subdir: vlc-android
@@ -1011,6 +1037,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@e731dc23a4f8ef6782c7cc2236bbbf41c034dad1
   subdir: vlc-android
@@ -1048,6 +1075,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@e33e5de
   subdir: vlc-android
@@ -1085,6 +1113,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@e33e5de
   subdir: vlc-android
@@ -1122,6 +1151,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@e33e5de
   subdir: vlc-android
@@ -1159,6 +1189,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@036010e
   subdir: vlc-android
@@ -1196,6 +1227,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@036010e
   subdir: vlc-android
@@ -1233,6 +1265,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@036010e
   subdir: vlc-android
@@ -1270,6 +1303,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@59409d5
   subdir: vlc-android
@@ -1307,6 +1341,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@59409d5
   subdir: vlc-android
@@ -1344,6 +1379,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC-2.2@59409d5
   subdir: vlc-android
@@ -1383,6 +1419,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@a9b19e4
   subdir: vlc-android
@@ -1422,6 +1459,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@a9b19e4
   subdir: vlc-android
@@ -1461,6 +1499,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@a9b19e4
   subdir: vlc-android
@@ -1500,6 +1539,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@e6b4585
   subdir: vlc-android
@@ -1539,6 +1579,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@e6b4585
   subdir: vlc-android
@@ -1578,6 +1619,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@e6b4585
   subdir: vlc-android
@@ -1617,6 +1659,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@551b670
   subdir: vlc-android
@@ -1656,6 +1699,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@551b670
   subdir: vlc-android
@@ -1695,6 +1739,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@551b670
   subdir: vlc-android
@@ -1734,6 +1779,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@23c8d86
   subdir: vlc-android
@@ -1773,6 +1819,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@23c8d86
   subdir: vlc-android
@@ -1812,6 +1859,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@23c8d86
   subdir: vlc-android
@@ -1851,6 +1899,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@23c8d86
   subdir: vlc-android
@@ -1890,6 +1939,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@23c8d86
   subdir: vlc-android
@@ -1929,6 +1979,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@23c8d86
   subdir: vlc-android
@@ -1968,6 +2019,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@7491a5f
   subdir: vlc-android
@@ -2007,6 +2059,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@7491a5f
   subdir: vlc-android
@@ -2046,6 +2099,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@7491a5f
   subdir: vlc-android
@@ -2085,6 +2139,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@7491a5f
   subdir: vlc-android
@@ -2124,6 +2179,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@7491a5f
   subdir: vlc-android
@@ -2163,6 +2219,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@7491a5f
   subdir: vlc-android
@@ -2202,6 +2259,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@7491a5f
   subdir: vlc-android
@@ -2241,6 +2299,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@7491a5f
   subdir: vlc-android
@@ -2280,6 +2339,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@7491a5f
   subdir: vlc-android
@@ -2319,6 +2379,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@50accb8
   subdir: vlc-android
@@ -2358,6 +2419,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@50accb8
   subdir: vlc-android
@@ -2397,6 +2459,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@50accb8
   subdir: vlc-android
@@ -2436,6 +2499,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@d59b81a
   subdir: vlc-android
@@ -2475,6 +2539,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@d59b81a
   subdir: vlc-android
@@ -2514,6 +2579,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - VLC@d59b81a
   subdir: vlc-android

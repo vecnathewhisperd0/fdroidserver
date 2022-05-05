@@ -238,6 +238,7 @@ build_flags = [
     'androidupdate',
     'target',
     'scanignore',
+    'scanignoreClasses',
     'scandelete',
     'build',
     'buildjni',
@@ -277,6 +278,7 @@ class Build(dict):
         self.androidupdate = []
         self.target = None
         self.scanignore = []
+        self.scanignoreClasses = []
         self.scandelete = []
         self.build = ''
         self.buildjni = []
@@ -340,6 +342,7 @@ flagtypes = {
     'preassemble': TYPE_LIST,
     'androidupdate': TYPE_LIST,
     'scanignore': TYPE_LIST,
+    'scanignoreClasses': TYPE_LIST,
     'scandelete': TYPE_LIST,
     'gradle': TYPE_LIST,
     'antcommands': TYPE_LIST,

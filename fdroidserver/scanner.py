@@ -401,24 +401,43 @@ def _get_tool():
     return scanner._SCANNER_TOOL
 
 
-def scan_binary(apkfile):
+def scan_binary(apkfile, build=metadata.Build()):
     """Scan output of dexdump for known non-free classes."""
     logging.info(_('Scanning APK with dexdump for known non-free classes.'))
     result = get_embedded_classes(apkfile)
     problems, warnings = 0, 0
+    scanignore_classes_unused = build.scanignoreClasses[:]
+    scanignore_classes = {
+        exp: re.compile(r'.*' + exp, re.IGNORECASE) for exp in build.scanignoreClasses
+    }
+
+    def is_ignored(classname):
+        for ignore_str, ignore_regex in scanignore_classes.items():
+            if ignore_regex.match(classname):
+                if ignore_str in scanignore_classes_unused:
+                    scanignore_classes_unused.remove(ignore_str)
+                    return True
+        return False
+
     for classname in result:
         for suspect, regexp in _get_tool().regexs['warn_code_signatures'].items():
-            if regexp.match(classname):
+            if regexp.match(classname) and not is_ignored(classname):
                 logging.debug("Warning: found class '%s'" % classname)
                 warnings += 1
         for suspect, regexp in _get_tool().regexs['err_code_signatures'].items():
-            if regexp.match(classname):
+            if regexp.match(classname) and not is_ignored(classname):
                 logging.debug("Problem: found class '%s'" % classname)
                 problems += 1
     if warnings:
         logging.warning(_("Found {count} warnings in {filename}").format(count=warnings, filename=apkfile))
     if problems:
         logging.critical(_("Found {count} problems in {filename}").format(count=problems, filename=apkfile))
+
+    if scanignore_classes_unused:
+        for c in scanignore_classes_unused:
+            logging.error(_('Unused scanignoreClasses class: %s') % c)
+            problems += 1
+
     return problems
 
 

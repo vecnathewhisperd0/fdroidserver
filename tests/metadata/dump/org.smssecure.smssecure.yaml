@@ -57,6 +57,7 @@ Builds:
   - libs/*
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - GradleWitness@10f1269c0aafdc1d478efc005ed48f3a47d44278
   - PreferenceFragment@717a45433b927d2f0dfc5328f79e77c9682c37bc
@@ -102,6 +103,7 @@ Builds:
   - libs/*.jar
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - GradleWitness@10f1269c0aafdc1d478efc005ed48f3a47d44278
   subdir: null
@@ -143,6 +145,7 @@ Builds:
   - libs/*.jar
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: null
   submodules: true
@@ -183,6 +186,7 @@ Builds:
   - libs/*.jar
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: null
   submodules: true
@@ -222,6 +226,7 @@ Builds:
   - libs/*.jar
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: null
   submodules: true
@@ -261,6 +266,7 @@ Builds:
   - libs/*.jar
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: null
   submodules: true
@@ -300,6 +306,7 @@ Builds:
   - libs/*.jar
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: null
   submodules: true
@@ -339,6 +346,7 @@ Builds:
   - libs/*.jar
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: null
   submodules: true

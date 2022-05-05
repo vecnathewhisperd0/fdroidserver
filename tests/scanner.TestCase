@@ -513,6 +513,30 @@ class Test_scan_binary(unittest.TestCase):
             ),
         )
 
+    def test_scanignore_binary(self):
+        apkfile = os.path.join(self.basedir, 'no_targetsdk_minsdk1_unsigned.apk')
+        build = fdroidserver.metadata.Build()
+        build.scanignoreClasses = ['java/lang/Object']
+        self.assertEqual(
+            0,
+            fdroidserver.scanner.scan_binary(apkfile, build=build),
+            'Did not obey scanignoreClasses',
+        )
+
+        build.scanignoreClasses = ['java/.*/Object']
+        self.assertEqual(
+            0,
+            fdroidserver.scanner.scan_binary(apkfile, build=build),
+            'Did not obey scanignoreClasses with regex',
+        )
+
+        build.scanignoreClasses = ['java/lang/Object', 'unknown/class']
+        self.assertEqual(
+            1,
+            fdroidserver.scanner.scan_binary(apkfile, build=build),
+            'Did not warn on unused entry in scanignoreClasses',
+        )
+
 
 class Test_SignatureDataController(unittest.TestCase):
     # __init__
