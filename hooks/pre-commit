@@ -143,6 +143,7 @@ for f in $YML_FILES; do
 		err ".yml tests failed on $f!"
 	fi
 done
+yamllint -d "{extends: relaxed, rules: {line-length: disable}}" .gitlab-ci.yml
 
 if grep -C 3 'shell=True' fdroidserver/[a-ce-z]*.py; then
     err "shell=True is too dangerous, there are unfiltered user inputs!"
