@@ -252,6 +252,7 @@ black:
         fdroidserver/tail.py
         setup.py
         tests/build.TestCase
+        tests/checkupdates.TestCase
         tests/deploy.TestCase
         tests/exception.TestCase
         tests/import.TestCase
