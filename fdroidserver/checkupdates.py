@@ -538,7 +538,7 @@ def checkupdates_app(app):
 
     if commitmsg:
         metadata.write_metadata(app.metadatapath, app)
-        if options.commit:
+        if options.commit or options.merge_request:
             logging.info("Commiting update for " + app.metadatapath)
             gitcmd = ["git", "commit", "-m", commitmsg]
             if 'auto_author' in config:
@@ -549,14 +549,28 @@ def checkupdates_app(app):
 
 
 def push_commits(remote_name='origin'):
-    """Push commits using either appid or 'checkupdates' as branch name."""
+    """Make git branch then push commits as merge request.
+
+    This uses the appid as the standard branch name so that there is
+    only ever one open merge request per-app.  If multiple apps are
+    included in the branch, then 'checkupdates' is used as branch
+    name.  This is to support the old way operating, e.g. in batches.
+
+    This uses GitLab "Push Options" to create a merge request. Git
+    Push Options are config data that can be sent via `git push
+    --push-option=... origin foo`.
+
+    References
+    ----------
+    * https://docs.gitlab.com/ee/user/project/push_options.html
+
+    """
     git_repo = git.Repo.init('.')
     files = set()
     upstream_main = 'main' if 'main' in git_repo.remotes.upstream.refs else 'master'
     local_main = 'main' if 'main' in git_repo.refs else 'master'
     for commit in git_repo.iter_commits(
-        'upstream/%s...%s'
-        % (upstream_main, local_main)
+        'upstream/%s...%s' % (upstream_main, local_main)
     ):
         files.update(commit.stats.files.keys())
 
@@ -566,47 +580,61 @@ def push_commits(remote_name='origin'):
         m = re.match(r'metadata/([^\s]+)\.yml', files[0])
         if m:
             branch_name = m.group(1)  # appid
-    if len(files) > 0:
-        if options and options.verbose:
-            from clint.textui import progress
+    if not files:
+        return
+    progress = None
+    if options and options.verbose:
+        import clint.textui
 
-            bar = progress.Bar()
+        bar = clint.textui.progress.Bar()
 
-            class MyProgressPrinter(git.RemoteProgress):
-                def update(self, op_code, current, maximum=None, message=None):
-                    if isinstance(maximum, float):
-                        bar.show(current, maximum)
+        class MyProgressPrinter(git.RemoteProgress):
+            def update(self, op_code, current, maximum=None, message=None):
+                if isinstance(maximum, float):
+                    bar.show(current, maximum)
 
-            progress = MyProgressPrinter()
+        progress = MyProgressPrinter()
+
+    git_repo.create_head(branch_name, force=True)
+    remote = git_repo.remotes[remote_name]
+    pushinfos = remote.push(
+        branch_name, force=True, set_upstream=True, progress=progress
+    )
+    pushinfos = remote.push(
+        branch_name,
+        progress=progress,
+        force=True,
+        set_upstream=True,
+        push_option=[
+            'merge_request.create',
+            'merge_request.remove_source_branch',
+            'merge_request.title=' + 'bot: checkupdates for ' + branch_name,
+            'merge_request.description='
+            + 'checkupdates-bot run %s' % os.getenv('BUILDURL'),
+        ],
+    )
+
+    for pushinfo in pushinfos:
+        if pushinfo.flags & (
+            git.remote.PushInfo.ERROR
+            | git.remote.PushInfo.REJECTED
+            | git.remote.PushInfo.REMOTE_FAILURE
+            | git.remote.PushInfo.REMOTE_REJECTED
+        ):
+            # Show potentially useful messages from git remote
+            if progress:
+                for line in progress.other_lines:
+                    if line.startswith('remote:'):
+                        logging.debug(line)
+            raise FDroidException(
+                remote.url
+                + ' push failed: '
+                + str(pushinfo.flags)
+                + ' '
+                + pushinfo.summary
+            )
         else:
-            progress = None
-
-        git_repo.create_head(branch_name, force=True)
-        remote = git_repo.remotes[remote_name]
-        pushinfos = remote.push(
-            branch_name, force=True, set_upstream=True, progress=progress
-        )
-        for pushinfo in pushinfos:
-            if pushinfo.flags & (
-                git.remote.PushInfo.ERROR
-                | git.remote.PushInfo.REJECTED
-                | git.remote.PushInfo.REMOTE_FAILURE
-                | git.remote.PushInfo.REMOTE_REJECTED
-            ):
-                # Show potentially useful messages from git remote
-                if progress:
-                    for line in progress.other_lines:
-                        if line.startswith('remote:'):
-                            logging.debug(line)
-                raise FDroidException(
-                    remote.url
-                    + ' push failed: '
-                    + str(pushinfo.flags)
-                    + ' '
-                    + pushinfo.summary
-                )
-            else:
-                logging.debug(remote.url + ': ' + pushinfo.summary)
+            logging.debug(remote.url + ': ' + pushinfo.summary)
 
 
 def prune_empty_appid_branches(git_repo=None):
@@ -658,6 +686,8 @@ def main():
                         help=_("Only process apps with auto-updates"))
     parser.add_argument("--commit", action="store_true", default=False,
                         help=_("Commit changes"))
+    parser.add_argument("--merge-request", action="store_true", default=False,
+                        help=_("Commit changes, push, then make a merge request"))
     parser.add_argument("--allow-dirty", action="store_true", default=False,
                         help=_("Run on git repo that has uncommitted changes"))
     parser.add_argument("--gplay", action="store_true", default=False,
@@ -673,6 +703,10 @@ def main():
         if status:
             logging.error(_('Build metadata git repo has uncommited changes!'))
             sys.exit(1)
+
+    if options.merge_request and not (options.appid and len(options.appid) == 1):
+        logging.error(_('--merge-request only runs on a single appid!'))
+        sys.exit(1)
 
     # Get all apps...
     allapps = metadata.read_metadata()
@@ -725,6 +759,10 @@ def main():
             logging.debug(traceback.format_exc())
             failed[appid] = str(e)
             exit_code = 1
+
+    if options.appid and options.merge_request:
+        push_commits()
+        prune_empty_appid_branches()
 
     status_update_json(processed, failed)
     sys.exit(exit_code)
