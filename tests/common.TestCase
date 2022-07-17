@@ -1297,7 +1297,7 @@ class CommonTest(unittest.TestCase):
         ]
         for path in paths:
             self.assertTrue(os.path.isfile(path))
-        self.assertEqual(('20180430-underscore', '2018_04_30', 'com.kunzisoft.fdroidtest.applicationidsuffix.underscore'),
+        self.assertEqual(('20180430-underscore', '20180430', 'com.kunzisoft.fdroidtest.applicationidsuffix.underscore'),
                          fdroidserver.common.parse_androidmanifests(paths, app))
 
         app = fdroidserver.metadata.App()
