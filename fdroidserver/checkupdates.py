@@ -650,7 +650,9 @@ def prune_empty_appid_branches(git_repo=None):
     remote.update(prune=True)
     merged_branches = git_repo.git().branch(remotes=True, merged=upstream_main).split()
     for remote_branch in merged_branches:
-        if '/' in remote_branch and remote_branch.split('/')[1] != main_branch:
+        if not remote_branch or '/' not in remote_branch:
+            continue
+        if remote_branch.split('/')[1] not in (main_branch, 'HEAD'):
             for ref in git_repo.remotes.origin.refs:
                 if remote_branch == ref.name:
                     remote.push(':%s' % ref.remote_head, force=True)  # rm remote branch
