@@ -17,6 +17,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import asyncio
 import os
 import re
 import urllib.request
@@ -557,6 +558,33 @@ def status_update_json(processed, failed):
         output['failed'] = failed
     common.write_status_json(output)
 
+async def checkupdate(appid, app):    
+    if options.autoonly and app.AutoUpdateMode in ('None', 'Static'):
+        logging.debug(_("Nothing to do for {appid}.").format(appid=appid))
+        return
+
+    msg = _("Processing {appid}").format(appid=appid)
+    logging.info(msg)
+
+    output = {"appid": appid}
+    try:
+        checkupdates_app(app)
+        output['processed'] = appid
+    except Exception as e:
+        msg = _("...checkupdate failed for {appid} : {error}").format(appid=appid, error=e)
+        logging.error(msg)
+        logging.debug(traceback.format_exc())
+        output['failed'] = str(e)
+    
+    return output
+
+async def dispatch(apps):
+    tasks = [checkupdate(appid, app) for appid, app in apps.items()]
+    results = await asyncio.gather(*tasks)
+    processed = [res.get('processed') for res in results]
+    failed = {res.get('appid'): res.get('failed') for res in results}
+    
+    return processed, failed
 
 config = None
 options = None
@@ -564,7 +592,6 @@ start_timestamp = time.gmtime()
 
 
 def main():
-
     global config, options
 
     # Parse command line...
@@ -623,30 +650,9 @@ def main():
                                      .format(_getappname(app), version))
         return
 
-    processed = []
-    failed = dict()
-    exit_code = 0
-    for appid, app in apps.items():
-
-        if options.autoonly and app.AutoUpdateMode in ('None', 'Static'):
-            logging.debug(_("Nothing to do for {appid}.").format(appid=appid))
-            continue
-
-        msg = _("Processing {appid}").format(appid=appid)
-        logging.info(msg)
-
-        try:
-            checkupdates_app(app)
-            processed.append(appid)
-        except Exception as e:
-            msg = _("...checkupdate failed for {appid} : {error}").format(appid=appid, error=e)
-            logging.error(msg)
-            logging.debug(traceback.format_exc())
-            failed[appid] = str(e)
-            exit_code = 1
+    processed, failed = asyncio.run(dispatch(apps))
 
     status_update_json(processed, failed)
-    sys.exit(exit_code)
 
 
 if __name__ == "__main__":

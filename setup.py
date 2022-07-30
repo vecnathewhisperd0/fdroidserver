@@ -118,6 +118,7 @@ setup(
         'ruamel.yaml >= 0.15',
         'requests >= 2.5.2, != 2.11.0, != 2.12.2, != 2.18.0',
         'yamllint',
+        'asyncio',
     ],
     extras_require={
         'test': ['pyjks', 'html5print'],
