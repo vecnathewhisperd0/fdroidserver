@@ -397,6 +397,34 @@ fdroid build:
     - if dpkg --list sudo; then echo "sudo should not be still there"; exit 1; fi
 
 
+# Run a simplified checkupdates job from fdroid/fdroiddata
+checkupdates:
+  needs: []
+  image: debian:bullseye-slim
+  before_script:
+    - apt-get --allow-releaseinfo-change update
+    - apt-get -qy dist-upgrade
+    - apt-get install -qy --no-install-recommends fdroidserver apksigner mercurial
+      git git-svn bzr
+    - export fdroidserver=/opt/fdroidserver
+    - rm -rf $fdroidserver
+    - mkdir -p $fdroidserver
+    - git ls-remote https://gitlab.com/fdroid/fdroidserver.git master
+    - curl --silent https://gitlab.com/fdroid/fdroidserver/-/archive/master/fdroidserver-master.tar.gz
+      | tar -xz --directory=$fdroidserver --strip-components=1
+    - export PATH="$fdroidserver:$PATH"
+    - export PYTHONPATH="$fdroidserver:$fdroidserver/examples"
+    - export PYTHONUNBUFFERED=true
+  script:
+    - git clone --depth 1 https://gitlab.com/fdroid/fdroiddata.git
+    - cd fdroiddata
+    - export CHANGED="org.fdroid.fdroid.privileged org.fdroid.fdroid"
+    - |
+      if [ -n "$CHANGED" ]; then
+        fdroid checkupdates --auto -v $CHANGED
+        git --no-pager diff --color=always --exit-code
+      fi
+
 # test the plugin API and specifically the fetchsrclibs plugin, which
 # is used by the `fdroid build` job.  This uses a fixed commit from
 # fdroiddata because that one is known to work, and this is a CI job,

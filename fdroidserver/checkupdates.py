@@ -558,7 +558,8 @@ def status_update_json(processed, failed):
         output['failed'] = failed
     common.write_status_json(output)
 
-async def checkupdate(appid, app):    
+
+async def checkupdates(appid, app):
     if options.autoonly and app.AutoUpdateMode in ('None', 'Static'):
         logging.debug(_("Nothing to do for {appid}.").format(appid=appid))
         return
@@ -575,15 +576,16 @@ async def checkupdate(appid, app):
         logging.error(msg)
         logging.debug(traceback.format_exc())
         output['failed'] = str(e)
-    
+
     return output
 
-async def dispatch(apps):
-    tasks = [checkupdate(appid, app) for appid, app in apps.items()]
+
+async def run(apps):
+    tasks = [checkupdates(appid, app) for appid, app in apps.items()]
     results = await asyncio.gather(*tasks)
     processed = [res.get('processed') for res in results]
     failed = {res.get('appid'): res.get('failed') for res in results}
-    
+
     return processed, failed
 
 config = None
@@ -650,7 +652,7 @@ def main():
                                      .format(_getappname(app), version))
         return
 
-    processed, failed = asyncio.run(dispatch(apps))
+    processed, failed = asyncio.run(run(apps))
 
     status_update_json(processed, failed)
 
