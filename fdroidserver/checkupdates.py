@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import asyncio
+import multiprocessing
 import os
 import re
 import urllib.request
@@ -581,8 +582,10 @@ async def checkupdates(appid, app):
 
 
 async def run(apps):
-    tasks = [checkupdates(appid, app) for appid, app in apps.items()]
-    results = await asyncio.gather(*tasks)
+    parallel_limit = asyncio.Semaphore(options.max_parallel)
+    async with parallel_limit:
+        tasks = [checkupdates(appid, app) for appid, app in apps.items()]
+        results = await asyncio.gather(*tasks)
     processed = [res.get('processed') for res in results]
     failed = {res.get('appid'): res.get('failed') for res in results}
 
@@ -610,6 +613,7 @@ def main():
                         help=_("Run on git repo that has uncommitted changes"))
     parser.add_argument("--gplay", action="store_true", default=False,
                         help=_("Only print differences with the Play Store"))
+    parser.add_argument("--max-parallel", help='Maximium number of packages to process in parallel', type=int, default=multiprocessing.cpu_count())
     metadata.add_metadata_arguments(parser)
     options = parser.parse_args()
     metadata.warnings_action = options.W
