@@ -39,7 +39,9 @@ export PYTHONUNBUFFERED=true
 ln -s $home_vagrant/build $CI_PROJECT_DIR/build
 
 # Make sure .gradle stores inside $CI_PROJECT_DIR (needed to make it cacheable on some CI environments)
-ln -s $home_vagrant/.gradle $CI_PROJECT_DIR/.gradle
+# (force link creation to ensure this operation completes even if there is cached data left behind by
+# previous CI setups)
+ln -fsv $home_vagrant/.gradle $CI_PROJECT_DIR/.gradle
 
 for d in logs tmp unsigned $home_vagrant/build $home_vagrant/.android $home_vagrant/.gradle $ANDROID_HOME; do
     test -d $d || mkdir $d;
