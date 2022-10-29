@@ -15,9 +15,10 @@
 # - On GitLab CI, the path is stored in CI_PROJECT_DIR and defaults to /builds/$CI_PROJECT_PATH.
 # - TODO add support for other CI environments
 # - As a fallback, we will use $PWD.
-test -n "$FDROID_PROJECT_DIR" || export FDROID_PROJECT_DIR=$CIRCLE_WORKING_DIRECTORY
-test -n "$FDROID_PROJECT_DIR" || export FDROID_PROJECT_DIR=$CI_PROJECT_DIR
-test -n "$FDROID_PROJECT_DIR" || export FDROID_PROJECT_DIR=$PWD
+test "$CIRCLECI" = true && test -z "$FDROID_PROJECT_DIR" && export FDROID_PROJECT_DIR=$CIRCLE_WORKING_DIRECTORY
+test "$GITLAB_CI" = true && test -z "$FDROID_PROJECT_DIR" && export FDROID_PROJECT_DIR=$CI_PROJECT_DIR
+test -z "$FDROID_PROJECT_DIR" && export FDROID_PROJECT_DIR=$PWD
+echo "FDROID_PROJECT_DIR: $FDROID_PROJECT_DIR"
 pushd $FDROID_PROJECT_DIR
 
 test -d build || mkdir build
