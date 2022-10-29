@@ -4,16 +4,21 @@
 #
 # Notes:
 #
-# - On CI environments that do not set CI_PROJECT_DIR, this script must be run from the equivalent dir, i.e.
-#   the path where the source code of the CI project resides.
+# - This script needs to determine the path where the app code resides. This is done by examining certain
+#   CI-specific environment variables, falling back to $PWD if no recognized variables are set. This check
+#   can be overridden by setting FDROID_PROJECT_DIR prior to running this script.
 # - This script does not set up a keystore, therefore `fdroid publish` will not work. If this is required, a
 #   keystore must be set up separately.
 
-# CI_PROJECT_DIR is set only on GitLab CI; use $PWD for others
-# TODO If other CI environments have equivalent env vars, this could be improved to use those, falling back
-# to $PWD only as a last resort.
-test -n "$CI_PROJECT_DIR" || export CI_PROJECT_DIR=$PWD
-pushd $CI_PROJECT_DIR
+# if FDROID_PROJECT_DIR is not set, determine where the app code resides. This depends on the CI environment:
+# - On CircleCI, the path is stored in CIRCLE_WORKING_DIRECTORY and defaults to ~/project.
+# - On GitLab CI, the path is stored in CI_PROJECT_DIR and defaults to /builds/$CI_PROJECT_PATH.
+# - TODO add support for other CI environments
+# - As a fallback, we will use $PWD.
+test -n "$FDROID_PROJECT_DIR" || export FDROID_PROJECT_DIR=$CIRCLE_WORKING_DIRECTORY
+test -n "$FDROID_PROJECT_DIR" || export FDROID_PROJECT_DIR=$CI_PROJECT_DIR
+test -n "$FDROID_PROJECT_DIR" || export FDROID_PROJECT_DIR=$PWD
+pushd $FDROID_PROJECT_DIR
 
 test -d build || mkdir build
 
@@ -36,12 +41,12 @@ export PATH="$fdroidserver:$PATH"
 export PYTHONPATH="$fdroidserver:$fdroidserver/examples"
 export PYTHONUNBUFFERED=true
 
-ln -s $home_vagrant/build $CI_PROJECT_DIR/build
+ln -s $home_vagrant/build $FDROID_PROJECT_DIR/build
 
-# Make sure .gradle stores inside $CI_PROJECT_DIR (needed to make it cacheable on some CI environments)
+# Make sure .gradle stores inside $FDROID_PROJECT_DIR (needed to make it cacheable on some CI environments)
 # (force link creation to ensure this operation completes even if there is cached data left behind by
 # previous CI setups)
-ln -fsv $home_vagrant/.gradle $CI_PROJECT_DIR/.gradle
+ln -fsv $home_vagrant/.gradle $FDROID_PROJECT_DIR/.gradle
 
 for d in logs tmp unsigned $home_vagrant/build $home_vagrant/.android $home_vagrant/.gradle $ANDROID_HOME; do
     test -d $d || mkdir $d;
@@ -58,19 +63,7 @@ export fdroid="sudo --preserve-env --user vagrant
   fdroid"
 
 # Modify permissions so `fdroid build` (running as user vagrant) has access to everything it needs.
-# Since we are accessing another user’s home dir, we change the group (not the owner) and set permissions as
-# needed.
-# - git needs read/execute on all parents of the source code dir.
-# - fdroid creates subdirs, so the source code dir must be writable.
-# - The build subdir already exists, therefore change ownership
-chgrp -R vagrant $CI_PROJECT_DIR
-chmod -R g+r $CI_PROJECT_DIR
-chmod g+w $CI_PROJECT_DIR
-# paranoia: first remove permissions, then change group, then add permissions
-chmod g-w ..
-chgrp vagrant ..
-chmod g+rx ..
-chown -R vagrant $CI_PROJECT_DIR/build;
+chown -R vagrant $FDROID_PROJECT_DIR
 
 chown -R vagrant $home_vagrant
 
