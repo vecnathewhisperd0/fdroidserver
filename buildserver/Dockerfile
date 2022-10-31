@@ -48,7 +48,7 @@ RUN printf "path-exclude=/usr/share/locale/*\npath-exclude=/usr/share/man/*\npat
 	&& bash /opt/buildserver/setup-env-vars /opt/android-sdk \
 	&& . /etc/profile.d/bsenv.sh \
 	&& bash /opt/buildserver/provision-apt-get-install https://deb.debian.org/debian \
-	&& bash /opt/buildserver/provision-android-sdk "tools;25.2.5" \
+	&& bash /opt/buildserver/provision-android-sdk \
 	&& bash /opt/buildserver/provision-android-ndk /opt/android-sdk/ndk \
 	&& bash /opt/buildserver/provision-gradle \
 	&& bash /opt/buildserver/provision-buildserverid $GIT_REV_PARSE_HEAD \

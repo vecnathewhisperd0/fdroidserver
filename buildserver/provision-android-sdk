@@ -36,10 +36,7 @@ for f in /vagrant/cache/*.zip; do
 done
 popd
 
-# TODO do not preinstall 'tools' or 'platform-tools' at all, app builds don't need them
-packages="
-  tools;25.2.5
-  platform-tools
+__all="
   build-tools;19.1.0
   build-tools;20.0.0
   build-tools;21.1.2
@@ -102,14 +99,16 @@ packages="
   platforms;android-33
 "
 
-if [ $# -gt 0 ]; then
+if [ "$1" == "--all" ]; then
+    packages=$__all
+elif [ $# -gt 0 ]; then
     echo found args
     packages=$@
 fi
 
 # temporary test of whether this script ran. It will change once
 # 'tools' is no longer installed by default.
-if [ ! -x $ANDROID_HOME/tools/bin/sdkmanager ]; then
+if [ -n "$packages" ]; then
     mkdir -p ${ANDROID_HOME}/
     sdkmanager $packages
 fi
@@ -149,7 +148,7 @@ chmod a+X $(dirname $ANDROID_HOME/)
 chmod -R a+rX $ANDROID_HOME/
 chgrp vagrant $ANDROID_HOME
 chmod g+w $ANDROID_HOME
-find $ANDROID_HOME/ -type f -executable -print0 | xargs -0 chmod a+x
+find $ANDROID_HOME/ -type f -executable -exec chmod a+x {} \;
 
 # allow gradle to install newer build-tools and platforms
 mkdir -p $ANDROID_HOME/{build-tools,platforms}
@@ -158,5 +157,5 @@ chmod g+w $ANDROID_HOME/{build-tools,platforms}
 
 # allow gradle/sdkmanager to install into the new m2repository
 test -d $ANDROID_HOME/extras/m2repository || mkdir -p $ANDROID_HOME/extras/m2repository
-find $ANDROID_HOME/extras/m2repository -type d | xargs chgrp vagrant
-find $ANDROID_HOME/extras/m2repository -type d | xargs chmod g+w
+find $ANDROID_HOME/extras/m2repository -type d -exec chgrp vagrant {} \;
+find $ANDROID_HOME/extras/m2repository -type d -exec chmod g+w {} \;
