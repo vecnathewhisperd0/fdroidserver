@@ -270,7 +270,7 @@ def check_update_check_data_int(app):  # noqa: D403
         # codeex can be empty as well
         if codeex and not versioncode_check_pattern.search(codeex):
             yield _(
-                f'UpdateCheckData must match the version code as integer (\\d or [0-9]): {codeex}'
+                'UpdateCheckData must match the version code as integer (\\d or [0-9]): %s' % codeex
             )
 
 
@@ -346,7 +346,7 @@ filling_ucms = re.compile(r'^(Tags.*|RepoManifest.*)')
 
 def check_checkupdates_ran(app):
     if filling_ucms.match(app.UpdateCheckMode):
-        if not app.AutoName and not app.CurrentVersion and app.CurrentVersionCode == 0:
+        if not app.AutoName and app.CurrentVersionCode == 0:
             yield _(
                 "UpdateCheckMode is set but it looks like"
                 "checkupdates hasn't been run yet"
@@ -463,8 +463,8 @@ def check_builds(app):
         for s in ['master', 'origin', 'HEAD', 'default', 'trunk']:
             if build.commit and build.commit.startswith(s):
                 yield _(
-                    "Branch '{branch}' used as commit in build '{versionName}'"
-                ).format(branch=s, versionName=build.versionName)
+                    "Branch '{branch}' used as commit in build '{versionCode}'"
+                ).format(branch=s, versionCode=build.versionCode)
             for srclib in build.srclibs:
                 if '@' in srclib:
                     ref = srclib.split('@')[1].split('/')[0]
@@ -501,8 +501,8 @@ def check_files_dir(app):
     for build in app.get('Builds', []):
         for fname in build.patch:
             if fname not in files:
-                yield _("Unknown file '{filename}' in build '{versionName}'").format(
-                    filename=fname, versionName=build.versionName
+                yield _("Unknown file '{filename}' in build '{versionCode}'").format(
+                    filename=fname, versionCode=build.versionCode
                 )
             else:
                 used.add(fname)
@@ -549,8 +549,8 @@ def check_extlib_dir(apps):
                 path = Path(path)
                 if path not in extlib_files:
                     yield _(
-                        "{appid}: Unknown extlib {path} in build '{versionName}'"
-                    ).format(appid=app.id, path=path, versionName=build.versionName)
+                        "{appid}: Unknown extlib {path} in build '{versionCode}'"
+                    ).format(appid=app.id, path=path, versionCode=build.versionCode)
                 else:
                     used.add(path)
 
