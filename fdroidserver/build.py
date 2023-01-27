@@ -35,6 +35,7 @@ import logging
 from gettext import ngettext
 
 from . import _
+from . import builder
 from . import common
 from . import net
 from . import metadata
@@ -237,6 +238,8 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
             cmdline += ' --no-tarball'
         if (options.scan_binary or config.get('scan_binary')) and not options.skipscan:
             cmdline += ' --scan-binary'
+        if options.experiment:
+            cmdline += ' --experiment'
         cmdline += " %s:%s" % (app.id, build.versionCode)
         chan.exec_command('bash --login -c "' + cmdline + '"')  # nosec B601 inputs are sanitized
 
@@ -884,7 +887,10 @@ def trybuild(app, build, build_dir, output_dir, log_dir, also_check_dir,
 
         build_server(app, build, vcs, build_dir, output_dir, log_dir, force)
     else:
-        build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, extlib_dir, tmp_dir, force, onserver, refresh)
+        if options.experiment:
+            builder.build_local(app, build, config, options, vcs, build_dir, output_dir, log_dir, srclib_dir, extlib_dir, tmp_dir, force, onserver, refresh)
+        else:
+            build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, extlib_dir, tmp_dir, force, onserver, refresh)
     return True
 
 
@@ -934,6 +940,8 @@ def parse_commandline():
     parser.add_argument("-a", "--all", action="store_true", default=False,
                         help=_("Build all applications available"))
     parser.add_argument("-w", "--wiki", default=False, action="store_true",
+                        help=argparse.SUPPRESS)
+    parser.add_argument("--experiment", default=False, action="store_true",
                         help=argparse.SUPPRESS)
     metadata.add_metadata_arguments(parser)
     options = parser.parse_args()
