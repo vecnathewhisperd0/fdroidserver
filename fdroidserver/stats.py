@@ -139,7 +139,7 @@ def main():
             + r'"GET (?P<uri>.*?) HTTP/1.\d" (?P<statuscode>\d+) ' \
             + r'\d+ "(?P<referral>.*?)" "(?P<useragent>.*?)"'
         logsearch = re.compile(logexpr).search
-        for logfile in glob.glob(os.path.join(logsdir, 'access-*.log.gz')):
+        for logfile in sorted(glob.glob(os.path.join(logsdir, 'access-*.log.gz'))):
             logging.debug('...' + logfile)
 
             # Get the date for this log - e.g. 2012-02-28

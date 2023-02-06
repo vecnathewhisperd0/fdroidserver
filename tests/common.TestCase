@@ -1005,7 +1005,7 @@ class CommonTest(unittest.TestCase):
             fdroidserver.common.get_apk_id(badzip)
 
     def test_get_apk_id_aapt_regex(self):
-        files = glob.glob(os.path.join(self.basedir, 'build-tools', '[1-9]*.*', '*.txt'))
+        files = sorted(glob.glob(os.path.join(self.basedir, 'build-tools', '[1-9]*.*', '*.txt')))
         self.assertNotEqual(0, len(files))
         for f in files:
             appid, versionCode = os.path.splitext(os.path.basename(f))[0][12:].split('_')

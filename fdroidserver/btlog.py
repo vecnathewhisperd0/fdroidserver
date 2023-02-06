@@ -142,7 +142,7 @@ For more info on this idea:
             json.dump(output, fp, indent=2)
         gitrepo.index.add([os.path.join(repodir, 'filesystemlog.json')])
 
-        for f in glob.glob(os.path.join(cpdir, '*.HTTP-headers.json')):
+        for f in sorted(glob.glob(os.path.join(cpdir, '*.HTTP-headers.json'))):
             gitrepo.index.add([os.path.join(repodir, os.path.basename(f))])
 
     gitrepo.index.commit(commit_title)

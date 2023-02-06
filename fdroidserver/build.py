@@ -729,7 +729,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
                 os.path.join(root_dir, '.buildozer', 'android', 'platform', 'build', 'dists', bconfig.get('app', 'title'), 'bin'),
                 ]:
             for apkglob in ['*-release-unsigned.apk', '*-unsigned.apk', '*.apk']:
-                apks = glob.glob(os.path.join(apks_dir, apkglob))
+                apks = sorted(glob.glob(os.path.join(apks_dir, apkglob)))
 
                 if len(apks) > 1:
                     raise BuildException('More than one resulting apks found in %s' % apks_dir,
@@ -760,7 +760,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
             apk_dirs.append(os.path.join(root_dir, 'build', 'outputs', 'apk', transform_first_char(flavours_cmd, str.lower), 'release'))
         for apks_dir in apk_dirs:
             for apkglob in ['*-release-unsigned.apk', '*-unsigned.apk', '*.apk']:
-                apks = glob.glob(os.path.join(apks_dir, apkglob))
+                apks = sorted(glob.glob(os.path.join(apks_dir, apkglob)))
 
                 if len(apks) > 1:
                     raise BuildException('More than one resulting apks found in %s' % apks_dir,
@@ -783,7 +783,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
     elif omethod == 'raw':
         output_path = common.replace_build_vars(build.output, build)
         globpath = os.path.join(root_dir, output_path)
-        apks = glob.glob(globpath)
+        apks = sorted(glob.glob(globpath))
         if len(apks) > 1:
             raise BuildException('Multiple apks match %s' % globpath, '\n'.join(apks))
         if len(apks) < 1:

@@ -222,9 +222,9 @@ def main():
             elif os.path.exists('/usr/lib64/opensc-pkcs11.so'):
                 opensc_so = '/usr/lib64/opensc-pkcs11.so'
             else:
-                files = glob.glob(
+                files = sorted(glob.glob(
                     '/usr/lib/' + os.uname()[4] + '-*-gnu/opensc-pkcs11.so'
-                )
+                ))
                 if len(files) > 0:
                     opensc_so = files[0]
                 else:

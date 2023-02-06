@@ -698,7 +698,7 @@ class UpdateTest(unittest.TestCase):
         fdroidserver.update.options.clean = False
         read_from_json = fdroidserver.update.get_cache()
         self.assertEqual(19, len(read_from_json))
-        for f in glob.glob('repo/*.apk'):
+        for f in sorted(glob.glob('repo/*.apk')):
             self.assertTrue(os.path.basename(f) in read_from_json)
 
         fdroidserver.update.options.clean = True
