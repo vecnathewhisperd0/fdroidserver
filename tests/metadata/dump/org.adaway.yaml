@@ -36,6 +36,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -72,6 +73,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -108,6 +110,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -144,6 +147,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -180,6 +184,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -216,6 +221,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -250,6 +256,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: null
   submodules: false
@@ -286,6 +293,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -322,6 +330,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -358,6 +367,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -394,6 +404,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -431,6 +442,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -468,6 +480,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -504,6 +517,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -541,6 +555,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -578,6 +593,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -615,6 +631,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -652,6 +669,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: org_adaway/
   submodules: false
@@ -700,6 +718,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - RootCommands@c940b0e503
   subdir: AdAway
@@ -749,6 +768,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs:
   - RootCommands@c940b0e503
   subdir: AdAway
@@ -787,6 +807,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: AdAway
   submodules: false
@@ -824,6 +845,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: AdAway
   submodules: false
@@ -861,6 +883,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: AdAway
   submodules: false
@@ -898,6 +921,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: AdAway
   submodules: false
@@ -935,6 +959,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: AdAway
   submodules: false
@@ -972,6 +997,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: AdAway
   submodules: false
@@ -1009,6 +1035,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: AdAway
   submodules: false
@@ -1046,6 +1073,7 @@ Builds:
   rm: []
   scandelete: []
   scanignore: []
+  scanignoreClasses: []
   srclibs: []
   subdir: AdAway
   submodules: false
