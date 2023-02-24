@@ -2120,8 +2120,8 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, onserver=
 
         p = FDroidPopen(['bash', '-e', '-u', '-o', 'pipefail', '-x', '-c', '--', cmd], cwd=root_dir)
         if p.returncode != 0:
-            raise BuildException("Error running init command for %s:%s" %
-                                 (app.id, build.versionName), p.output)
+            raise BuildException("Error running init command for %s:%d" %
+                                 (app.id, build.versionCode), p.output)
 
     # Apply patches if any
     if build.patch:
@@ -2212,6 +2212,9 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, onserver=
 
     # Insert version code and number into the manifest if necessary
     if build.forceversion:
+        if not build.versionName:
+            raise MetaDataException(_("forceversion requires versionName to be set"))
+
         logging.info("Changing the version name")
         for path in manifest_paths(root_dir, flavours):
             if not os.path.isfile(path):
@@ -2290,8 +2293,8 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, onserver=
 
         p = FDroidPopen(['bash', '-e', '-u', '-o', 'pipefail', '-x', '-c', '--', cmd], cwd=root_dir)
         if p.returncode != 0:
-            raise BuildException("Error running prebuild command for %s:%s" %
-                                 (app.id, build.versionName), p.output)
+            raise BuildException("Error running prebuild command for %s:%d" %
+                                 (app.id, build.versionCode), p.output)
 
     # Generate (or update) the ant build file, build.xml...
     if build.build_method() == 'ant' and build.androidupdate != ['no']:
@@ -2919,7 +2922,8 @@ def set_FDroidPopen_env(build=None):
 
 def replace_build_vars(cmd, build):
     cmd = cmd.replace('$$COMMIT$$', build.commit)
-    cmd = cmd.replace('$$VERSION$$', build.versionName)
+    if build.get('versionName'):
+        cmd = cmd.replace('$$VERSION$$', build.versionName)
     cmd = cmd.replace('$$VERCODE$$', str(build.versionCode))
     return cmd
 

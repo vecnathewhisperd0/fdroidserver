@@ -196,7 +196,6 @@ def check_for_kivy_buildozer(tmp_importer_dir, app, build):
         app.AutoName = config['app'].get('package.name', app.AutoName)
         app.License = config['app'].get('license', app.License)
         app.Description = config['app'].get('description', app.Description)
-        build.versionName = config['app'].get('version')
         build.output = 'bin/%s-$$VERSION$$-release-unsigned.apk' % app.AutoName
         build.ndk = 'r17c'
         build.srclibs = [
@@ -218,7 +217,7 @@ def check_for_kivy_buildozer(tmp_importer_dir, app, build):
         build.build = [
             'PATH="$HOME/.local/bin:$PATH" buildozer android release',
         ]
-    return build.get('versionName'), versionCode, app.get('id')
+    return versionCode, app.get('id')
 
 
 def main():
@@ -287,17 +286,15 @@ def main():
     app.UpdateCheckMode = 'Tags'
     build.commit = common.get_head_commit_id(git_repo)
 
-    versionName, versionCode, appid = check_for_kivy_buildozer(tmp_importer_dir, app, build)
+    versionCode, appid = check_for_kivy_buildozer(tmp_importer_dir, app, build)
 
     # Extract some information...
     paths = common.get_all_gradle_and_manifests(tmp_importer_dir)
     subdir = common.get_gradle_subdir(tmp_importer_dir, paths)
     if paths:
-        versionName, versionCode, appid = common.parse_androidmanifests(paths, app)
+        _, versionCode, appid = common.parse_androidmanifests(paths, app)
         if not appid:
             raise FDroidException(_("Couldn't find Application ID"))
-        if not versionName:
-            logging.warning(_('Could not find latest version name'))
         if not versionCode:
             logging.warning(_('Could not find latest version code'))
     elif not appid:
@@ -308,7 +305,6 @@ def main():
         raise FDroidException(_('Package "{appid}" already exists').format(appid=appid))
 
     # Create a build line...
-    build.versionName = versionName or 'Unknown'
     build.versionCode = versionCode or 0
     if options.subdir:
         build.subdir = options.subdir

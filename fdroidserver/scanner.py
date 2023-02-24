@@ -803,11 +803,11 @@ def main():
                 json_per_appid[build.versionCode] = json_per_build
 
                 if build.disable and not options.force:
-                    logging.info("...skipping version %s - %s" % (
-                        build.versionName, build.get('disable', build.commit[1:])))
+                    logging.info("...skipping version %d - %s" % (
+                        build.versionCode, build.get('disable', build.commit[1:])))
                     continue
 
-                logging.info("...scanning version " + build.versionName)
+                logging.info("...scanning version " + build.versionCode)
                 # Prepare the source code...
                 common.prepare_source(vcs, app, build,
                                       build_dir, srclib_dir,
