@@ -249,6 +249,7 @@ class UpdateTest(unittest.TestCase):
         fdroidserver.update.insert_localized_app_metadata(apps)
         self.assertEqual('42', apps[app.id]['localized']['en-US']['whatsNew'])
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_name_title_scraping(self):
         """metadata file --> fdroiddata localized files --> fastlane/triple-t in app source --> APK"""
         shutil.copytree(self.basedir, self.testdir, dirs_exist_ok=True)
@@ -337,6 +338,7 @@ class UpdateTest(unittest.TestCase):
                 self.assertIsNone(app.get('Name'))
                 self.assertEqual(testvalue, app['localized']['en-US']['name'])
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_insert_missing_app_names_from_apks_from_repo(self):
         os.chdir(self.testdir)
         shutil.copytree(self.basedir, self.testdir, dirs_exist_ok=True)
@@ -547,6 +549,7 @@ class UpdateTest(unittest.TestCase):
         self.assertEqual(sig, 'e0ecb5fc2d63088e4a07ae410a127722',
                          "python sig should be: " + str(sig))
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_getsig(self):
         # config needed to use jarsigner and keytool
         config = dict()
@@ -590,6 +593,7 @@ class UpdateTest(unittest.TestCase):
         self.assertEqual(good_fingerprint, sig,
                          "python sig was: " + str(sig))
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def testScanApksAndObbs(self):
         os.chdir(self.testdir)
         shutil.copytree(os.path.join(self.basedir, 'repo'), 'repo')
@@ -644,6 +648,7 @@ class UpdateTest(unittest.TestCase):
                 self.assertIsNone(apk.get('obbMainFile'))
                 self.assertIsNone(apk.get('obbPatchFile'))
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_apkcache_json(self):
         """test the migration from pickle to json"""
         os.chdir(self.testdir)
@@ -706,6 +711,7 @@ class UpdateTest(unittest.TestCase):
             info['hash'],
         )
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_read_added_date_from_all_apks(self):
         os.chdir(self.testdir)
         shutil.copytree(os.path.join(self.basedir, 'repo'), 'repo')
@@ -719,6 +725,7 @@ class UpdateTest(unittest.TestCase):
         apks, cachechanged = fdroidserver.update.process_apks({}, 'repo', knownapks)
         fdroidserver.update.read_added_date_from_all_apks(apps, apks)
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_apply_info_from_latest_apk(self):
         os.chdir(self.testdir)
         shutil.copytree(os.path.join(self.basedir, 'repo'), 'repo')
@@ -733,6 +740,7 @@ class UpdateTest(unittest.TestCase):
         apks, cachechanged = fdroidserver.update.process_apks({}, 'repo', knownapks)
         fdroidserver.update.apply_info_from_latest_apk(apps, apks)
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_scan_apk(self):
         config = dict()
         fdroidserver.common.fill_config_defaults(config)
@@ -803,6 +811,7 @@ class UpdateTest(unittest.TestCase):
         self.assertEqual(apk_info.get('versionName'), '1.0')
         self.assertEqual(apk_info['icons_src'], {})
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_scan_apk_no_min_target(self):
         config = dict()
         fdroidserver.common.fill_config_defaults(config)
@@ -841,6 +850,7 @@ class UpdateTest(unittest.TestCase):
 
         self.assertDictEqual(apk_info, expected)
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_scan_apk_no_sig(self):
         config = dict()
         fdroidserver.common.fill_config_defaults(config)
@@ -923,6 +933,7 @@ class UpdateTest(unittest.TestCase):
             shutil.copy(os.path.join(self.basedir, os.path.basename(apkfile)), apkfile)
             fdroidserver.update.scan_apk(apkfile)
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_process_apk(self):
         def _build_yaml_representer(dumper, data):
             '''Creates a YAML representation of a Build instance'''
@@ -994,6 +1005,7 @@ class UpdateTest(unittest.TestCase):
                 del from_yaml['ipfsCIDv1']  # handle when ipfs_cid is not installed
             self.assertEqual(apk, from_yaml)
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_process_apk_signed_by_disabled_algorithms(self):
         config = dict()
         fdroidserver.common.fill_config_defaults(config)
@@ -1108,6 +1120,7 @@ class UpdateTest(unittest.TestCase):
         self.assertIsNone(apk)
         self.assertFalse(cachechanged)
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_get_apks_without_allowed_signatures(self):
         """Test when no AllowedAPKSigningKeys is specified"""
         os.chdir(self.testdir)
@@ -1129,6 +1142,7 @@ class UpdateTest(unittest.TestCase):
         r = fdroidserver.update.get_apks_without_allowed_signatures(app, apk)
         self.assertIsNone(r)
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_get_apks_without_allowed_signatures_allowed(self):
         """Test when the APK matches the specified AllowedAPKSigningKeys"""
         os.chdir(self.testdir)
@@ -1154,6 +1168,7 @@ class UpdateTest(unittest.TestCase):
         r = fdroidserver.update.get_apks_without_allowed_signatures(app, apk)
         self.assertIsNone(r)
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_get_apks_without_allowed_signatures_blocked(self):
         """Test when the APK does not match any specified AllowedAPKSigningKeys"""
         os.chdir(self.testdir)
@@ -1179,6 +1194,7 @@ class UpdateTest(unittest.TestCase):
         r = fdroidserver.update.get_apks_without_allowed_signatures(app, apk)
         self.assertEqual(apkfile, r)
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_update_with_AllowedAPKSigningKeys(self):
         """Test that APKs without allowed signatures get deleted."""
         os.chdir(self.testdir)
@@ -1224,6 +1240,7 @@ class UpdateTest(unittest.TestCase):
             fdroidserver.update.main()
         self.assertFalse(os.path.exists(testapk))
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_translate_per_build_anti_features(self):
         os.chdir(self.testdir)
         shutil.copytree(os.path.join(self.basedir, 'repo'), 'repo')
@@ -1253,6 +1270,7 @@ class UpdateTest(unittest.TestCase):
                 foundtest = True
         self.assertTrue(foundtest)
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_create_metadata_from_template(self):
         os.chdir(self.testdir)
         os.mkdir('repo')
@@ -1664,6 +1682,7 @@ class UpdateTest(unittest.TestCase):
                 self.assertEqual(fdroidserver.update.config['jarsigner'], data['jarsigner'])
                 self.assertEqual(fdroidserver.update.config['keytool'], data['keytool'])
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_scan_metadata_androguard(self):
 
         def _create_apkmetadata_object(apkName):
@@ -1728,6 +1747,7 @@ class UpdateTest(unittest.TestCase):
             self.maxDiff = None
             self.assertEqual(apkaapt, apkandroguard)
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_exclude_disabled_apks(self):
         os.chdir(self.testdir)
         os.mkdir('repo')

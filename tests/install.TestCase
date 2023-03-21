@@ -22,6 +22,7 @@ import fdroidserver.install
 class InstallTest(unittest.TestCase):
     '''fdroidserver/install.py'''
 
+    @unittest.skipIf(os.uname().machine == 's390x', 'adb is not ported to s390x')
     def test_devices(self):
         config = dict()
         fdroidserver.common.fill_config_defaults(config)
