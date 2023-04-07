@@ -19,6 +19,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import git
+import importlib
+import json
 from pathlib import Path
 import math
 import platform
@@ -28,9 +30,15 @@ import logging
 import ruamel.yaml
 from collections import OrderedDict
 
+try:
+    import jsonschema
+except ImportError:
+    jsonschema = None
+
 from . import common
 from . import _
 from .exception import MetaDataException
+from . import schemas
 
 srclibs = None
 warnings_action = None
@@ -526,6 +534,15 @@ def parse_yaml_srclib(metadatapath):
     return thisinfo
 
 
+def get_validator():
+    schema = json.loads(
+        importlib.resources.files(schemas)
+        .joinpath('metadata.json')
+        .read_text(encoding='utf-8')
+    )
+    return jsonschema.validators.validator_for(schema)(schema)
+
+
 def read_srclibs():
     """Read all srclib metadata.
 
@@ -551,7 +568,7 @@ def read_srclibs():
         srclibs[metadatapath.stem] = parse_yaml_srclib(metadatapath)
 
 
-def read_metadata(appids={}, sort_by_time=False):
+def read_metadata(appids={}, sort_by_time=False, validate_with_schema=False):
     """Return a list of App instances sorted newest first.
 
     This reads all of the metadata files in a 'data' repository, then
@@ -562,6 +579,13 @@ def read_metadata(appids={}, sort_by_time=False):
     appids is a dict with appids a keys and versionCodes as values.
 
     """
+    validator = None
+    if validate_with_schema:
+        if jsonschema:
+            validator = get_validator()
+        else:
+            logging.warning('Validation with JSON schema requested but jsonschema (python3-jsonschema) is not installed!')
+
     # Always read the srclibs before the apps, since they can use a srlib as
     # their source repository.
     read_srclibs()
@@ -600,14 +624,19 @@ def read_metadata(appids={}, sort_by_time=False):
             _warn_or_exception(
                 _("Found multiple metadata files for {appid}").format(appid=appid)
             )
-        app = parse_metadata(metadatapath)
+        app = parse_metadata(metadatapath, validator=validator)
+
+        # app might be None if schema validation failed, but only a warning was raised
+        if not app:
+            continue
+
         check_metadata(app)
         apps[app.id] = app
 
     return apps
 
 
-def parse_metadata(metadatapath):
+def parse_metadata(metadatapath, validator=None):
     """Parse metadata file, also checking the source repo for .fdroid.yml.
 
     This function finds the relevant files, gets them parsed, converts
@@ -628,9 +657,11 @@ def parse_metadata(metadatapath):
 
     Parameters
     ----------
-    metadatapath
+    metadatapath: Path
       The file path to read. The "Application ID" aka "Package Name"
       for the application comes from this filename.
+    validator: jsonschema.Validator
+      The validator for the parsed data from the metadatapath.
 
     Raises
     ------
@@ -651,7 +682,12 @@ def parse_metadata(metadatapath):
     app.metadatapath = metadatapath.as_posix()
     if metadatapath.suffix == '.yml':
         with metadatapath.open('r', encoding='utf-8') as mf:
-            app.update(parse_yaml_metadata(mf))
+            _app = parse_yaml_metadata(mf, validator=validator)
+        if _app is not None:
+            app.update(_app)
+        else:
+            # Schema validation failed
+            return None
     else:
         _warn_or_exception(
             _('Unknown metadata format: {path} (use: *.yml)').format(path=metadatapath)
@@ -676,8 +712,7 @@ def parse_metadata(metadatapath):
                 logging.debug(
                     _('Including metadata from {path}').format(path=metadata_in_repo)
                 )
-            app_in_repo = parse_metadata(metadata_in_repo)
-            for k, v in app_in_repo.items():
+            for k, v in (parse_metadata(metadata_in_repo) or {}).items():
                 if k not in app:
                     app[k] = v
 
@@ -701,7 +736,7 @@ def parse_metadata(metadatapath):
     return app
 
 
-def parse_yaml_metadata(mf):
+def parse_yaml_metadata(mf, validator=None):
     """Parse the .yml file and post-process it.
 
     This function handles parsing a metadata YAML file and converting
@@ -713,6 +748,15 @@ def parse_yaml_metadata(mf):
     make a better user experience for people editing .yml files, there
     is post processing.  That makes the parsing perform something like
     Strict YAML.
+
+    Parameters
+    ----------
+    mf : io.TextIOWrapper
+        Buffered text stream of the metadata file.
+    app : App
+        The App instance to put the data in.
+    validator : jsonschema.Validator
+        Validator to validate the data from the mf.
 
     """
     try:
@@ -738,6 +782,17 @@ def parse_yaml_metadata(mf):
             path=mf.name)
         )
         yamldata = dict()
+
+    if validator:
+        # Validate using JSON schema validator and handle errors
+        errors = list(validator.iter_errors(yamldata))
+        if errors:
+            _warn_or_exception(
+                _('%s is not valid:%s') % (
+                    mf.name, '\n' + '\n'.join(e.message for e in errors)
+                )
+            )
+            return None
 
     deprecated_in_yaml = ['Provides']
 

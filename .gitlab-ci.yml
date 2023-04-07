@@ -262,6 +262,7 @@ black:
     - apt-get install black
     - black --check --diff --color $CI_PROJECT_DIR
 
+
 fedora_latest:
   image: fedora:latest
   only:

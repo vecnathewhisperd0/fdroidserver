@@ -42,6 +42,7 @@ include locale/zh_Hans/LC_MESSAGES/fdroidserver.po
 include locale/zh_Hant/LC_MESSAGES/fdroidserver.po
 include makebuildserver
 include README.md
+include fdroidserver/schemas/metadata.json
 include tests/aosp_testkey_debug.keystore
 include tests/apk.embedded_1.apk
 include tests/bad-unicode-*.apk
@@ -723,6 +724,7 @@ include tests/repo/v1.v2.sig_1020.apk
 include tests/rewritemeta.TestCase
 include tests/run-tests
 include tests/scanner.TestCase
+include tests/schemas.TestCase
 include tests/signatures.TestCase
 include tests/signindex.TestCase
 include tests/signindex/guardianproject.jar

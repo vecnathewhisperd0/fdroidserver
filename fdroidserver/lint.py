@@ -792,7 +792,7 @@ def main():
     load_categories_config()
 
     # Get all apps...
-    allapps = metadata.read_metadata(options.appid)
+    allapps = metadata.read_metadata(options.appid, validate_with_schema=True)
     apps = common.read_app_args(options.appid, allapps, False)
 
     anywarns = check_for_unsupported_metadata_files()
