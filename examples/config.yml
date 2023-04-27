@@ -59,6 +59,17 @@
 #   by the admin of f-droid.org using the tools on
 #   https://gitlab.com/fdroid.
 
+# repo_inclusion_policy_text: >-
+#   This is complete text of the inclusion policy. This repository guarantees
+#   for all apps in this repository to comply with this policy.
+# repo_inclusion_policy_url: https://f-droid.org/docs/Inclusion_Policy/
+
+# repo_privacy_policy_text: >-
+#   This is the complete privacy policy text for this repo. This repository
+#   guarantees that all data this repository could gather is treated with
+#   regard to this policy text.
+# repo_privacy_policy_url: https://forum.f-droid.org/privacy
+
 # As above, but for the archive repo.
 #
 # archive_url: https://f-droid.org/archive

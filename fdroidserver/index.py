@@ -100,6 +100,10 @@ def make(apps, apks, repodir, archive):
             repodict["webBaseUrl"] = common.config['repo_web_base_url']
         repodict['description'] = common.config['repo_description']
         urlbasepath = os.path.basename(urllib.parse.urlparse(common.config['repo_url']).path)
+    repodict['inclusion_policy_text'] = common.config['repo_inclusion_policy_text']
+    repodict['inclusion_policy_url'] = common.config['repo_inclusion_policy_url']
+    repodict['privacy_policy_text'] = common.config['repo_privacy_policy_text']
+    repodict['privacy_policy_url'] = common.config['repo_privacy_policy_url']
 
     mirrorcheckfailed = False
     mirrors = []
