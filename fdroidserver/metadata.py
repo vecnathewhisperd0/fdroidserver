@@ -579,14 +579,11 @@ def read_metadata(appids={}, sort_by_time=False):
             Path('.').glob('.fdroid.yml')
         )
 
+    # Most things want the index alpha sorted for stability
+    metadatafiles.sort()
     if sort_by_time:
-        entries = ((path.stat().st_mtime, path) for path in metadatafiles)
-        metadatafiles = []
-        for _ignored, path in sorted(entries, reverse=True):
-            metadatafiles.append(path)
-    else:
-        # most things want the index alpha sorted for stability
-        metadatafiles = sorted(metadatafiles)
+        # Sort on mtime as primary, alpha as secondary (sort stability)
+        metadatafiles.sort(key=lambda path: path.stat().st_mtime, reverse=True)
 
     for metadatapath in metadatafiles:
         appid = metadatapath.stem
