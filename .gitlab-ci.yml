@@ -307,6 +307,18 @@ fedora_latest:
         "cd `pwd`; export ANDROID_HOME=$ANDROID_HOME; fdroid=~testuser/.local/bin/fdroid ./run-tests"
 
 
+completion:
+  image: debian:sid-slim
+  <<: *apt-template
+  script:
+    - apt-get install fdroidserver fish git python3
+    # Test whether completion file needs to be updated
+    - PYTHONPATH=. python3 devscripts/completion/fish-completion.py > completion/fish-completion.fish
+    - git diff --exit-code -- completion/fish-completion.fish
+    # Test whether completion file can be loaded without errors
+    - fish completion/fish-completion.fish
+
+
 gradle:
   image: debian:bullseye
   <<: *apt-template
