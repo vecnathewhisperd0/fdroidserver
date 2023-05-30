@@ -96,14 +96,18 @@ def extract(options):
                 logging.debug(e.detail)
 
 
-def main():
+def get_argument_parser() -> ArgumentParser:
     parser = ArgumentParser()
     common.setup_global_opts(parser)
     parser.add_argument(
         "APK", nargs='*', help=_("signed APK, either a file-path or HTTPS URL.")
     )
     parser.add_argument("--no-check-https", action="store_true", default=False)
-    options = parser.parse_args()
+    return parser
+
+
+def main():
+    options = get_argument_parser().parse_args()
 
     # Read config.py...
     common.read_config(options)

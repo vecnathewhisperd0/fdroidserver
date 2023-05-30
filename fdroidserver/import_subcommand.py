@@ -182,10 +182,7 @@ def get_app_from_url(url):
     return app
 
 
-def main():
-    global config, options
-
-    # Parse command line...
+def get_argument_parser() -> ArgumentParser:
     parser = ArgumentParser()
     common.setup_global_opts(parser)
     parser.add_argument("-u", "--url", default=None,
@@ -201,7 +198,14 @@ def main():
     parser.add_argument("--rev", default=None,
                         help=_("Allows a different revision (or git branch) to be specified for the initial import"))
     metadata.add_metadata_arguments(parser)
-    options = parser.parse_args()
+    return parser
+
+
+def main():
+    global config, options
+
+    # Parse command line...
+    options = get_argument_parser().parse_args()
     metadata.warnings_action = options.W
 
     config = common.read_config(options)

@@ -48,10 +48,7 @@ def disable_in_config(key, value):
         f.writelines(data)
 
 
-def main():
-    global options, config
-
-    # Parse command line...
+def get_argument_parser() -> ArgumentParser:
     parser = ArgumentParser()
     common.setup_global_opts(parser)
     parser.add_argument(
@@ -81,7 +78,14 @@ def main():
         default=False,
         help=_("Do not prompt for Android SDK path, just fail"),
     )
-    options = parser.parse_args()
+    return parser
+
+
+def main():
+    global options, config
+
+    # Parse command line...
+    options = get_argument_parser().parse_args()
 
     fdroiddir = os.getcwd()
     test_config = dict()

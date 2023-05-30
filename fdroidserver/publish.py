@@ -258,10 +258,7 @@ def create_key_if_not_existing(keyalias):
         return False
 
 
-def main():
-    global config, options
-
-    # Parse command line...
+def get_argument_parser() -> ArgumentParser:
     parser = ArgumentParser(
         usage="%(prog)s [options] " "[APPID[:VERCODE] [APPID[:VERCODE] ...]]"
     )
@@ -272,7 +269,14 @@ def main():
         help=_("application ID with optional versionCode in the form APPID[:VERCODE]"),
     )
     metadata.add_metadata_arguments(parser)
-    options = parser.parse_args()
+    return parser
+
+
+def main():
+    global config, options
+
+    # Parse command line...
+    options = get_argument_parser().parse_args()
     metadata.warnings_action = options.W
 
     config = common.read_config(options)

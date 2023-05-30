@@ -760,10 +760,7 @@ def check_certificate_pinned_binaries(app):
             return
 
 
-def main():
-    global config, options
-
-    # Parse command line...
+def get_argument_parser() -> ArgumentParser:
     parser = ArgumentParser()
     common.setup_global_opts(parser)
     parser.add_argument(
@@ -786,7 +783,14 @@ def main():
         "appid", nargs='*', help=_("application ID of file to operate on")
     )
     metadata.add_metadata_arguments(parser)
-    options = parser.parse_args()
+    return parser
+
+
+def main():
+    global config, options
+
+    # Parse command line...
+    options = get_argument_parser().parse_args()
     metadata.warnings_action = options.W
 
     config = common.read_config(options)

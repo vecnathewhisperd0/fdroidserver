@@ -835,14 +835,7 @@ def keep_when_not_allowed():
     )
 
 
-def parse_commandline():
-    """Parse the command line.
-
-    Returns
-    -------
-    options
-    parser
-    """
+def get_argument_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(usage="%(prog)s [options] [APPID[:VERCODE] [APPID[:VERCODE] ...]]")
     common.setup_global_opts(parser)
     parser.add_argument("appid", nargs='*', help=_("application ID with optional versionCode in the form APPID[:VERCODE]"))
@@ -877,6 +870,18 @@ def parse_commandline():
     parser.add_argument("-w", "--wiki", default=False, action="store_true",
                         help=argparse.SUPPRESS)
     metadata.add_metadata_arguments(parser)
+    return parser
+
+
+def parse_commandline():
+    """Parse the command line.
+
+    Returns
+    -------
+    options
+    parser
+    """
+    parser = get_argument_parser()
     options = parser.parse_args()
     metadata.warnings_action = options.W
 

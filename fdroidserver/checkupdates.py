@@ -693,15 +693,7 @@ options = None
 start_timestamp = time.gmtime()
 
 
-def main():
-    """Check for updates for one or more apps.
-
-    The behaviour of this function is influenced by the configuration file as
-    well as command line parameters.
-    """
-    global config, options
-
-    # Parse command line...
+def get_argument_parser() -> ArgumentParser:
     parser = ArgumentParser()
     common.setup_global_opts(parser)
     parser.add_argument("appid", nargs='*', help=_("application ID of file to operate on"))
@@ -714,7 +706,20 @@ def main():
     parser.add_argument("--allow-dirty", action="store_true", default=False,
                         help=_("Run on git repo that has uncommitted changes"))
     metadata.add_metadata_arguments(parser)
-    options = parser.parse_args()
+
+    return parser
+
+
+def main():
+    """Check for updates for one or more apps.
+
+    The behaviour of this function is influenced by the configuration file as
+    well as command line parameters.
+    """
+    global config, options
+
+    # Parse command line...
+    options = get_argument_parser().parse_args()
     metadata.warnings_action = options.W
 
     config = common.read_config(options)

@@ -23,11 +23,15 @@ from . import metadata
 options = None
 
 
-def main():
+def get_argument_parser() -> ArgumentParser:
     parser = ArgumentParser()
     common.setup_global_opts(parser)
     metadata.add_metadata_arguments(parser)
-    options = parser.parse_args()
+    return parser
+
+
+def main():
+    options = get_argument_parser().parse_args()
     metadata.warnings_action = options.W
     common.read_config(None)
 

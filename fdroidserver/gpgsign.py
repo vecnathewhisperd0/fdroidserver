@@ -41,13 +41,17 @@ def status_update_json(signed):
     common.write_status_json(output)
 
 
+def get_argument_parser() -> ArgumentParser:
+    parser = ArgumentParser()
+    common.setup_global_opts(parser)
+    return parser
+
+
 def main():
     global config, options
 
     # Parse command line...
-    parser = ArgumentParser()
-    common.setup_global_opts(parser)
-    options = parser.parse_args()
+    options = get_argument_parser().parse_args()
 
     config = common.read_config(options)
 

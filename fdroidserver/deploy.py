@@ -726,9 +726,7 @@ def push_binary_transparency(git_repo_path, git_remote):
         origin.push(GIT_BRANCH)
 
 
-def main():
-    global config, options
-
+def get_argument_parser() -> ArgumentParser:
     parser = ArgumentParser()
     common.setup_global_opts(parser)
     parser.add_argument("-i", "--identity-file", default=None,
@@ -739,7 +737,13 @@ def main():
                         help=_("Don't use rsync checksums"))
     parser.add_argument("--no-keep-git-mirror-archive", action="store_true", default=False,
                         help=_("If a git mirror gets to big, allow the archive to be deleted"))
-    options = parser.parse_args()
+    return parser
+
+
+def main():
+    global config, options
+
+    options = get_argument_parser().parse_args()
     config = common.read_config(options)
 
     if config.get('nonstandardwebroot') is True:
