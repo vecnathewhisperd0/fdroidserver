@@ -333,7 +333,7 @@ def update_ipfs(repo_section):
     logging.debug(_('adding {section} to ipfs').format(section=repo_section))
 
     return subprocess.check_output(
-        ['ipfs', 'add', '-r', '-Q', repo_section], text=True
+        ['ipfs', 'add', '-r', '-Q', '--to-files', f"/{repo_section}", repo_section], text=True
     ).strip()
 
 
