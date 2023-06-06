@@ -333,7 +333,16 @@ def update_ipfs(repo_section):
     logging.debug(_('adding {section} to ipfs').format(section=repo_section))
 
     return subprocess.check_output(
-        ['ipfs', 'add', '-r', '-Q', '--to-files', f"/{repo_section}", repo_section], text=True
+        [
+            config.get("ipfs"),
+            'add',
+            '-r',
+            '-Q',
+            '--to-files',
+            f"/{repo_section}",
+            repo_section,
+        ],
+        text=True,
     ).strip()
 
 
@@ -346,7 +355,14 @@ def update_ipns(ipfs_hash, ipns_key):
     )
 
     subprocess.check_call(
-        ['ipfs', 'name', 'publish', '--key', ipns_key, '/ipfs/{}'.format(ipfs_hash)]
+        [
+            config.get("ipfs"),
+            'name',
+            'publish',
+            '--key',
+            ipns_key,
+            '/ipfs/{}'.format(ipfs_hash),
+        ]
     )
 
 

@@ -619,14 +619,13 @@ ipfs:
     - cd /tmp
     - wget https://dist.ipfs.tech/kubo/v0.20.0/kubo_v0.20.0_linux-amd64.tar.gz
     - tar -xvzf kubo_v0.20.0_linux-amd64.tar.gz
-    - export PATH=/tmp/kubo:$PATH
-    - ipfs init
+    - /tmp/kubo/ipfs init
     - test -d /tmp/fdroid/repo || mkdir -p /tmp/fdroid/repo
     - cp $FDROIDSERVER/tests/config.py $FDROIDSERVER/tests/keystore.jks /tmp/fdroid/
     - cp $FDROIDSERVER/tests/repo/com.politedroid_6.apk /tmp/fdroid/repo/
     - cd /tmp/fdroid
-    - 'printf "ipfs = True\n" >> config.py'
+    - 'echo ipfs = \"/tmp/kubo/ipfs\" >> config.py'
     - $FDROIDSERVER/fdroid update --verbose --create-metadata
     - $FDROIDSERVER/fdroid deploy --verbose
-    - ipfs files ls /repo
-    - ipfs files ls /repo/com.politedroid_6.apk
+    - /tmp/kubo/ipfs files ls /repo
+    - /tmp/kubo/ipfs files ls /repo/com.politedroid_6.apk
