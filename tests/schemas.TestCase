@@ -27,12 +27,13 @@ class SchemasTest(unittest.TestCase):
         importlib.util.find_spec('jsonschema'),
         'jsonschema might not be installed, e.g. on Buildserver',
     )
-    def test_schemas_are_valid(self):
-        for name in ('metadata',):
-            schema = json.loads(
-                importlib.resources.read_text(fdroidserver.schemas, f'{name}.json')
-            )
-            jsonschema.validators.validator_for(schema).check_schema(schema)
+    def test_schema_is_valid(self):
+        schema = json.loads(
+            importlib.resources.files(fdroidserver.schemas)
+            .joinpath('metadata.json')
+            .read_text(encoding='utf-8')
+        )
+        jsonschema.validators.validator_for(schema).check_schema(schema)
 
 
 # Boilerplate code
