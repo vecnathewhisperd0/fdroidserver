@@ -175,11 +175,39 @@ def update_awsbucket_s3cmd(repo_section):
     # _EX_SIGINT = 2
     # EX_BREAK = _EX_SIGNAL + _EX_SIGINT  # Control-C (KeyboardInterrupt raised)
 
+    acl_public_flag = '--acl-public'
+    output_lines = []
+
     def run_s3cmd(command, bucket_name_for_err_msg="YOUR_BUCKET_NAME"):
         retry_timeouts = [0, 0, 1, 1, 5, 30, 60]
         for current in retry_timeouts:
             time.sleep(current)
-            s3cmd_exit_code = subprocess.call(command)
+
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                       universal_newlines=True)
+
+            for line in iter(process.stdout.readline, ''):
+                if line.endswith('\r'):
+                    sys.stdout.write(line)
+                    sys.stdout.flush()
+                    if output_lines:  # Replace the last line if there's one
+                        output_lines[-1] = line
+                    else:
+                        output_lines.append(line)
+                else:
+                    sys.stdout.write(line)
+                    sys.stdout.flush()
+                    output_lines.append(line)
+
+            process.stdout.close()
+            s3cmd_exit_code = process.wait()
+
+            if "AccessControlListNotSupported" in ''.join(output_lines):
+                if acl_public_flag in command:
+                    logging.info(_('Remove ACL from the command'))
+                    command.remove(acl_public_flag)
+                continue
+
             if s3cmd_exit_code == EX_OK:
                 return
             elif s3cmd_exit_code in [EX_GENERAL, EX_PARTIAL, EX_SERVICE, EX_DATAERR, EX_OSERR, EX_IOERR, EX_TEMPFAIL]:
@@ -223,7 +251,7 @@ def update_awsbucket_s3cmd(repo_section):
     # check if bucket
     run_s3cmd(s3cmd + ['info', s3bucketurl], bucket_name_for_err_msg=config['awsbucket'])
 
-    s3cmd_sync = s3cmd + ['sync', '--acl-public']
+    s3cmd_sync = s3cmd + ['sync', '--acl-public', '--no-progress']
     if options.verbose:
         s3cmd_sync += ['--verbose']
     if options.quiet:
