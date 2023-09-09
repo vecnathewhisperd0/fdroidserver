@@ -126,13 +126,11 @@ def update_awsbucket_s3cmd(repo_section):
     if configfilename is not None:
         s3cmd.append('--config=' + configfilename)
 
+    # check if bucket exist
     if subprocess.call(s3cmd + ['info', s3bucketurl]) != 0:
-        logging.warning(_('Creating new S3 bucket: {url}')
-                        .format(url=s3bucketurl))
-        if subprocess.call(s3cmd + ['mb', s3bucketurl]) != 0:
-            logging.error(_('Failed to create S3 bucket: {url}')
-                          .format(url=s3bucketurl))
-            raise FDroidException()
+        raise FDroidException(
+            _('Bucket {name} doesn\'t exist. Please create it manually with latest AWS S3 recommendations')
+            .format(name=config['awsbucket']))
 
     s3cmd_sync = s3cmd + ['sync', '--acl-public']
     if options.verbose:
@@ -199,10 +197,10 @@ def update_awsbucket_libcloud(repo_section):
     driver = cls(config['awsaccesskeyid'], config['awssecretkey'])
     try:
         container = driver.get_container(container_name=awsbucket)
-    except ContainerDoesNotExistError:
-        container = driver.create_container(container_name=awsbucket)
-        logging.info(_('Created new container "{name}"')
-                     .format(name=container.name))
+    except ContainerDoesNotExistError as e:
+        raise FDroidException(
+            _('Bucket {name} doesn\'t exist. Please create it manually with latest AWS S3 recommendations')
+            .format(name=awsbucket)) from e
 
     upload_dir = 'fdroid/' + repo_section
     objs = dict()
