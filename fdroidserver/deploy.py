@@ -82,7 +82,7 @@ def update_awsbucket(repo_section):
     The contents of that subdir of the
     bucket will first be deleted.
 
-    Requires AWS credentials set in config.yml: awsaccesskeyid, awssecretkey
+    Requires AWS credentials set in config.yml if s3cmd is not installed: awsaccesskeyid, awssecretkey
     """
     logging.debug('Syncing "' + repo_section + '" to Amazon S3 bucket "'
                   + config['awsbucket'] + '"')
@@ -90,6 +90,9 @@ def update_awsbucket(repo_section):
     if common.set_command_in_config('s3cmd'):
         update_awsbucket_s3cmd(repo_section)
     else:
+        if os.path.exists(USER_S3CFG):
+            raise FDroidException(_('"{path}" exists but s3cmd is not installed!')
+                                  .format(path=USER_S3CFG))
         update_awsbucket_libcloud(repo_section)
 
 
@@ -107,10 +110,9 @@ def update_awsbucket_s3cmd(repo_section):
     logging.debug(_('Using s3cmd to sync with: {url}')
                   .format(url=config['awsbucket']))
 
-    if os.path.exists(USER_S3CFG):
-        logging.info(_('Using "{path}" for configuring s3cmd.').format(path=USER_S3CFG))
-        configfilename = USER_S3CFG
-    else:
+    configfilename = None
+    # user should prefer provide credential in other way
+    if 'awsaccesskeyid' in config or 'awssecretkey' in config:  # it's intended if only one present it will fail
         fd = os.open(AUTO_S3CFG, os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0o600)
         logging.debug(_('Creating "{path}" for configuring s3cmd.').format(path=AUTO_S3CFG))
         os.write(fd, '[default]\n'.encode('utf-8'))
@@ -120,7 +122,10 @@ def update_awsbucket_s3cmd(repo_section):
         configfilename = AUTO_S3CFG
 
     s3bucketurl = 's3://' + config['awsbucket']
-    s3cmd = [config['s3cmd'], '--config=' + configfilename]
+    s3cmd = [config['s3cmd']]
+    if configfilename is not None:
+        s3cmd.append('--config=' + configfilename)
+
     if subprocess.call(s3cmd + ['info', s3bucketurl]) != 0:
         logging.warning(_('Creating new S3 bucket: {url}')
                         .format(url=s3bucketurl))
@@ -186,12 +191,9 @@ def update_awsbucket_libcloud(repo_section):
 
     if not config.get('awsaccesskeyid') or not config.get('awssecretkey'):
         raise FDroidException(
-            _('To use awsbucket, awssecretkey and awsaccesskeyid must also be set in config.yml!'))
+            _('Since s3cmd is not installed, deploy.py is using Apache Libcloud as a fallback. '
+              'For this, "awssecretkey" and "awsaccesskeyid" must be explicitly defined in config.yml.'))
     awsbucket = config['awsbucket']
-
-    if os.path.exists(USER_S3CFG):
-        raise FDroidException(_('"{path}" exists but s3cmd is not installed!')
-                              .format(path=USER_S3CFG))
 
     cls = get_driver(Provider.S3)
     driver = cls(config['awsaccesskeyid'], config['awssecretkey'])
