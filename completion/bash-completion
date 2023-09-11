@@ -72,18 +72,18 @@ __vercode() {
 __complete_options() {
 	case "${cur}" in
 		--*)
-			COMPREPLY=( $( compgen -W "--help --version ${lopts}" -- $cur ) )
+			COMPREPLY=( $( compgen -W "--help --quiet --verbose ${lopts}" -- $cur ) )
 			return 0;;
 		*)
-			COMPREPLY=( $( compgen -W "-h ${opts} --help --version ${lopts}" -- $cur ) )
+			COMPREPLY=( $( compgen -W "-h -q -v ${opts} --help --quiet --verbose ${lopts}" -- $cur ) )
 			return 0;;
 	esac
 }
 
 __complete_build() {
-	opts="-v -q -l -s -t -f -a"
+	opts="-l -s -t -f -a"
 
-	lopts="--verbose --quiet --latest --stop --test --server --reset-server --skip-scan --scan-binary --no-tarball --force --all --no-refresh"
+	lopts="--latest --stop --test --server --reset-server --skip-scan --scan-binary --no-tarball --force --all --no-refresh"
 	case "${prev}" in
 		:)
 			__vercode
@@ -103,14 +103,12 @@ __complete_build() {
 }
 
 __complete_gpgsign() {
-	opts="-v -q"
-	lopts="--verbose --quiet"
 	__complete_options
 }
 
 __complete_install() {
-	opts="-v -q"
-	lopts="--verbose --quiet --all"
+	opts="-a"
+	lopts="--all"
 	case "${cur}" in
 		-*)
 			__complete_options
@@ -125,21 +123,12 @@ __complete_install() {
 }
 
 __complete_update() {
-	opts="-c -v -q -i -I -e"
-	lopts="--create-metadata --verbose --quiet
- --icons --pretty --clean --delete-unknown
- --nosign --rename-apks --use-date-from-apk"
-	case "${prev}" in
-		-e|--editor)
-			_filedir
-			return 0;;
-	esac
+	opts="-c -I"
+	lopts="--create-metadata --icons --pretty --clean --delete-unknown --nosign --rename-apks --use-date-from-apk --create-key --allow-disabled-algorithms"
 	__complete_options
 }
 
 __complete_publish() {
-	opts="-v -q"
-	lopts="--verbose --quiet"
 	case "${cur}" in
 		-*)
 			__complete_options
@@ -154,8 +143,7 @@ __complete_publish() {
 }
 
 __complete_checkupdates() {
-	opts="-v -q"
-	lopts="--verbose --quiet --auto --autoonly --commit --allow-dirty"
+	lopts="--auto --autoonly --commit --allow-dirty"
 	case "${cur}" in
 		-*)
 			__complete_options
@@ -167,8 +155,8 @@ __complete_checkupdates() {
 }
 
 __complete_import() {
-	opts="-c -h -l -q -s -u -v -W"
-	lopts="--categories --license --quiet --rev --subdir --url"
+	opts="-c -l -s -u -W"
+	lopts="--categories --license --rev --subdir --url --omit-disable"
 	case "${prev}" in
 		-c|-l|-s|-u|--categories|--license|--quiet|--rev|--subdir|--url)
 		return 0;;
@@ -180,14 +168,12 @@ __complete_import() {
 }
 
 __complete_readmeta() {
-	opts="-v -q"
-	lopts="--verbose --quiet"
 	__complete_options
 }
 
 __complete_rewritemeta() {
-	opts="-v -q -l"
-	lopts="--verbose --quiet --list"
+	opts="-l"
+	lopts="--list"
 	case "${cur}" in
 		-*)
 			__complete_options
@@ -199,8 +185,8 @@ __complete_rewritemeta() {
 }
 
 __complete_lint() {
-	opts="-v -q -f"
-	lopts="--verbose --quiet --force-yamllint --format"
+	opts="-f"
+	lopts="--force-yamllint --format"
 	case "${cur}" in
 		-*)
 			__complete_options
@@ -212,8 +198,8 @@ __complete_lint() {
 }
 
 __complete_scanner() {
-	opts="-v -q"
-	lopts="--verbose --quiet"
+	opts="-e -f -r"
+	lopts="--exit-code --force --json --refresh"
 	case "${cur}" in
 		-*)
 			__complete_options
@@ -228,8 +214,7 @@ __complete_scanner() {
 }
 
 __complete_verify() {
-	opts="-v -q -p"
-	lopts="--verbose --quiet"
+	lopts="--output-json --reuse-remote-apk"
 	case "${cur}" in
 		-*)
 			__complete_options
@@ -250,27 +235,23 @@ __complete_btlog() {
 }
 
 __complete_mirror() {
-	opts="-v"
 	lopts="--all --archive --build-logs --pgp-signatures --src-tarballs --output-dir"
 	__complete_options
 }
 
 __complete_nightly() {
-	opts="-v -q"
-	lopts="--show-secret-var --archive-older"
+	lopts="--archive-older --file --keep-private-keys --keystore --no-checksum --no-deploy --show-secret-var"
 	__complete_options
 }
 
 __complete_deploy() {
-	opts="-i -v -q"
-	lopts="--identity-file --local-copy-dir --sync-from-local-copy-dir
- --verbose --quiet --no-checksum --no-keep-git-mirror-archive"
+	opts="-i"
+	lopts="--identity-file --local-copy-dir --no-checksum --no-keep-git-mirror-archive"
 	__complete_options
 }
 
 __complete_signatures() {
-	opts="-v -q"
-	lopts="--verbose --no-check-https"
+	lopts="--no-check-https"
 	case "${cur}" in
 		-*)
 			__complete_options
@@ -281,15 +262,12 @@ __complete_signatures() {
 }
 
 __complete_signindex() {
-	opts="-v -q"
-	lopts="--verbose"
 	__complete_options
 }
 
 __complete_init() {
-	opts="-v -q -d"
-	lopts="--verbose --quiet --distinguished-name --keystore
- --repo-keyalias --android-home --no-prompt"
+	opts="-d"
+	lopts="--distinguished-name --keystore --repo-keyalias --android-home --no-prompt"
 	__complete_options
 }
 
@@ -327,7 +305,7 @@ _fdroid() {
 	cmd=${COMP_WORDS[1]}
 
 	[[ $__cmds == *\ $cmd\ * ]] && _fdroid_${cmd} || {
-		(($COMP_CWORD == 1)) && COMPREPLY=( $( compgen -W "${__cmds}" -- $cmd ) )
+		(($COMP_CWORD == 1)) && COMPREPLY=( $( compgen -W "${__cmds} --version" -- $cmd ) )
 	}
 }
 
