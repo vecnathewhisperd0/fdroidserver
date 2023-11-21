@@ -67,7 +67,6 @@ complete -c fdroid -n '__fish_seen_subcommand_from checkupdates' -l auto -d 'Pro
 complete -c fdroid -n '__fish_seen_subcommand_from checkupdates' -l autoonly -d 'Only process apps with auto-updates'
 complete -c fdroid -n '__fish_seen_subcommand_from checkupdates' -l commit -d 'Commit changes'
 complete -c fdroid -n '__fish_seen_subcommand_from checkupdates' -l allow-dirty -d 'Run on git repo that has uncommitted changes'
-complete -c fdroid -n '__fish_seen_subcommand_from checkupdates' -l gplay -d 'Only print differences with the Play Store'
 complete -c fdroid -n '__fish_seen_subcommand_from checkupdates' -s W -d 'Force metadata errors (default) to be warnings, or to be ignored.'
 complete -c fdroid -n '__fish_seen_subcommand_from deploy' -s h -l help -d 'Show this help message and exit'
 complete -c fdroid -n '__fish_seen_subcommand_from deploy' -s v -l verbose -d 'Spew out even more information than normal'
