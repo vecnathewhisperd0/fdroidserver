@@ -159,7 +159,7 @@ def get_repo_base_url(clone_url, repo_git_base, force_type=None):
     sys.exit(1)
 
 
-def main():
+def get_argument_parser(archive_older_unset=-1) -> ArgumentParser:
     parser = ArgumentParser()
     common.setup_global_opts(parser)
     parser.add_argument(
@@ -196,15 +196,20 @@ def main():
         default=False,
         help=_("Don't use rsync checksums"),
     )
-    archive_older_unset = -1
     parser.add_argument(
         "--archive-older",
         type=int,
         default=archive_older_unset,
         help=_("Set maximum releases in repo before older ones are archived"),
     )
+    return parser
+
+
+def main():
+    archive_older_unset = -1
+
     # TODO add --with-btlog
-    options = parser.parse_args()
+    options = get_argument_parser(archive_older_unset=archive_older_unset).parse_args()
     common.options = options
 
     # force a tighter umask since this writes private key material

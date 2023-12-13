@@ -145,10 +145,7 @@ def write_json_report(url, remote_apk, unsigned_apk, compare_result):
             json.dump(data, fp, cls=common.Encoder, sort_keys=True)
 
 
-def main():
-    global options, config
-
-    # Parse command line...
+def get_argument_parser() -> ArgumentParser:
     parser = ArgumentParser(
         usage="%(prog)s [options] [APPID[:VERCODE] [APPID[:VERCODE] ...]]"
     )
@@ -170,7 +167,14 @@ def main():
         default=False,
         help=_("Output JSON report to file named after APK."),
     )
-    options = parser.parse_args()
+    return parser
+
+
+def main():
+    global options, config
+
+    # Parse command line...
+    options = get_argument_parser().parse_args()
 
     config = common.read_config(options)
 

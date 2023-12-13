@@ -61,9 +61,7 @@ def remove_blank_flags_from_builds(builds):
     return newbuilds
 
 
-def main():
-    global config, options
-
+def get_argument_parser() -> ArgumentParser:
     parser = ArgumentParser()
     common.setup_global_opts(parser)
     parser.add_argument(
@@ -77,7 +75,13 @@ def main():
         "appid", nargs='*', help=_("application ID of file to operate on")
     )
     metadata.add_metadata_arguments(parser)
-    options = parser.parse_args()
+    return parser
+
+
+def main():
+    global config, options
+
+    options = get_argument_parser().parse_args()
     metadata.warnings_action = options.W
 
     config = common.read_config(options)

@@ -148,9 +148,7 @@ For more info on this idea:
     gitrepo.index.commit(commit_title)
 
 
-def main():
-    global options
-
+def get_argument_parser() -> ArgumentParser:
     parser = ArgumentParser()
     common.setup_global_opts(parser)
     parser.add_argument(
@@ -169,7 +167,13 @@ def main():
         default=None,
         help=_("Push the log to this git remote repository"),
     )
-    options = parser.parse_args()
+    return parser
+
+
+def main():
+    global options
+
+    options = get_argument_parser().parse_args()
 
     if options.verbose:
         logging.getLogger("requests").setLevel(logging.INFO)

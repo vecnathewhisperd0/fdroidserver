@@ -47,9 +47,7 @@ def _run_wget(path, urls):
     os.chdir(cwd)  # leave the working env the way we found it
 
 
-def main():
-    global options
-
+def get_argument_parser() -> ArgumentParser:
     parser = ArgumentParser()
     common.setup_global_opts(parser)
     parser.add_argument(
@@ -93,6 +91,13 @@ def main():
     parser.add_argument(
         "--output-dir", default=None, help=_("The directory to write the mirror to")
     )
+    return parser
+
+
+def main():
+    global options
+
+    parser = get_argument_parser()
     options = parser.parse_args()
 
     if options.all:

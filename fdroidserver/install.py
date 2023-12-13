@@ -43,15 +43,20 @@ def devices():
     return [line.split()[0] for line in lines]
 
 
-def main():
-    global options, config
-
-    # Parse command line...
+def get_argument_parser() -> ArgumentParser:
     parser = ArgumentParser(usage="%(prog)s [options] [APPID[:VERCODE] [APPID[:VERCODE] ...]]")
     common.setup_global_opts(parser)
     parser.add_argument("appid", nargs='*', help=_("application ID with optional versionCode in the form APPID[:VERCODE]"))
     parser.add_argument("-a", "--all", action="store_true", default=False,
                         help=_("Install all signed applications available"))
+    return parser
+
+
+def main():
+    global options, config
+
+    # Parse command line...
+    parser = get_argument_parser()
     options = parser.parse_args()
 
     if not options.appid and not options.all:

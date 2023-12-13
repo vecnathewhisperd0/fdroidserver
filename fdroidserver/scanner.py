@@ -771,10 +771,7 @@ def scan_source(build_dir, build=metadata.Build(), json_per_build=None):
     return count
 
 
-def main():
-    global options
-
-    # Parse command line...
+def get_argument_parser() -> ArgumentParser:
     parser = ArgumentParser(
         usage="%(prog)s [options] [(APPID[:VERCODE] | path/to.apk) ...]"
     )
@@ -789,7 +786,14 @@ def main():
     parser.add_argument("-e", "--exit-code", action="store_true", default=False,
                         help=_("Exit with a non-zero code if problems were found"))
     metadata.add_metadata_arguments(parser)
-    options = parser.parse_args()
+    return parser
+
+
+def main():
+    global options
+
+    # Parse command line...
+    options = get_argument_parser().parse_args()
     metadata.warnings_action = options.W
 
     json_output = dict()
