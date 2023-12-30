@@ -1,16 +1,24 @@
 ---
-
 include:
   - template: Jobs/Secret-Detection.gitlab-ci.yml
   - template: Jobs/SAST.gitlab-ci.yml
   - template: Security/Dependency-Scanning.gitlab-ci.yml
   - template: Code-Quality.gitlab-ci.yml
 
+workflow:
+  rules:
+    # required to enable merge request pipelines: https://docs.gitlab.com/ee/ci/pipelines/merge_request_pipelines.html#prerequisites
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" && $CI_ENABLE_MERGE_REQUEST_PIPELINES != "false"
+    # to prevent duplicate pipelines in MRs: https://docs.gitlab.com/ee/ci/yaml/workflow.html#switch-between-branch-pipelines-and-merge-request-pipelines
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push" && $CI_ENABLE_MERGE_REQUEST_PIPELINES != "false"
+      when: never
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH
+
 variables:
   pip: pip3 --timeout 100 --retries 10
   # speed up git checkout phase
   GIT_DEPTH: 1
-
 
 # Run the whole test suite in an environment that is like the
 # buildserver guest VM.  This installs python3-babel because that is
@@ -30,10 +38,10 @@ buildserver run-tests:
     # make sure that translations do not cause stacktraces
     - cd $CI_PROJECT_DIR/locale
     - for locale in *; do
-          test -d $locale || continue;
-          for cmd in `sed -n 's/.*("\(.*\)", *_.*/\1/p' $CI_PROJECT_DIR/fdroid`; do
-              LANGUAGE=$locale $CI_PROJECT_DIR/fdroid $cmd --help > /dev/null;
-          done
+      test -d $locale || continue;
+      for cmd in `sed -n 's/.*("\(.*\)", *_.*/\1/p' $CI_PROJECT_DIR/fdroid`; do
+      LANGUAGE=$locale $CI_PROJECT_DIR/fdroid $cmd --help > /dev/null;
+      done
       done
 
 # Test that the parsing of the .yml metadata format didn't change from last
@@ -47,7 +55,7 @@ metadata_v0:
   image: registry.gitlab.com/fdroid/fdroidserver:buildserver
   variables:
     GIT_DEPTH: 1000
-    RELEASE_COMMIT_ID: a1c4f803de8d4dc92ebd6b571a493183d14a00bf  # after ArchivePolicy: 0
+    RELEASE_COMMIT_ID: a1c4f803de8d4dc92ebd6b571a493183d14a00bf # after ArchivePolicy: 0
   script:
     - git fetch https://gitlab.com/fdroid/fdroidserver.git $RELEASE_COMMIT_ID
     - cd tests
@@ -63,9 +71,9 @@ metadata_v0:
     - cd fdroiddata
     - ../tests/dump_internal_metadata_format.py
     - sed -i
-          -e '/ArchivePolicy:/d'
-          -e '/RequiresRoot:/d'
-          metadata/dump_*/*.yaml
+      -e '/ArchivePolicy:/d'
+      -e '/RequiresRoot:/d'
+      metadata/dump_*/*.yaml
     - diff -uw metadata/dump_*
 
 .apt-template: &apt-template
@@ -75,15 +83,14 @@ metadata_v0:
   before_script:
     - echo Etc/UTC > /etc/timezone
     - echo 'APT::Install-Recommends "0";'
-           'APT::Install-Suggests "0";'
-           'APT::Get::Assume-Yes "true";'
-           'Acquire::Retries "20";'
-           'Dpkg::Use-Pty "0";'
-           'quiet "1";'
-        >> /etc/apt/apt.conf.d/99gitlab
+      'APT::Install-Suggests "0";'
+      'APT::Get::Assume-Yes "true";'
+      'Acquire::Retries "20";'
+      'Dpkg::Use-Pty "0";'
+      'quiet "1";'
+      >> /etc/apt/apt.conf.d/99gitlab
     - apt-get update
     - apt-get dist-upgrade
-
 
 # Since F-Droid uses Debian as its default platform, from production
 # servers to CI to contributor machines, it is important to know when
@@ -96,23 +103,22 @@ debian_testing:
     - master@fdroid/fdroidserver
   script:
     - apt-get install
-        aapt
-        androguard
-        apksigner
-        dexdump
-        fdroidserver
-        git
-        gnupg
-        ipfs-cid
-        python3-defusedxml
-        python3-setuptools
-        sdkmanager
+      aapt
+      androguard
+      apksigner
+      dexdump
+      fdroidserver
+      git
+      gnupg
+      ipfs-cid
+      python3-defusedxml
+      python3-setuptools
+      sdkmanager
     - python3 -c 'import fdroidserver'
     - python3 -c 'import androguard'
     - python3 -c 'import sdkmanager'
     - cd tests
     - ./run-tests
-
 
 # Test using latest LTS set up with the PPA, including Recommends.
 ubuntu_lts_ppa:
@@ -135,7 +141,6 @@ ubuntu_lts_ppa:
 
     - cd tests
     - ./run-tests
-
 
 # Test using Ubuntu/jammy LTS (supported til April, 2027) with depends
 # from pypi and sdkmanager.  The venv is used to isolate the dist
@@ -167,7 +172,6 @@ ubuntu_jammy_pip:
     # check localization was properly installed
     - LANGUAGE='de' fdroid --help | grep 'Gültige Befehle sind'
 
-
 # test installation process on a bleeding edge distro with pip
 arch_pip_install:
   image: archlinux
@@ -181,7 +185,6 @@ arch_pip_install:
     - fdroid
     - fdroid readmeta
     - fdroid update --help
-
 
 # The gradlew-fdroid tests are isolated from the rest of the test
 # suite, so they run as their own job.
@@ -198,7 +201,6 @@ gradlew-fdroid:
     - shellcheck --severity=error --color gradlew-fdroid tests/test-gradlew-fdroid
     - ./tests/test-gradlew-fdroid
 
-
 # Run all the various linters and static analysis tools.
 lint_format_safety_bandit_checks:
   image: debian:bookworm-slim
@@ -207,43 +209,42 @@ lint_format_safety_bandit_checks:
   script:
     - apt-get update
     - apt-get -y install --no-install-recommends
-          bash
-          ca-certificates
-          dash
-          gcc
-          git
-          make
-          pycodestyle
-          pyflakes3
-          pylint
-          python3-dev
-          python3-git
-          python3-nose
-          python3-pip
-          python3-yaml
-          shellcheck
+      bash
+      ca-certificates
+      dash
+      gcc
+      git
+      make
+      pycodestyle
+      pyflakes3
+      pylint
+      python3-dev
+      python3-git
+      python3-nose
+      python3-pip
+      python3-yaml
+      shellcheck
     - $pip install --break-system-packages bandit safety
     - export EXITVALUE=0
     - function set_error() { export EXITVALUE=1; printf "\x1b[31mERROR `history|tail -2|head -1|cut -b 6-500`\x1b[0m\n"; }
     - ./hooks/pre-commit || set_error
     - bandit
-        -r
-        -ii
-        --ini .bandit
-        || set_error
+      -r
+      -ii
+      --ini .bandit
+      || set_error
     - safety check --full-report || set_error
     - pylint --output-format=colorized --reports=n
-            fdroid
-            makebuildserver
-            setup.py
-            fdroidserver/*.py
-            tests/*.py
-            tests/*.TestCase
-        || set_error
+      fdroid
+      makebuildserver
+      setup.py
+      fdroidserver/*.py
+      tests/*.py
+      tests/*.TestCase
+      || set_error
     - shellcheck --exclude SC2046,SC2090 --severity=warning --color tests/run-tests
-        || set_error
+      || set_error
     - exit $EXITVALUE
-
 
 # Run all the various linters and static analysis tools.
 locales:
@@ -253,16 +254,15 @@ locales:
   script:
     - apt-get update
     - apt-get -y install --no-install-recommends
-          gettext
-          make
-          python3-babel
+      gettext
+      make
+      python3-babel
     - export EXITVALUE=0
     - function set_error() { export EXITVALUE=1; printf "\x1b[31mERROR `history|tail -2|head -1|cut -b 6-500`\x1b[0m\n"; }
     - make -C locale compile || set_error
     - rm -f locale/*/*/*.mo
     - pybabel compile --domain=fdroidserver --directory locale 2>&1 | { grep -F "error:" && exit 1; } || true
     - exit $EXITVALUE
-
 
 black:
   image: debian:bookworm-slim
@@ -283,18 +283,18 @@ fedora_latest:
 
     - dnf -y update || dnf -y update
     - dnf -y install @development-tools
-                     diffutils
-                     findutils
-                     git
-                     gnupg
-                     java-17-openjdk-devel
-                     openssl
-                     python3
-                     python3-babel
-                     python3-matplotlib
-                     python3-pip
-                     rsync
-                     which
+      diffutils
+      findutils
+      git
+      gnupg
+      java-17-openjdk-devel
+      openssl
+      python3
+      python3-babel
+      python3-matplotlib
+      python3-pip
+      rsync
+      which
     - $pip install sdkmanager
     - ./setup.py sdist
     - useradd -m -c "test account" --password "fakepassword"  testuser
@@ -312,8 +312,7 @@ fedora_latest:
     - chown -R testuser .
     - cd tests
     - su testuser --login --command
-        "cd `pwd`; export ANDROID_HOME=$ANDROID_HOME; fdroid=~testuser/.local/bin/fdroid ./run-tests"
-
+      "cd `pwd`; export ANDROID_HOME=$ANDROID_HOME; fdroid=~testuser/.local/bin/fdroid ./run-tests"
 
 macOS:
   tags:
@@ -327,7 +326,7 @@ macOS:
     - brew install fdroidserver
 
     # Android SDK and Java JDK
-    - brew install --cask android-commandlinetools temurin  # temurin is a JDK
+    - brew install --cask android-commandlinetools temurin # temurin is a JDK
 
     # test suite dependencies
     - brew install dash bash coreutils gnu-sed
@@ -352,7 +351,6 @@ macOS:
     # test fdroidserver from git with current package's dependencies
     - fdroid="$(brew --prefix fdroidserver)/libexec/bin/python3 $PWD/fdroid" ./tests/run-tests
 
-
 gradle:
   image: debian:bullseye
   <<: *apt-template
@@ -360,26 +358,25 @@ gradle:
     GIT_DEPTH: 1000
   script:
     - apt-get install
-          ca-certificates
-          git
-          openssh-client
-          python3-bs4
-          python3-colorama
-          python3-git
-          python3-gitlab
-          python3-packaging
-          python3-requests
+      ca-certificates
+      git
+      openssh-client
+      python3-bs4
+      python3-colorama
+      python3-git
+      python3-gitlab
+      python3-packaging
+      python3-requests
     # if this is a merge request fork, then only check if relevant files changed
     - if [ "$CI_PROJECT_NAMESPACE" != "fdroid" ]; then
-        git fetch https://gitlab.com/fdroid/fdroidserver.git;
-        for f in `git diff --name-only --diff-filter=d FETCH_HEAD...HEAD`; do
-           test "$f" == "makebuildserver" && export CHANGED="yes";
-           test "$f" == "gradlew-fdroid" && export CHANGED="yes";
-        done;
-        test -z "$CHANGED" && exit;
+      git fetch https://gitlab.com/fdroid/fdroidserver.git;
+      for f in `git diff --name-only --diff-filter=d FETCH_HEAD...HEAD`; do
+      test "$f" == "makebuildserver" && export CHANGED="yes";
+      test "$f" == "gradlew-fdroid" && export CHANGED="yes";
+      done;
+      test -z "$CHANGED" && exit;
       fi
     - ./tests/gradle-release-checksums.py
-
 
 # Run an actual build in a simple, faked version of the buildserver guest VM.
 fdroid build:
@@ -409,25 +406,25 @@ fdroid build:
 
     # TODO remove sdkmanager install once it is included in the buildserver image
     - apt-get install sdkmanager
-    - rm -rf "$ANDROID_HOME/tools"  # TODO remove once sdkmanager can upgrade installed packages
+    - rm -rf "$ANDROID_HOME/tools" # TODO remove once sdkmanager can upgrade installed packages
     - sdkmanager "tools" "platform-tools" "build-tools;31.0.0"
 
     - git ls-remote https://gitlab.com/fdroid/fdroiddata.git master
     - git clone --depth 1 https://gitlab.com/fdroid/fdroiddata.git
     - cd fdroiddata
     - for d in build logs repo tmp unsigned $home_vagrant/.android; do
-          test -d $d || mkdir $d;
-          chown -R vagrant $d;
+      test -d $d || mkdir $d;
+      chown -R vagrant $d;
       done
 
     - export GRADLE_USER_HOME=$home_vagrant/.gradle
     - export fdroid="sudo --preserve-env --user vagrant
-          env PATH=$fdroidserver:$PATH
-          env PYTHONPATH=$fdroidserver:$fdroidserver/examples
-          env PYTHONUNBUFFERED=true
-          env TERM=$TERM
-          env HOME=$home_vagrant
-          fdroid"
+      env PATH=$fdroidserver:$PATH
+      env PYTHONPATH=$fdroidserver:$fdroidserver/examples
+      env PYTHONUNBUFFERED=true
+      env TERM=$TERM
+      env HOME=$home_vagrant
+      fdroid"
 
     - chown -R vagrant $home_vagrant
     - chown -R vagrant $fdroidserver/.git
@@ -446,7 +443,6 @@ fdroid build:
     - 'if [ ! -f repo/status/running.json ]; then echo "ERROR: running.json does not exist!"; exit 1; fi'
     - 'if [ ! -f repo/status/build.json ]; then echo "ERROR: build.json does not exist!"; exit 1; fi'
 
-
 # test the plugin API and specifically the fetchsrclibs plugin, which
 # is used by the `fdroid build` job.  This uses a fixed commit from
 # fdroiddata because that one is known to work, and this is a CI job,
@@ -461,16 +457,16 @@ plugin_fetchsrclibs:
       - fdroidserver/__main__.py
   script:
     - apt-get install
-        curl
-        git
-        python3-cffi
-        python3-matplotlib
-        python3-nacl
-        python3-paramiko
-        python3-pil
-        python3-pip
-        python3-pycparser
-        python3-venv
+      curl
+      git
+      python3-cffi
+      python3-matplotlib
+      python3-nacl
+      python3-paramiko
+      python3-pil
+      python3-pip
+      python3-pycparser
+      python3-venv
     - python3 -m venv --system-site-packages env
     - . env/bin/activate
     - export PATH="$CI_PROJECT_DIR:$PATH"
@@ -483,7 +479,7 @@ plugin_fetchsrclibs:
     - mkdir fdroiddata
     - commitid=b9e9a077d720c86ff6fff4dbb341254cc4370b1a
     - curl https://gitlab.com/fdroid/fdroiddata/-/archive/${commitid}/fdroiddata-${commitid}.tar.gz
-          | tar -xz --directory=fdroiddata --strip-components=1
+      | tar -xz --directory=fdroiddata --strip-components=1
     - cd fdroiddata
     - fdroid fetchsrclibs freemap.opentrail:4 --verbose
     - test -d build/freemap.opentrail/.git
@@ -493,7 +489,6 @@ plugin_fetchsrclibs:
     - test -d build/srclib/JCoord/.git
     - test -d build/srclib/javaproj/.git
 
-
 # test a full update and deploy cycle to gitlab.com
 servergitmirrors:
   image: debian:bullseye-backports
@@ -502,26 +497,26 @@ servergitmirrors:
     - master@fdroid/fdroidserver
   script:
     - apt-get install
-        default-jdk-headless
-        git
-        openssh-client
-        openssl
-        python3-cffi
-        python3-cryptography
-        python3-matplotlib
-        python3-nacl
-        python3-pil
-        python3-pip
-        python3-pycparser
-        python3-setuptools
-        python3-venv
-        rsync
-        wget
+      default-jdk-headless
+      git
+      openssh-client
+      openssl
+      python3-cffi
+      python3-cryptography
+      python3-matplotlib
+      python3-nacl
+      python3-pil
+      python3-pip
+      python3-pycparser
+      python3-setuptools
+      python3-venv
+      rsync
+      wget
     - apt-get install -t bullseye-backports apksigner
     - python3 -m venv --system-site-packages env
     - . env/bin/activate
     - export PYTHONPATH=`pwd`
-    - export SETUPTOOLS_USE_DISTUTILS=stdlib  # https://github.com/pypa/setuptools/issues/2956
+    - export SETUPTOOLS_USE_DISTUTILS=stdlib # https://github.com/pypa/setuptools/issues/2956
     - $pip install -e .
     - mkdir /root/.ssh/
     - ./tests/key-tricks.py
@@ -555,7 +550,6 @@ Build documentation:
     paths:
       - docs/build/html/
 
-
 # this job will only run in branches called "windows" until the Windows port is complete
 Windows:
   tags:
@@ -574,13 +568,13 @@ Windows:
 
     - $files = @(Get-ChildItem tests\*.TestCase)
     - foreach ($f in $files) {
-          write-output $f;
-          python $f;
-          if( $LASTEXITCODE -eq 0 ) {
-              write-output "SUCCESS $f";
-          } else {
-              write-output "ERROR $f failed";
-          }
+      write-output $f;
+      python $f;
+      if( $LASTEXITCODE -eq 0 ) {
+      write-output "SUCCESS $f";
+      } else {
+      write-output "ERROR $f failed";
+      }
       }
 
     # these are the tests that must pass
@@ -602,19 +596,17 @@ Windows:
   allow_failure:
     exit_codes: 1
 
-
 pages:
   image: alpine:latest
   stage: deploy
   script:
-    - cp docs/build/html public -r  # GL Pages needs the files in a directory named "public"
+    - cp docs/build/html public -r # GL Pages needs the files in a directory named "public"
   artifacts:
     paths:
       - public
   needs: ["Build documentation"]
   rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'  # only publish pages on default (master) branch
-
+    - if: "$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH" # only publish pages on default (master) branch
 
 # This job pushes the official CI docker image based on the master
 # branch, so in fdroid/fdroidserver, it should only run on the master
@@ -645,10 +637,10 @@ docker:
     - echo $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin registry.gitlab.com
     # This avoids filling up gitlab.com free tier accounts with unused docker images.
     - if test -z "$FDROID_PUSH_DOCKER_IMAGE"; then
-          echo "Skipping docker push to save quota on your gitlab namespace.";
-          echo "If you want to enable the push, set FDROID_PUSH_DOCKER_IMAGE in";
-          echo "https://gitlab.com/$CI_PROJECT_NAMESPACE/fdroidserver/-/settings/ci_cd#js-cicd-variables-settings";
-          exit 0;
+      echo "Skipping docker push to save quota on your gitlab namespace.";
+      echo "If you want to enable the push, set FDROID_PUSH_DOCKER_IMAGE in";
+      echo "https://gitlab.com/$CI_PROJECT_NAMESPACE/fdroidserver/-/settings/ci_cd#js-cicd-variables-settings";
+      exit 0;
       fi
     - docker push $RELEASE_IMAGE
     - docker push $RELEASE_IMAGE-bullseye
