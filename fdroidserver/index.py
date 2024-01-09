@@ -1333,20 +1333,25 @@ def make_v0(apps, apks, repodir, repodict, requestsdict, fdroid_signing_key_fing
 
     # Copy the repo icon into the repo directory...
     icon_dir = os.path.join(repodir, 'icons')
-    repo_icon = common.config.get('repo_icon', common.default_config['repo_icon'])
-    iconfilename = os.path.join(icon_dir, os.path.basename(repo_icon))
-    if os.path.exists(repo_icon):
-        shutil.copyfile(common.config['repo_icon'], iconfilename)
+    if repodir == 'archive':
+        icon_key_name = 'archive_icon'
     else:
-        logging.warning(_('repo_icon "repo/icons/%s" does not exist, generating placeholder.')
-                        % repo_icon)
-        os.makedirs(os.path.dirname(iconfilename), exist_ok=True)
-        try:
-            qrcode.make(common.config['repo_url']).save(iconfilename)
-        except Exception:
-            exampleicon = os.path.join(common.get_examples_dir(),
-                                       common.default_config['repo_icon'])
-            shutil.copy(exampleicon, iconfilename)
+        icon_key_name = 'repo_icon'
+    config_icon_name = common.config.get(icon_key_name, common.default_config['repo_icon'])
+    icon_filename = os.path.join(icon_dir, os.path.basename(config_icon_name))
+    if not os.path.exists(icon_filename):
+        if os.path.exists(config_icon_name):
+            shutil.copyfile(config_icon_name, icon_filename)
+        else:
+            logging.warning(_('%s "%s" does not exist, generating placeholder.')
+                            % (icon_key_name, icon_filename))
+            os.makedirs(os.path.dirname(icon_filename), exist_ok=True)
+            try:
+                qrcode.make(common.config['repo_url']).save(icon_filename)
+            except Exception:
+                exampleicon = os.path.join(common.get_examples_dir(),
+                                           common.default_config['repo_icon'])
+                shutil.copy(exampleicon, icon_filename)
 
 
 def extract_pubkey():
