@@ -653,7 +653,7 @@ class IndexTest(unittest.TestCase):
 
         common.config['repo_pubkey'] = 'ffffffffffffffffffffffffffffffffff'
 
-        index.make_website([], "repo", repodict)
+        index.make_website([], "repo", repodict, "fake_repo_pubkey_fingerprint")
         self.assertTrue(os.path.exists(os.path.join('repo', 'index.html')))
         self.assertTrue(os.path.exists(os.path.join('repo', 'index.css')))
         self.assertTrue(os.path.exists(os.path.join('repo', 'index.png')))
