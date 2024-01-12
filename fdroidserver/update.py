@@ -1490,11 +1490,24 @@ def scan_apk_androguard(apk, apkfile):
             icon_id = int(icon_id_str.replace("@", "0x"), 16)
             resource_id = arsc.get_id(apk['packageName'], icon_id)
             if resource_id:
-                icon_name = arsc.get_id(apk['packageName'], icon_id)[1]
+                icon_res = arsc.get_resolved_res_configs(resource_id[2])
+                icons_src = {}
+                for config, path in icon_res:
+                    if path.endswith('.png'):
+                        try:
+                            density = screen_resolutions[
+                                config.get_qualifier().split('-')[0]
+                            ]
+                        except Exception:
+                            density = '160'
+                        icons_src[density] = path
+                if not icons_src.get('-1') and '160' in icons_src:
+                    icons_src['-1'] = icons_src['160']
+                apk['icons_src'] = icons_src
             else:
                 # don't use 'anydpi' aka 0xFFFE aka 65534 since it is XML
                 icon_name = os.path.splitext(os.path.basename(apkobject.get_app_icon(max_dpi=65534 - 1)))[0]
-            apk['icons_src'] = _get_apk_icons_src(apkfile, icon_name)
+                apk['icons_src'] = _get_apk_icons_src(apkfile, icon_name)
         except Exception as e:
             logging.error("Cannot fetch icon from %s: %s" % (apkfile, str(e)))
 
