@@ -120,6 +120,7 @@ def make(apps, apks, repodir, archive):
 
     make_v0(sortedapps, apks, repodir, repodict, requestsdict,
             fdroid_signing_key_fingerprints)
+    copy_repo_icon(repodir)
     make_v1(sortedapps, apks, repodir, repodict, requestsdict,
             fdroid_signing_key_fingerprints)
     make_v2(sortedapps, apks, repodir, repodict, requestsdict,
@@ -1331,7 +1332,8 @@ def make_v0(apps, apks, repodir, repodict, requestsdict, fdroid_signing_key_fing
             signindex.config = common.config
             signindex.sign_jar(signed, use_old_algs=True)
 
-    # Copy the repo icon into the repo directory...
+
+def copy_repo_icon(repodir):
     icon_dir = os.path.join(repodir, 'icons')
     if repodir == 'archive':
         icon_key_name = 'archive_icon'
