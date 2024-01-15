@@ -442,6 +442,25 @@ class IndexTest(unittest.TestCase):
         )
         self.assertTrue(os.path.exists(os.path.join('repo', 'index.xml')))
 
+    def test_copy_repo_icon(self):
+        os.chdir(self.testdir)
+        os.mkdir('repo')
+        repo_icons_dir = os.path.join('repo', 'icons')
+        self.assertFalse(os.path.isdir(repo_icons_dir))
+        common.config['repo_icon'] = 'test_icon.png'
+        self.assertFalse(
+            os.path.exists(
+                os.path.join(repo_icons_dir, common.config['repo_icon'])
+            )
+        )
+        index.copy_repo_icon('repo')
+        self.assertTrue(os.path.isdir(repo_icons_dir))
+        self.assertTrue(
+            os.path.exists(
+                os.path.join(repo_icons_dir, common.config['repo_icon'])
+            )
+        )
+
     def test_make_v0(self):
         os.chdir(self.testdir)
         os.mkdir('metadata')
