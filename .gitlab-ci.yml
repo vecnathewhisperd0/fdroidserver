@@ -278,6 +278,17 @@ black:
     - apt-get install black
     - black --check --diff --color $CI_PROJECT_DIR
 
+
+# Replaces pydocstyle
+ruff-check:
+  image: debian:bookworm-slim
+  <<: *apt-template
+  script:
+    - apt-get install python3-pip
+    - pip install --break-system-packages ruff
+    - ruff check fdroidserver --extend-exclude 'apksigcopier.py,common.py,deploy.py,exception.py,gpgsign.py,index.py,__init__.py,init.py,install.py,lint.py,__main__.py,metadata.py,mirror.py,net.py,publish.py,readmeta.py,rewritemeta.py,scanner.py,signatures.py,signindex.py,tail.py,update.py,verify.py,vmtools.py'
+
+
 fedora_latest:
   image: fedora:latest
   only:
@@ -554,10 +565,8 @@ Build documentation:
   image: debian:bookworm
   <<: *apt-template
   script:
-    - apt-get install make python3-sphinx python3-numpydoc python3-pydata-sphinx-theme pydocstyle fdroidserver
+    - apt-get install make python3-sphinx python3-numpydoc python3-pydata-sphinx-theme fdroidserver
     - apt purge fdroidserver
-    # ignore vendored files
-    - pydocstyle --verbose --match='(?!apksigcopier|looseversion|setup|test_).*\.py' fdroidserver
     - cd docs
     - sphinx-apidoc -o ./source ../fdroidserver -M -e
     - PYTHONPATH=.. sphinx-autogen -o generated source/*.rst

@@ -118,7 +118,6 @@ setup(
             'sphinx',
             'numpydoc',
             'pydata_sphinx_theme',
-            'pydocstyle',
         ],
     },
     classifiers=[
