@@ -2302,9 +2302,9 @@ def main():
 
     # check that icons exist now, rather than fail at the end of `fdroid update`
     if 'repo_icon' in config:
-        if not os.path.exists(os.path.join(repodirs[0], 'icons', config['repo_icon'])):
+        if not os.path.exists(os.path.join(repodirs[0], 'icons', os.path.basename(config['repo_icon']))):
             logging.warning(_('repo_icon "repo/icons/{path}" does not exist! Check "config.yml".').
-                            format(path=config['repo_icon']))
+                            format(path=os.path.basename(config['repo_icon'])))
 
     # if the user asks to create a keystore, do it now, reusing whatever it can
     if options.create_key:
