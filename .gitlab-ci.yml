@@ -15,11 +15,12 @@ variables:
 # * python3-babel for compiling localization files
 # * gnupg-agent for the full signing setup
 # * python3-clint for fancy progress bars for users
+# * python3-pycountry for linting config/mirrors.yml
 buildserver run-tests:
   image: registry.gitlab.com/fdroid/fdroidserver:buildserver
   script:
     - apt-get update
-    - apt-get install gnupg-agent python3-babel python3-clint
+    - apt-get install gnupg-agent python3-babel python3-biplist python3-clint python3-pycountry
     - ./tests/run-tests
     # make sure that translations do not cause stacktraces
     - cd $CI_PROJECT_DIR/locale
@@ -41,11 +42,11 @@ metadata_v0:
   image: registry.gitlab.com/fdroid/fdroidserver:buildserver
   variables:
     GIT_DEPTH: 1000
-    RELEASE_COMMIT_ID: a1c4f803de8d4dc92ebd6b571a493183d14a00bf  # after ArchivePolicy: 0
+    RELEASE_COMMIT_ID: 50aa35772b058e76b950c01e16019c072c191b73  # after switching to `git rev-parse`
   script:
     - git fetch https://gitlab.com/fdroid/fdroidserver.git $RELEASE_COMMIT_ID
     - cd tests
-    - export GITCOMMIT=`git describe`
+    - export GITCOMMIT=$(git rev-parse HEAD)
     - git checkout $RELEASE_COMMIT_ID
     - cd ..
     - git clone --depth 1 https://gitlab.com/fdroid/fdroiddata.git
@@ -98,7 +99,9 @@ debian_testing:
         git
         gnupg
         ipfs-cid
+        python3-biplist
         python3-defusedxml
+        python3-pycountry
         python3-setuptools
         sdkmanager
     - python3 -c 'import fdroidserver'
@@ -122,7 +125,14 @@ ubuntu_lts_ppa:
     - echo "deb http://ppa.launchpad.net/fdroid/fdroidserver/ubuntu $RELEASE main" >> /etc/apt/sources.list
     - apt-get update
     - apt-get dist-upgrade
-    - apt-get install --install-recommends dexdump fdroidserver git python3-setuptools sdkmanager
+    - apt-get install --install-recommends
+        dexdump
+        fdroidserver
+        git
+        python3-biplist
+        python3-pycountry
+        python3-setuptools
+        sdkmanager
 
     # Test things work with a default branch other than 'master'
     - git config --global init.defaultBranch thisisnotmasterormain
@@ -151,6 +161,9 @@ ubuntu_jammy_pip:
     - export ANDROID_HOME=/opt/android-sdk
     - $pip install sdkmanager
     - sdkmanager 'build-tools;33.0.0'
+
+    # Install extras_require.optional from setup.py
+    - $pip install biplist pycountry
 
     - $pip install dist/fdroidserver-*.tar.gz
     - tar xzf dist/fdroidserver-*.tar.gz
@@ -287,6 +300,7 @@ fedora_latest:
                      python3-babel
                      python3-matplotlib
                      python3-pip
+                     python3-pycountry
                      rsync
                      which
     - $pip install sdkmanager
@@ -342,6 +356,9 @@ macOS:
     - echo "macOS sticks with bash 3.x because of licenses, so avoid new bash syntax"
     - /bin/bash --version
     - /bin/bash -n gradlew-fdroid tests/run-tests
+
+    # TODO remove the packages below once they are included in the Homebrew package
+    - $(brew --prefix fdroidserver)/libexec/bin/python3 -m pip install biplist pycountry
 
     # test fdroidserver from git with current package's dependencies
     - fdroid="$(brew --prefix fdroidserver)/libexec/bin/python3 $PWD/fdroid" ./tests/run-tests
