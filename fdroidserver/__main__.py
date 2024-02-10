@@ -53,6 +53,7 @@ COMMANDS = OrderedDict([
     ("signatures", _("Extract signatures from APKs")),
     ("nightly", _("Set up an app build for a nightly build repo")),
     ("mirror", _("Download complete mirrors of small repos")),
+    ("fetch_metadata", _("Fetch app metadata")),
 ])
 
 
@@ -175,6 +176,8 @@ def main():
     elif quiet:
         loglevel = logging.WARN
 
+    if logging.getLogger().hasHandlers():
+        logging.error("Log is printed before log level is set!")
     logging.basicConfig(format=logformat, level=loglevel)
 
     if verbose and quiet:

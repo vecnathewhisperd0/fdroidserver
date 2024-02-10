@@ -555,6 +555,7 @@ def parse_mirrors_config(mirrors):
 
 
 def file_entry(filename, hash_value=None):
+    filename = str(filename)
     meta = {}
     meta["name"] = "/" + filename.split("/", 1)[1]
     meta["sha256"] = hash_value or common.sha256sum(filename)
