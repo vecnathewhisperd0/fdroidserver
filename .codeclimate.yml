@@ -1,17 +1,6 @@
 ---
 version: "2"
 plugins:
-  pylint:
-    enabled: true
-    exclude_patterns:
-      - "**/*"
-      - "!fdroid"
-      - "!makebuildserver"
-      - "!setup.py"
-      - "!fdroidserver/*.py"
-      - "!tests/*.py"
-      - "!tests/*.TestCase"
-
   shellcheck:
     enabled: true
     # Only include tests/run-tests
