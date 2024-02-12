@@ -9,3 +9,10 @@ plugins:
 
   bandit:
     enabled: true
+
+  # Disable as they are not among the array of linters we used previously
+  duplication:
+    enabled: false
+
+  structure:
+    enabled: false
