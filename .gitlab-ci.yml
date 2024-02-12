@@ -265,7 +265,7 @@ pylint:
     - apt-get -y install --no-install-recommends
           python3-pip
           pylint
-    - $pip install pylint-gitlab
+    - $pip install --break-system-packages pylint-gitlab
     - pylint --exit-zero --output-format=pylint_gitlab.GitlabCodeClimateReporter 
               fdroid
             makebuildserver
