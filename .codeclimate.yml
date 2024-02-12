@@ -12,6 +12,8 @@ plugins:
         enabled: false
       SC2090:
         enabled: false
+    issue_override:
+      severity: "major"
 
   bandit:
     enabled: true
