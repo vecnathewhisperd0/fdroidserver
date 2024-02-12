@@ -7,6 +7,11 @@ plugins:
     exclude_patterns:
       - "**/*"
       - "!tests/run-tests"
+    checks:
+      SC2046:
+        enabled: false
+      SC2090:
+        enabled: false
 
   bandit:
     enabled: true

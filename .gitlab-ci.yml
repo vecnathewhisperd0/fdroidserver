@@ -209,7 +209,7 @@ gradlew-fdroid:
 
 
 # Run all the various linters and static analysis tools.
-lint_format_safety_bandit_checks:
+lint_format_safety_checks:
   image: debian:bookworm-slim
   variables:
     LANG: C.UTF-8
