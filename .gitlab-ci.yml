@@ -238,6 +238,8 @@ lint_format_safety_checks:
 
 
 code_quality:
+  variables:
+    CODECLIMATE_DEBUG: 1
   rules:
     - if: $CODE_QUALITY_DISABLED
       when: never
