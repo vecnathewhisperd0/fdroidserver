@@ -262,7 +262,7 @@ pylint:
   image: debian:bookworm-slim
   script:
     - apt-get update
-    - apt-get -y install --no-install-recommends \
+    - apt-get -y install --no-install-recommends
           python3-pip
           pylint
     - $pip install pylint-gitlab
