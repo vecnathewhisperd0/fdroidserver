@@ -3,6 +3,7 @@ version: "2"
 plugins:
   shellcheck:
     enabled: true
+    channel: 
     # Only include tests/run-tests
     exclude_patterns:
       - "**/*"
@@ -12,8 +13,16 @@ plugins:
         enabled: false
       SC2090:
         enabled: false
-    issue_override:
-      severity: "major"
+      # Disable as the followings are absent in the shellcheck version provided by debian
+      # https://gitlab.com/fdroid/fdroidserver/-/merge_requests/1443#note_1769237096
+      SC2086:
+        enabled: false
+      SC2129:
+        enabled: false
+      SC2006: 
+        enabled: false
+      SC2126:
+        enabled: false
 
   bandit:
     enabled: true
