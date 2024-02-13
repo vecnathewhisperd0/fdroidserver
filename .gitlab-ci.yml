@@ -247,13 +247,6 @@ code_quality:
   tags:
     - saas-linux-medium-amd64
 
-code_quality_html:
-  extends: code_quality
-  variables:
-    REPORT_FORMAT: html
-  artifacts:
-    paths: [gl-code-quality-report.html]
-
 
 pylint:
   rules:
