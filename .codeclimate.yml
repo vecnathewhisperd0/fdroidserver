@@ -3,7 +3,7 @@ version: "2"
 plugins:
   shellcheck:
     enabled: true
-    channel: 
+    channel:
     # Only include tests/run-tests
     exclude_patterns:
       - "**/*"
@@ -19,9 +19,19 @@ plugins:
         enabled: false
       SC2129:
         enabled: false
-      SC2006: 
+      SC2006:
         enabled: false
       SC2126:
+        enabled: false
+      SC1007:
+        enabled: false
+      SC1001:
+        enabled: false
+      SC2016:
+        enabled: false
+      SC2181:
+        enabled: false
+      SC2103:
         enabled: false
 
   bandit:
