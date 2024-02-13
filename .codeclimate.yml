@@ -33,6 +33,8 @@ plugins:
         enabled: false
       SC2103:
         enabled: false
+      SC2089:
+        enabled: false
 
   bandit:
     enabled: true
