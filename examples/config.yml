@@ -281,6 +281,13 @@
 # awssecretkey: {env: awssecretkey}
 
 
+# To deploy to IPFS you need the ipfs command line utility and specify
+# the path as an argument. To serve the repo permanently, you either need to
+# keep the daemon running or use a pinning service.
+#
+# ipfs: /path/to/ipfs
+
+
 # If you want to force 'fdroid server' to use a non-standard serverwebroot.
 # This will allow you to have 'serverwebroot' entries which do not end in
 # '/fdroid'. (Please note that some client features expect repository URLs
@@ -302,6 +309,26 @@
 # Or get it from an environment variable:
 #
 # virustotal_apikey: {env: virustotal_apikey}
+
+
+# If you want to upload the repo to  https://estuary.tech/
+# You have to enter your profile apikey to enable the upload.
+# Note that his is experimental and could be removed without warning.
+#
+# estuary_apikey: ESTXXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXXARY
+#
+# Or get it from an environment variable:
+#
+# estuary_apikey: {env: estuary_apikey}
+
+
+# To publish to a permanent IPNS you need the ipfs command line utility in
+# $PATH and have a `ipfs daemon` running. Make sure to generate the keys before
+# the first run, using: `ipfs key gen <key>`.
+#
+# ipfns:
+#   repo: fdroid
+#   archive: fdroid_archive
 
 
 # Keep a log of all generated index files in a git repo to provide a

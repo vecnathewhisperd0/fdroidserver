@@ -669,3 +669,30 @@ docker:
       fi
     - docker push $RELEASE_IMAGE
     - docker push $RELEASE_IMAGE-bullseye
+
+ipfs:
+  image: debian:testing
+  only:
+    changes:
+      - .gitlab-ci.yml
+      - fdroidserver/deploy.py
+  <<: *apt-template
+  script:
+    - apt-get install
+        ca-certificates
+        fdroidserver
+        wget
+    - export FDROIDSERVER=$PWD
+    - cd /tmp
+    - wget https://dist.ipfs.tech/kubo/v0.20.0/kubo_v0.20.0_linux-amd64.tar.gz
+    - tar -xvzf kubo_v0.20.0_linux-amd64.tar.gz
+    - /tmp/kubo/ipfs init
+    - test -d /tmp/fdroid/repo || mkdir -p /tmp/fdroid/repo
+    - cp $FDROIDSERVER/tests/config.py $FDROIDSERVER/tests/keystore.jks /tmp/fdroid/
+    - cp $FDROIDSERVER/tests/repo/com.politedroid_6.apk /tmp/fdroid/repo/
+    - cd /tmp/fdroid
+    - 'echo ipfs = \"/tmp/kubo/ipfs\" >> config.py'
+    - $FDROIDSERVER/fdroid update --verbose --create-metadata
+    - $FDROIDSERVER/fdroid deploy --verbose
+    - /tmp/kubo/ipfs files ls /repo
+    - /tmp/kubo/ipfs files ls /repo/com.politedroid_6.apk
