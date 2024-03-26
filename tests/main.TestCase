@@ -49,6 +49,7 @@ class MainTest(unittest.TestCase):
                 'signatures',
                 'nightly',
                 'mirror',
+                'fetch_metadata',
             ],
         )
 
