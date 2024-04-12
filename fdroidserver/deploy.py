@@ -29,6 +29,7 @@ import yaml
 from argparse import ArgumentParser
 import logging
 import shutil
+from string import Template
 
 from . import _
 from . import common
@@ -95,7 +96,7 @@ def update_awsbucket(repo_section):
     The contents of that subdir of the
     bucket will first be deleted.
 
-    Requires AWS credentials set in config.yml: awsaccesskeyid, awssecretkey
+    Requires AWS credentials set in config.yml if s3cmd is not installed: awsaccesskeyid, awssecretkey
     """
     logging.debug('Syncing "' + repo_section + '" to Amazon S3 bucket "'
                   + config['awsbucket'] + '"')
@@ -103,7 +104,48 @@ def update_awsbucket(repo_section):
     if common.set_command_in_config('s3cmd'):
         update_awsbucket_s3cmd(repo_section)
     else:
+        if os.path.exists(USER_S3CFG):
+            raise FDroidException(_('"{path}" exists but s3cmd is not installed!')
+                                  .format(path=USER_S3CFG))
         update_awsbucket_libcloud(repo_section)
+
+
+required_permissions = '''{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket",
+                "s3:GetBucketAcl",
+                "s3:GetBucketRequestPayment",
+                "s3:GetCallerIdentity",
+                "s3:CreateBucket",
+                "s3:GetBucketCors",
+                "s3:GetBucketPolicy",
+                "s3:GetBucketLifecycle",
+                "s3:GetBucketLocation",
+                "s3:GetBucketLocation"
+            ],
+            "Resource": "arn:aws:s3:::$bucket_name"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject",
+                "s3:PutObjectAcl"
+            ],
+            "Resource": "arn:aws:s3:::$bucket_name/*"
+        }
+    ]
+}
+'''
+
+
+def get_required_permission_policy(name):
+    return Template(required_permissions).substitute(bucket_name=name)
 
 
 def update_awsbucket_s3cmd(repo_section):
@@ -120,10 +162,92 @@ def update_awsbucket_s3cmd(repo_section):
     logging.debug(_('Using s3cmd to sync with: {url}')
                   .format(url=config['awsbucket']))
 
-    if os.path.exists(USER_S3CFG):
-        logging.info(_('Using "{path}" for configuring s3cmd.').format(path=USER_S3CFG))
-        configfilename = USER_S3CFG
-    else:
+    # copy s3cmd exit codes from https://raw.githubusercontent.com/s3tools/s3cmd/master/S3/ExitCodes.py
+    # !!!!! DON'T export these codes directly even if S3 python package is installed on your system.
+    # !!!!! The s3cmd can miss this source file in some distributions
+    EX_OK = 0
+    EX_GENERAL = 1
+    EX_PARTIAL = 2  # some parts of the command succeeded, while others failed
+    # EX_SERVERMOVED = 10  # 301: Moved permanantly & 307: Moved temp
+    # EX_SERVERERROR = 11  # 400, 405, 411, 416, 417, 501: Bad request, 504: Gateway Time-out
+    EX_NOTFOUND = 12  # 404: Not found
+    # EX_CONFLICT = 13  # 409: Conflict (ex: bucket error)
+    # EX_PRECONDITION = 14  # 412: Precondition failed
+    EX_SERVICE = 15  # 503: Service not available or slow down
+    # EX_USAGE = 64  # The command was used incorrectly (e.g. bad command line syntax)
+    EX_DATAERR = 65  # Failed file transfer, upload or download
+    # EX_SOFTWARE = 70  # internal software error (e.g. S3 error of unknown specificity)
+    EX_OSERR = 71  # system error (e.g. out of memory)
+    # EX_OSFILE = 72  # OS error (e.g. invalid Python version)
+    EX_IOERR = 74  # An error occurred while doing I/O on some file.
+    EX_TEMPFAIL = 75  # temporary failure (S3DownloadError or similar, retry later)
+    EX_ACCESSDENIED = 77  # Insufficient permissions to perform the operation on S3
+    EX_CONFIG = 78  # Configuration file error
+    # EX_CONNECTIONREFUSED = 111  # TCP connection refused (e.g. connecting to a closed server port)
+    # _EX_SIGNAL = 128
+    # _EX_SIGINT = 2
+    # EX_BREAK = _EX_SIGNAL + _EX_SIGINT  # Control-C (KeyboardInterrupt raised)
+
+    acl_public_flag = '--acl-public'
+    output_lines = []
+
+    def run_s3cmd(command, bucket_name_for_err_msg="YOUR_BUCKET_NAME"):
+        retry_timeouts = [0, 0, 1, 1, 5, 30, 60]
+        for current in retry_timeouts:
+            time.sleep(current)
+
+            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                                       universal_newlines=True)
+
+            for line in iter(process.stdout.readline, ''):
+                if line.endswith('\r'):
+                    sys.stdout.write(line)
+                    sys.stdout.flush()
+                    if output_lines:  # Replace the last line if there's one
+                        output_lines[-1] = line
+                    else:
+                        output_lines.append(line)
+                else:
+                    sys.stdout.write(line)
+                    sys.stdout.flush()
+                    output_lines.append(line)
+
+            process.stdout.close()
+            s3cmd_exit_code = process.wait()
+
+            if "AccessControlListNotSupported" in ''.join(output_lines):
+                if acl_public_flag in command:
+                    logging.info(_('Remove ACL from the command'))
+                    command.remove(acl_public_flag)
+                continue
+
+            if s3cmd_exit_code == EX_OK:
+                return
+            elif s3cmd_exit_code in [EX_GENERAL, EX_PARTIAL, EX_SERVICE, EX_DATAERR, EX_OSERR, EX_IOERR, EX_TEMPFAIL]:
+                retry = "it was last try"
+                if current + 1 != len(retry_timeouts):
+                    retry = "retry in {retry} second".format(retry=retry_timeouts[current + 1])
+                logging.debug('s3cmd exited with code {code};  {retry}'.format(
+                    code=s3cmd_exit_code, retry=retry))
+                continue
+            elif s3cmd_exit_code == EX_ACCESSDENIED:
+                raise FDroidException('s3cmd exited with code {code};'
+                                      '\nRequired permissions:\n{required_permissions}'.
+                                      format(code=s3cmd_exit_code,
+                                             required_permissions=get_required_permission_policy(
+                                                 bucket_name_for_err_msg)))
+            elif s3cmd_exit_code == EX_CONFIG:
+                raise FDroidException('s3cmd exited with code {code};'
+                                      'probably it could not find credentials'.format(code=s3cmd_exit_code))
+            elif s3cmd_exit_code == EX_NOTFOUND:
+                raise FDroidException('s3cmd exited with code {code};'
+                                      'probably the bucket doesn\'t exist'.format(code=s3cmd_exit_code))
+            else:
+                raise FDroidException('s3cmd exited with code {code}'.format(code=repo_section))
+
+    configfilename = None
+    # user should prefer provide credential in other way
+    if 'awsaccesskeyid' in config or 'awssecretkey' in config:  # it's intended if only one present it will fail
         fd = os.open(AUTO_S3CFG, os.O_CREAT | os.O_TRUNC | os.O_WRONLY, 0o600)
         logging.debug(_('Creating "{path}" for configuring s3cmd.').format(path=AUTO_S3CFG))
         os.write(fd, '[default]\n'.encode('utf-8'))
@@ -133,16 +257,14 @@ def update_awsbucket_s3cmd(repo_section):
         configfilename = AUTO_S3CFG
 
     s3bucketurl = 's3://' + config['awsbucket']
-    s3cmd = [config['s3cmd'], '--config=' + configfilename]
-    if subprocess.call(s3cmd + ['info', s3bucketurl]) != 0:
-        logging.warning(_('Creating new S3 bucket: {url}')
-                        .format(url=s3bucketurl))
-        if subprocess.call(s3cmd + ['mb', s3bucketurl]) != 0:
-            logging.error(_('Failed to create S3 bucket: {url}')
-                          .format(url=s3bucketurl))
-            raise FDroidException()
+    s3cmd = [config['s3cmd']]
+    if configfilename is not None:
+        s3cmd.append('--config=' + configfilename)
 
-    s3cmd_sync = s3cmd + ['sync', '--acl-public']
+    # check if bucket
+    run_s3cmd(s3cmd + ['info', s3bucketurl], bucket_name_for_err_msg=config['awsbucket'])
+
+    s3cmd_sync = s3cmd + ['sync', '--acl-public', '--no-progress']
     if options.verbose:
         s3cmd_sync += ['--verbose']
     if options.quiet:
@@ -152,19 +274,16 @@ def update_awsbucket_s3cmd(repo_section):
     logging.debug('s3cmd sync new files in ' + repo_section + ' to ' + s3url)
     logging.debug(_('Running first pass with MD5 checking disabled'))
     excludes = _get_index_excludes(repo_section)
-    returncode = subprocess.call(
-        s3cmd_sync
-        + excludes
-        + ['--no-check-md5', '--skip-existing', repo_section, s3url]
-    )
-    if returncode != 0:
-        raise FDroidException()
+    run_s3cmd(s3cmd_sync
+              + excludes
+              + ['--no-check-md5', '--skip-existing', repo_section, s3url],
+              bucket_name_for_err_msg=config['awsbucket']
+              )
+
     logging.debug('s3cmd sync all files in ' + repo_section + ' to ' + s3url)
-    returncode = subprocess.call(
-        s3cmd_sync + excludes + ['--no-check-md5', repo_section, s3url]
-    )
-    if returncode != 0:
-        raise FDroidException()
+
+    run_s3cmd(s3cmd_sync + excludes + ['--no-check-md5', repo_section, s3url],
+              bucket_name_for_err_msg=config['awsbucket'])
 
     logging.debug(_('s3cmd sync indexes {path} to {url} and delete')
                   .format(path=repo_section, url=s3url))
@@ -174,8 +293,7 @@ def update_awsbucket_s3cmd(repo_section):
         s3cmd_sync.append('--no-check-md5')
     else:
         s3cmd_sync.append('--check-md5')
-    if subprocess.call(s3cmd_sync + [repo_section, s3url]) != 0:
-        raise FDroidException()
+    run_s3cmd(s3cmd_sync + [repo_section, s3url], bucket_name_for_err_msg=config['awsbucket'])
 
 
 def update_awsbucket_libcloud(repo_section):
@@ -199,21 +317,18 @@ def update_awsbucket_libcloud(repo_section):
 
     if not config.get('awsaccesskeyid') or not config.get('awssecretkey'):
         raise FDroidException(
-            _('To use awsbucket, awssecretkey and awsaccesskeyid must also be set in config.yml!'))
+            _('Since s3cmd is not installed, deploy.py is using Apache Libcloud as a fallback. '
+              'For this, "awssecretkey" and "awsaccesskeyid" must be explicitly defined in config.yml.'))
     awsbucket = config['awsbucket']
-
-    if os.path.exists(USER_S3CFG):
-        raise FDroidException(_('"{path}" exists but s3cmd is not installed!')
-                              .format(path=USER_S3CFG))
 
     cls = get_driver(Provider.S3)
     driver = cls(config['awsaccesskeyid'], config['awssecretkey'])
     try:
         container = driver.get_container(container_name=awsbucket)
-    except ContainerDoesNotExistError:
-        container = driver.create_container(container_name=awsbucket)
-        logging.info(_('Created new container "{name}"')
-                     .format(name=container.name))
+    except ContainerDoesNotExistError as e:
+        raise FDroidException(
+            _('Bucket {name} doesn\'t exist. Please create it manually with latest AWS S3 recommendations')
+            .format(name=awsbucket)) from e
 
     upload_dir = 'fdroid/' + repo_section
     objs = dict()
