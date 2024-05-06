@@ -78,3 +78,7 @@ locale/*/LC_MESSAGES/fdroidserver.mo
 
 # sphinx
 public/
+
+/docs/build/
+/docs/source/fdroidserver*.rst
+/docs/source/modules.rst

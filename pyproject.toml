@@ -141,3 +141,13 @@ max-nested-blocks = 5
 [tool.pylint.format]
 # Maximum number of characters on a single line.
 max-line-length = 88
+
+
+[tool.ruff]
+extend-exclude = ["fdroidserver/apksigcopier.py", "fdroidserver/looseversion.py"]
+
+[tool.ruff.lint]
+select = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
