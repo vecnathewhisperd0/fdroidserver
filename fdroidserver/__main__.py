@@ -56,6 +56,14 @@ COMMANDS = OrderedDict([
 ])
 
 
+# commands that are not advertised as public api, intended for the use-case
+# of breaking down builds in buildbot into smaller steps
+COMMANDS_INTERNAL = [
+    "build_local_prepare",
+    "build_local_run",
+]
+
+
 def print_help(available_plugins=None):
     print(_("usage: ") + _("fdroid [<command>] [-h|--help|--version|<args>]"))
     print("")
@@ -136,7 +144,12 @@ def main():
         sys.exit(0)
 
     command = sys.argv[1]
-    if command not in COMMANDS and command not in available_plugins:
+    command_not_found = (
+        command not in COMMANDS
+        and command not in COMMANDS_INTERNAL
+        and command not in available_plugins
+    )
+    if command_not_found:
         if command in ('-h', '--help'):
             print_help(available_plugins=available_plugins)
             sys.exit(0)
@@ -186,7 +199,7 @@ def main():
     sys.argv[0] += ' ' + command
 
     del sys.argv[1]
-    if command in COMMANDS.keys():
+    if command in COMMANDS.keys() or command in COMMANDS_INTERNAL:
         # import is named import_subcommand internally b/c import is reserved by Python
         command = 'import_subcommand' if command == 'import' else command
         mod = __import__('fdroidserver.' + command, None, None, [command])

@@ -607,6 +607,45 @@ def read_metadata(appids={}, sort_by_time=False):
     return apps
 
 
+def read_build_metadata(package_name, version_code, check_disabled=True):
+    """read 1 single metadata file from the file system + 1 singled out build
+
+    Parameters
+    ----------
+    package_name
+        appid of the metadata supposed to be loaded (e.g. 'org.fdroid.fdroid')
+    version_code
+        android integer version identifier of a build (e.g. 1234)
+    check_disabled
+        If True this function will raise an exception in case the disabled flag
+        on the build or the metadata file is set.
+
+    Returns
+    -------
+    Tuple
+        A tuple of (metadata, build) dictionsaries, containing the pared data from
+        the metadata file.
+
+    Raises
+    ------
+    MetaDataException
+        If parsing or selecting the requested version fails.
+    """
+    m = read_metadata({package_name: version_code})
+    if len(m) != 1 or package_name not in m:
+        raise MetaDataException(f"Could not read metadata for '{package_name}:{version_code}' (metadata file might not be present or correct)")
+    if check_disabled and m[package_name].get("Disabled"):
+        raise MetaDataException(f"'{package_name}' disbaled in metadata file.")
+    if "Builds" not in m[package_name]:
+        raise MetaDataException(f"Cound not find 'Builds' section in '{package_name}' metadata file")
+    for b in m[package_name]["Builds"]:
+        if b['versionCode'] == version_code:
+            if check_disabled and b.get('disable'):
+                raise MetaDataException(f"'{package_name}:{version_code}' disabled in metadata file")
+            return m[package_name], b
+    raise MetaDataException(f"Could not find '{version_code}' in 'Builds' section of 'package_name' metadata file")
+
+
 def parse_metadata(metadatapath):
     """Parse metadata file, also checking the source repo for .fdroid.yml.
 
