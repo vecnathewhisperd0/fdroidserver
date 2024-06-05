@@ -61,6 +61,7 @@ COMMANDS = OrderedDict([
 COMMANDS_INTERNAL = [
     "build_local_prepare",
     "build_local_run",
+    "build_local_sudo",
 ]
 
 
