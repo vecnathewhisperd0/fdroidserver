@@ -608,7 +608,7 @@ def read_metadata(appids={}, sort_by_time=False):
 
 
 def read_build_metadata(package_name, version_code, check_disabled=True):
-    """read 1 single metadata file from the file system + 1 singled out build
+    """Read 1 single metadata file from the file system + 1 singled out build.
 
     Parameters
     ----------

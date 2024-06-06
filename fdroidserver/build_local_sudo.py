@@ -90,7 +90,6 @@ def main():
     package_name, version_code = fdroidserver.common.split_pkg_arg(options.APP_VERSION)
     app, build = fdroidserver.metadata.read_build_metadata(package_name, version_code)
 
-
     # intialize FDroidPopen
     # TODO: remove once FDroidPopen is replaced with vm/container exec
     fdroidserver.common.set_FDroidPopen_env(build)
@@ -99,6 +98,7 @@ def main():
     sudo_run(app, build)
     sudo_lock_root(app, build)
     sudo_uninstall(app, build)
+
 
 if __name__ == "__main__":
     main()
