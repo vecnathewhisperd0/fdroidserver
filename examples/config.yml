@@ -6,13 +6,13 @@
 #
 # sdk_path: $ANDROID_HOME
 
-# Paths to installed versions of the Android NDK.  This will be
+# Paths to installed versions of the Android NDK. This will be
 # automatically filled out from well known sources like
-# $ANDROID_HOME/ndk-bundle and $ANDROID_HOME/ndk/*.  If a required
+# $ANDROID_HOME/ndk-bundle and $ANDROID_HOME/ndk/*. If a required
 # version is missing in the buildserver VM, it will be automatically
 # downloaded and installed into the standard $ANDROID_HOME/ndk/
-# directory.  Manually setting it here will override the auto-detected
-# values.  The keys can either be the "release" (e.g. r21e) or the
+# directory. Manually setting it here will override the auto-detected
+# values. The keys can either be the "release" (e.g. r21e) or the
 # "revision" (e.g. 21.4.7075529).
 #
 # ndk_paths:
@@ -83,18 +83,18 @@
 
 # The repo's icon defaults to a file called 'icon.png' in the 'icons'
 # folder for each section, e.g. repo/icons/icon.png and
-# archive/icons/icon.png.  To use a different filename for the icons,
-# set the filename here.  You must still copy it into place in
+# archive/icons/icon.png. To use a different filename for the icons,
+# set the filename here. You must still copy it into place in
 # repo/icons/ and/or archive/icons/.
 #
 # repo_icon: myicon.png
 # archive_icon: myicon.png
 
 # This allows a specific kind of insecure APK to be included in the
-# 'repo' section.  Since April 2017, APK signatures that use MD5 are
+# 'repo' section. Since April 2017, APK signatures that use MD5 are
 # no longer considered valid, jarsigner and apksigner will return an
 # error when verifying.  `fdroid update` will move APKs with these
-# disabled signatures to the archive.  This option stops that
+# disabled signatures to the archive. This option stops that
 # behavior, and lets those APKs stay part of 'repo'.
 #
 # allow_disabled_algorithms: true
@@ -206,12 +206,12 @@
 #     index_only: true
 
 # When running fdroid processes on a remote server, it is possible to
-# publish extra information about the status.  Each fdroid sub-command
+# publish extra information about the status. Each fdroid sub-command
 # can create repo/status/running.json when it starts, then a
-# repo/status/<sub-command>.json when it completes.  The builds logs
+# repo/status/<sub-command>.json when it completes. The builds logs
 # and other processes will also get published, if they are running in
-# a buildserver VM.  The build logs name scheme is:
-# .../repo/$APPID_$VERCODE.log.gz.  These files are also pushed to all
+# a buildserver VM. The build logs name scheme is:
+# .../repo/$APPID_$VERCODE.log.gz. These files are also pushed to all
 # servers configured in 'serverwebroot'.
 #
 # deploy_process_logs: true
@@ -262,17 +262,17 @@
 # Most git hosting services have hard size limits for each git repo.
 # `fdroid deploy` will delete the git history when the git mirror repo
 # approaches this limit to ensure that the repo will still fit when
-# pushed.  GitHub recommends 1GB, gitlab.com recommends 10GB.
+# pushed. GitHub recommends 1GB, gitlab.com recommends 10GB.
 #
 # git_mirror_size_limit: 10GB
 
 # Any mirrors of this repo, for example all of the servers declared in
 # serverwebroot and all the servers declared in servergitmirrors,
-# will automatically be used by the client.  If one
-# mirror is not working, then the client will try another.  If the
+# will automatically be used by the client. If one
+# mirror is not working, then the client will try another. If the
 # client has Tor enabled, then the client will prefer mirrors with
 # .onion addresses. This base URL will be used for both the main repo
-# and the archive, if it is enabled.  So these URLs should end in the
+# and the archive, if it is enabled. So these URLs should end in the
 # 'fdroid' base of the F-Droid part of the web server like serverwebroot.
 #
 # mirrors:
@@ -287,7 +287,7 @@
 #   - url: http://foobarfoobarfoobar.onion/fdroid
 #
 # The list of mirrors can also be maintained in config/mirrors.yml, a
-# standalone YAML file in the optional configuration directory.  In
+# standalone YAML file in the optional configuration directory. In
 # that case, mirrors: should be removed from this file (config.yml).
 
 # optionally specify which identity file to use when using rsync or git over SSH
@@ -397,14 +397,14 @@
 
 # Keep a log of all generated index files in a git repo to provide a
 # "binary transparency" log for anyone to check the history of the
-# binaries that are published.  This is in the form of a "git remote",
+# binaries that are published. This is in the form of a "git remote",
 # which this machine where `fdroid update` is run has already been
 # configured to allow push access (e.g. ssh key, username/password, etc)
 #
 # binary_transparency_remote: git@gitlab.com:fdroid/binary-transparency-log.git
 
 # If you want to keep the "added" and "last updated" dates for each
-# app and APK in your repo, enable this.  The name comes from an old
+# app and APK in your repo, enable this. The name comes from an old
 # system for tracking statistics that is no longer included.
 #
 # update_stats: true
@@ -429,7 +429,7 @@
 # must be installed or uninstalled on the client (aka "push installs).
 # If the user has opted in, or the device is already setup to respond
 # to these requests, then F-Droid will automatically install/uninstall
-# the packageNames listed.  This is protected by the same signing key
+# the packageNames listed. This is protected by the same signing key
 # as the app index metadata.
 #
 # install_list:
@@ -441,9 +441,9 @@
 #   - com.facebook.orca
 #   - com.android.vending
 
-# `fdroid lint` checks licenses in metadata against a built white list.  By
+# `fdroid lint` checks licenses in metadata against a built white list. By
 # default we will require license metadata to be present and only allow
-# licenses approved either by FSF or OSI.  We're using the standardized SPDX
+# licenses approved either by FSF or OSI. We're using the standardized SPDX
 # license IDs.  (https://spdx.org/licenses/)
 #
 # We use `python3 -m spdx-license-list print --filter-fsf-or-osi` for
@@ -474,7 +474,7 @@
 #   - https://example.com/signatures.json
 
 # The scanner can use signature sources from the internet. These are
-# cached locally.  To force them to be refreshed from the network on
+# cached locally. To force them to be refreshed from the network on
 # every run, set this to true:
 #
 # refresh_scanner: true
