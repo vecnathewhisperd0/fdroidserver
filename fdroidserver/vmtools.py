@@ -100,10 +100,17 @@ def get_clean_builder(serverdir):
     except FDroidBuildVmException:
         # workaround because libvirt sometimes likes to forget
         # about ssh connection info even thou the vm is running
+        logging.debug('attempt #2')
+        logging.debug('halting buildserver VM')
         vm.halt()
+
+        logging.debug('starting buildserver VM (again)')
         vm.up()
+
+        logging.debug('getting vm.sshinfo() (again)')
         sshinfo = vm.sshinfo()
 
+    logging.debug('buildserver VM up')
     return sshinfo
 
 
