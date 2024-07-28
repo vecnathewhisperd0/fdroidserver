@@ -18,6 +18,7 @@
 
 from os.path import isdir, isfile, basename, abspath, expanduser
 import os
+import yaml
 import json
 import shutil
 import subprocess
@@ -31,33 +32,70 @@ lock = threading.Lock()
 
 
 def get_clean_builder(serverdir):
+    # fdroidserver's custom Vagrantfile settings
+    configfile = os.path.dirname(os.path.realpath(__file__)) + '/../buildserver/Vagrantfile.yaml'
+    if os.path.exists(configfile):
+        logging.debug("Found buildserver Vagrantfile.yaml configfile: %s" % os.path.realpath(configfile))
+
+        with open(configfile) as fp:
+            config = yaml.safe_load(fp)
+            if not isinstance(config, dict):
+                logging.info("Vagrantfile.yaml is empty or not a dict, using default.")
+                config = {}
+            else:
+                logging.debug("Vagrantfile.yaml parsed -> %s", json.dumps(config, indent=4, sort_keys=True))
+    else:
+        logging.debug("Missing buildserver Vagrantfile.yaml configfile: %s" % os.path.realpath(configfile))
+
+    if 'cpus' not in config:
+        config['cpus'] = 1
+        logging.debug("Defaulting Vagrant CPUs to: %s" % config['cpus'])
+
+    if 'memory' not in config:
+        config['memory'] = 2048
+        logging.debug("Defaulting Vagrant CPUs to: %s" % config['memory'])
+
+    if 'vm_provider' not in config:
+        config['vm_provider'] = 'virtualbox'
+        logging.debug("Defaulting VM Provider to: %s" % config['vm_provider'])
+
+    # fdroiddata metadata
     if not os.path.isdir(serverdir):
         if os.path.islink(serverdir):
             os.unlink(serverdir)
-        logging.info("buildserver path does not exists, creating %s", serverdir)
+        logging.info("buildserver VM path does not exists, creating: %s", serverdir)
         os.makedirs(serverdir)
-    vagrantfile = os.path.join(serverdir, 'Vagrantfile')
-    if not os.path.isfile(vagrantfile):
-        with open(vagrantfile, 'w') as f:
-            f.write(
-                textwrap.dedent(
-                    """\
-                # generated file, do not change.
 
-                Vagrant.configure("2") do |config|
-                    config.vm.box = "buildserver"
-                    config.vm.synced_folder ".", "/vagrant", disabled: true
-                end
-                """
-                )
+    vagrantfile = os.path.join(os.getcwd(), serverdir, 'Vagrantfile')
+    logging.debug("writing Vagrantfile VM file: %s" % vagrantfile)
+    with open(vagrantfile, 'w') as f:
+        f.write(
+            textwrap.dedent(
+                f"""\
+            # generated file, do not change.
+
+            Vagrant.configure("2") do |config|
+                config.vm.box = "buildserver"
+                config.vm.synced_folder ".", "/vagrant", disabled: true
+
+                 config.vm.provider :{config['vm_provider']} do |domain|
+                    domain.cpus = {config['cpus']}
+                    domain.memory = {config['memory']}
+                 end
+            end
+            """
             )
+        )
+
     vm = get_build_vm(serverdir)
-    logging.info('destroying buildserver before build')
+    logging.info('destroying buildserver VM before build')
     vm.destroy()
-    logging.info('starting buildserver')
+
+    logging.info('starting buildserver VM')
     vm.up()
 
     try:
+        logging.debug('getting vm.sshinfo()')
         sshinfo = vm.sshinfo()
     except FDroidBuildVmException:
         # workaround because libvirt sometimes likes to forget
