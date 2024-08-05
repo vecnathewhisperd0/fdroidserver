@@ -36,8 +36,8 @@ EOF
 echo "man-db man-db/auto-update boolean false" | debconf-set-selections
 
 if echo $debian_mirror | grep '^https' 2>&1 > /dev/null; then
-    apt-get update
-    apt-get install ca-certificates
+       apt-get update
+       apt-get install ca-certificates
 fi
 
 cat << EOF > /etc/apt/sources.list
