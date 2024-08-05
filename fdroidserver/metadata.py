@@ -241,6 +241,7 @@ build_flags = [
     'postbuild',
     'novcheck',
     'antifeatures',
+    'javapackage',
 ]
 
 
@@ -280,6 +281,7 @@ class Build(dict):
         self.postbuild = ''
         self.novcheck = False
         self.antifeatures = dict()
+        self.javapackage = ''
         if copydict:
             super().__init__(copydict)
             return
@@ -361,6 +363,7 @@ flagtypes = {
     'forcevercode': TYPE_BOOL,
     'novcheck': TYPE_BOOL,
     'antifeatures': TYPE_STRINGMAP,
+    'javapackage': TYPE_SCRIPT,
     'timeout': TYPE_INT,
 }
 

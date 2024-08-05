@@ -483,6 +483,35 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
 
     # create ..._toolsversion.log when running in builder vm
     if onserver:
+        if build.javapackage:
+            javapackage = " ".join(build.javapackage)
+
+            javapath = ''
+
+            if re.search(r'^temurin-(\d)+(-jdk)?', javapackage, flags=re.IGNORECASE):
+                logging.debug('Java package - Eclipse Temurin OpenJDK: %s' % javapackage)
+                regex = re.compile(r'^temurin-(\d)+(-jdk)?')
+                javapath = '/usr/lib/jvm/temurin-%s-jdk-amd64/bin' % regex.search(javapackage).group(1)
+            elif re.search(r'^openjdk-(\d)+(-headless)?', javapackage, flags=re.IGNORECASE):
+                logging.debug('Java package - Debian OpenJDK: %s' % javapackage)
+                regex = re.compile(r'^openjdk-(\d)+(-headless)?')
+                javapath = '/usr/lib/jvm/java-%s-openjdk-amd64/bin' % regex.search(javapackage).group(1)
+            else:
+                logging.debug('Java package - Debian default OpenJDK: %s' % javapackage)
+
+            if javapath:
+                logging.debug("Switching Java package: %s (%s)" % (javapackage, javapath))
+                for javabin in ["javac", 'java']:
+                    p = FDroidPopen(['sudo', 'DEBIAN_FRONTEND=noninteractive',
+                                     'update-alternatives', '--set', javabin, '%s/%s' % (javapath, javabin)])
+                    if p.returncode != 0:
+                        raise BuildException("Error switching %s for %s:%s" %
+                                             (javabin, app.id, build.versionName), p.output)
+            else:
+                logging.debug("Java package does not need to be altered")
+        else:
+            logging.debug("Leaving OS default OpenJDK package")
+
         # before doing anything, run the sudo commands to setup the VM
         if build.sudo:
             logging.info("Running 'sudo' commands in %s" % os.getcwd())
@@ -508,6 +537,10 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
         with open(log_path, 'w') as f:
             f.write(common.get_android_tools_version_log())
     else:
+        if build.javapackage:
+            logging.warning('%s:%s runs this on the buildserver with Java package:\n\t%s\nThis was skipped because fdroid build is not running on a dedicated build server.'
+                            % (app.id, build.versionName, build.sudo))
+
         if build.sudo:
             logging.warning('%s:%s runs this on the buildserver with sudo:\n\t%s\nThese commands were skipped because fdroid build is not running on a dedicated build server.'
                             % (app.id, build.versionName, build.sudo))
@@ -1126,6 +1159,18 @@ def main():
         if (app.get('Disabled') and not options.force) or not app.get('RepoType') or not app.get('Builds', []):
             del apps[appid]
 
+        if options.onserver and app.get('Builds')[0]['javapackage']:
+            javapackage = ''.join(app.get('Builds')[0]['javapackage'])
+            if re.search(r'^temurin-(\d)+(-jdk)?', javapackage, flags=re.IGNORECASE):
+                logging.debug('Java package - Eclipse Temurin OpenJDK: %s' % javapackage)
+            elif re.search(r'^default-jdk(-headless)?', javapackage, flags=re.IGNORECASE):
+                logging.debug('Java package - Debian default OpenJDK: %s' % javapackage)
+            elif re.search(r'^openjdk-(\d)+(-headless)?', javapackage, flags=re.IGNORECASE):
+                logging.debug('Java package - Debian OpenJDK: %s' % javapackage)
+                logging.warning('Using a pinned version of Debian OpenJDK may break when builder/buildserver VM is upgraded')
+            else:
+                logging.warning('Unsupported Java package: %s' % javapackage)
+                logging.warning('Defaulting to: default-jdk')
     if not apps:
         raise FDroidException("No apps to process.")
 
