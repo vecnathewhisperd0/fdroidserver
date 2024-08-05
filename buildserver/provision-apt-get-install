@@ -36,7 +36,7 @@ EOF
 echo "man-db man-db/auto-update boolean false" | debconf-set-selections
 
 if echo $debian_mirror | grep '^https' 2>&1 > /dev/null; then
-    apt-get update || apt-get update
+    apt-get update
     apt-get install ca-certificates
 fi
 
@@ -47,7 +47,7 @@ deb ${debian_mirror} ${VERSION_CODENAME}-updates main
 EOF
 echo "deb ${debian_mirror} ${VERSION_CODENAME}-backports main" > /etc/apt/sources.list.d/backports.list
 
-apt-get update || apt-get update
+apt-get update
 
 # purge things that might come from the base box, but we don't want
 # https://salsa.debian.org/cloud-team/debian-vagrant-images/-/tree/master/config_space/package_config
@@ -103,7 +103,7 @@ apt-get upgrade --download-only
 apt-get upgrade
 
 # again after upgrade in case of keyring changes
-apt-get update || apt-get update
+apt-get update
 
 packages="
  apksigner
