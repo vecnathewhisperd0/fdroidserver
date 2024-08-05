@@ -129,6 +129,3 @@ apt-get install $packages
 # fdroidserver comes from git, it was installed just for dependencies
 apt-mark manual `apt-cache depends fdroidserver | sed -nE 's,^[| ]*Depends: ([a-z0-9 -]+),\1,p'`
 apt-get purge fdroidserver
-
-highestjava=`update-java-alternatives --list | sort -n | tail -1 | cut -d ' ' -f 1`
-update-java-alternatives --set $highestjava
