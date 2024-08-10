@@ -58,12 +58,15 @@ def get_clean_builder(serverdir):
     vm.up()
 
     try:
+        logging.debug('vagrant ssh-config')
         sshinfo = vm.sshinfo()
     except FDroidBuildVmException:
         # workaround because libvirt sometimes likes to forget
         # about ssh connection info even thou the vm is running
         vm.halt()
         vm.up()
+
+        logging.debug('vagrant ssh-config (again)')
         sshinfo = vm.sshinfo()
 
     return sshinfo
@@ -411,8 +414,9 @@ class LibvirtBuildVm(FDroidBuildVm):
                 logging.debug("removed old box image '%s'"
                               "from libvirt storeage pool", boximg)
             except subprocess.CalledProcessError as e:
-                logging.debug("tried removing old box image '%s',"
-                              "file was not present in first place",
+                logging.debug("tried removing old box image '%s', "
+                              "file was not present in first place. "
+                              "Ignoring the below error, continuing",
                               boximg, exc_info=e)
         super().box_add(boxname, boxfile, force)
 

@@ -189,6 +189,7 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
         ftp.mkdir('srclib')
         # Copy any extlibs that are required...
         if build.extlibs:
+            logging.debug("Found extlibs")
             ftp.chdir(posixpath.join(homedir, 'build', 'extlib'))
             for lib in build.extlibs:
                 lib = lib.strip()
@@ -206,6 +207,7 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
         # Copy any srclibs that are required...
         srclibpaths = []
         if build.srclibs:
+            logging.debug("Found srclibs")
             for lib in build.srclibs:
                 srclibpaths.append(
                     common.getsrclib(lib, 'build/srclib', basepath=True, prepare=False))
@@ -257,6 +259,7 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
         if (options.scan_binary or config.get('scan_binary')) and not options.skipscan:
             cmdline += ' --scan-binary'
         cmdline += " %s:%s" % (app.id, build.versionCode)
+        logging.debug("Build command: " + cmdline)
         ssh_channel.exec_command('bash --login -c "' + cmdline + '"')  # nosec B601 inputs are sanitized
 
         # Fetch build process output ...
@@ -493,11 +496,13 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
                 raise BuildException("Error running sudo command for %s:%s" %
                                      (app.id, build.versionName), p.output)
 
+        logging.debug("Locking root account")
         p = FDroidPopen(['sudo', 'passwd', '--lock', 'root'])
         if p.returncode != 0:
             raise BuildException("Error locking root account for %s:%s" %
                                  (app.id, build.versionName), p.output)
 
+        logging.debug("Removing sudo program")
         p = FDroidPopen(['sudo', 'SUDO_FORCE_REMOVE=yes', 'dpkg', '--purge', 'sudo'])
         if p.returncode != 0:
             raise BuildException("Error removing sudo for %s:%s" %
@@ -505,6 +510,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
 
         log_path = os.path.join(log_dir,
                                 common.get_toolsversion_logname(app, build))
+        logging.debug("Writing log: %s" % log_path)
         with open(log_path, 'w') as f:
             f.write(common.get_android_tools_version_log())
     else:
@@ -1081,12 +1087,12 @@ def main():
 
     log_dir = 'logs'
     if not os.path.isdir(log_dir):
-        logging.info("Creating log directory")
+        logging.info("Creating log directory: ./%s" % log_dir)
         os.makedirs(log_dir)
 
     tmp_dir = 'tmp'
     if not os.path.isdir(tmp_dir):
-        logging.info("Creating temporary directory")
+        logging.info("Creating temporary directory: ./%s" % tmp_dir)
         os.makedirs(tmp_dir)
 
     if options.test:
@@ -1094,7 +1100,7 @@ def main():
     else:
         output_dir = 'unsigned'
         if not os.path.isdir(output_dir):
-            logging.info("Creating output directory")
+            logging.info("Creating output directory: ./%s" % output_dir)
             os.makedirs(output_dir)
     binaries_dir = os.path.join(output_dir, 'binaries')
 
@@ -1112,7 +1118,7 @@ def main():
 
     build_dir = 'build'
     if not os.path.isdir(build_dir):
-        logging.info("Creating build directory")
+        logging.info("Creating build directory: ./%s" % build_dir)
         os.makedirs(build_dir)
     srclib_dir = os.path.join(build_dir, 'srclib')
     extlib_dir = os.path.join(build_dir, 'extlib')
@@ -1124,6 +1130,13 @@ def main():
 
     for appid, app in list(apps.items()):
         if (app.get('Disabled') and not options.force) or not app.get('RepoType') or not app.get('Builds', []):
+            if (app.get('Disabled') and not options.force):
+                logging.debug("disabled & not forced: %s" % appid)
+            if (not app.get('RepoType')):
+                logging.debug("missing RepoType: %s" % appid)
+            if (not app.get('Builds', [])):
+                logging.debug("missing Builds: %s" % appid)
+            logging.debug("deleting appid from apps: %s" % appid)
             del apps[appid]
 
     if not apps:
@@ -1148,9 +1161,11 @@ def main():
         pass
 
     if options.latest:
+        logging.debug("Only building latest version (--latest)")
         for app in apps.values():
             for build in reversed(app.get('Builds', [])):
                 if build.disable and not options.force:
+                    logging.debug("Skipping disabled build (missing --force)")
                     continue
                 app['Builds'] = [build]
                 break
@@ -1195,6 +1210,7 @@ def main():
                 # the source repo. We can reuse it on subsequent builds, if
                 # there are any.
                 if first:
+                    logging.debug("First build")
                     vcs, build_dir = common.setup_vcs(app)
                     first = False
 
