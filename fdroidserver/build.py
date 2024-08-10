@@ -1000,7 +1000,7 @@ def parse_commandline():
     parser.add_argument("-s", "--stop", action="store_true", default=False,
                         help=_("Make the build stop on exceptions"))
     parser.add_argument("-t", "--test", action="store_true", default=False,
-                        help=_("Test mode - put output in the tmp directory only, and always build, even if the output already exists."))
+                        help=_("Test mode - put output in the tmp directory only, and always build, even if the output already exists"))
     parser.add_argument("--server", action="store_true", default=False,
                         help=_("Use build server"))
     # this option is internal API for telling fdroid that
@@ -1010,7 +1010,7 @@ def parse_commandline():
     parser.add_argument("--skip-scan", dest="skipscan", action="store_true", default=False,
                         help=_("Skip scanning the source code for binaries and other problems"))
     parser.add_argument("--scan-binary", action="store_true", default=False,
-                        help=_("Scan the resulting APK(s) for known non-free classes."))
+                        help=_("Scan the resulting APK(s) for known non-free classes"))
     parser.add_argument("--no-tarball", dest="notarball", action="store_true", default=False,
                         help=_("Don't create a source tarball, useful when testing a build"))
     parser.add_argument("--no-refresh", dest="refresh", action="store_false", default=True,
@@ -1018,7 +1018,7 @@ def parse_commandline():
     parser.add_argument("-r", "--refresh-scanner", dest="refresh_scanner", action="store_true", default=False,
                         help=_("Refresh and cache scanner rules and signatures from the network"))
     parser.add_argument("-f", "--force", action="store_true", default=False,
-                        help=_("Force build of disabled apps, and carries on regardless of scan problems. Only allowed in test mode."))
+                        help=_("Force build of disabled apps, and carries on regardless of scan problems. Only allowed in test mode"))
     parser.add_argument("-a", "--all", action="store_true", default=False,
                         help=_("Build all applications available"))
     parser.add_argument("--keep-when-not-allowed", default=False, action="store_true",
