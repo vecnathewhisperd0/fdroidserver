@@ -318,10 +318,13 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
         ftp.close()
 
     finally:
-        # Suspend the build server.
         vm = vmtools.get_build_vm('builder')
-        logging.info('destroying buildserver after build')
-        vm.destroy()
+        if options.keep_server:
+            logging.info('Keeping buildserver after build')
+        else:
+            # Suspend the build server.
+            logging.info('destroying buildserver after build (Missing --keep-server)')
+            vm.destroy()
 
         # deploy logfile to repository web server
         if output:
@@ -989,6 +992,8 @@ def parse_commandline():
                         help=_("Test mode - put output in the tmp directory only, and always build, even if the output already exists."))
     parser.add_argument("--server", action="store_true", default=False,
                         help=_("Use build server"))
+    parser.add_argument("--keep-server", action="store_true", default=False,
+                        help=_("Keep build server VM running after build completes"))
     # this option is internal API for telling fdroid that
     # it's running inside a buildserver vm.
     parser.add_argument("--on-server", dest="onserver", action="store_true", default=False,
@@ -1078,6 +1083,8 @@ def main():
 
     if config['build_server_always']:
         options.server = True
+    if options.keep_server and not options.server:
+        parser.error("option %s: Using --keep-server without --server makes no sense" % "keep-server")
 
     log_dir = 'logs'
     if not os.path.isdir(log_dir):
