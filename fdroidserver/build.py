@@ -931,8 +931,10 @@ def trybuild(app, build, build_dir, output_dir, log_dir, also_check_dir,
     if build.disable and not options.force:
         return False
 
-    logging.info("Building version %s (%s) of %s" % (
-        build.versionName, build.versionCode, app.id))
+    # If not using builder/buildserver VM (--server) - otherwise this gets shown twice
+    if not options.onserver:
+        logging.info("Building version %s (%s) of %s" % (
+            build.versionName, build.versionCode, app.id))
 
     if server:
         # When using server mode, still keep a local cache of the repo, by
