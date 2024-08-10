@@ -32,6 +32,7 @@ import requests
 import tempfile
 import argparse
 import logging
+import platform
 from gettext import ngettext
 from pathlib import Path
 
@@ -935,6 +936,11 @@ def trybuild(app, build, build_dir, output_dir, log_dir, also_check_dir,
     if not options.onserver:
         logging.info("Building version %s (%s) of %s" % (
             build.versionName, build.versionCode, app.id))
+
+    # If using buildserver VM (--server), the code is being executed there, otherwise if on localhost
+    if (server and options.onserver) or not server:
+        logging.debug("Platform: %s" % platform.platform())
+        logging.debug("Node    : %s" % platform.node())
 
     if server:
         # When using server mode, still keep a local cache of the repo, by
