@@ -88,6 +88,25 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
     """
     global buildserverid, ssh_channel
 
+    def send_dir(path):
+        """Copy the contents of a directory to the server."""
+        logging.debug("rsyncing %s to %s" % (os.path.realpath(path), ftp.getcwd()))
+        # TODO this should move to `vagrant rsync` from >= v1.5
+        try:
+            subprocess.check_output(['rsync', '--recursive', '--perms', '--links', '--quiet', '--rsh='
+                                     + 'ssh -o StrictHostKeyChecking=no'
+                                     + ' -o UserKnownHostsFile=/dev/null'
+                                     + ' -o LogLevel=FATAL'
+                                     + ' -o IdentitiesOnly=yes'
+                                     + ' -o PasswordAuthentication=no'
+                                     + ' -p ' + str(sshinfo['port'])
+                                     + ' -i ' + sshinfo['idfile'],
+                                     path,
+                                     sshinfo['user'] + "@" + sshinfo['hostname'] + ":" + ftp.getcwd()],
+                                    stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            raise FDroidException(str(e), e.output.decode()) from e
+
     try:
         paramiko
     except NameError as e:
@@ -102,6 +121,7 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
     output = None
     try:
         if not buildserverid:
+            logging.debug("Missing buildserverid from VM. Fetching")
             try:
                 buildserverid = subprocess.check_output(['vagrant', 'ssh', '-c',
                                                          'cat /home/vagrant/buildserverid'],
@@ -123,45 +143,29 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
                      port=sshinfo['port'], timeout=300,
                      look_for_keys=False, key_filename=sshinfo['idfile'])
 
-        homedir = posixpath.join('/home', sshinfo['user'])
-
         # Get an SFTP connection...
         ftp = sshs.open_sftp()
         ftp.get_channel().settimeout(60)
 
         # Put all the necessary files in place...
-        ftp.chdir(homedir)
-
-        def send_dir(path):
-            """Copy the contents of a directory to the server."""
-            logging.debug("rsyncing %s to %s" % (path, ftp.getcwd()))
-            # TODO this should move to `vagrant rsync` from >= v1.5
-            try:
-                subprocess.check_output(['rsync', '--recursive', '--perms', '--links', '--quiet', '--rsh='
-                                         + 'ssh -o StrictHostKeyChecking=no'
-                                         + ' -o UserKnownHostsFile=/dev/null'
-                                         + ' -o LogLevel=FATAL'
-                                         + ' -o IdentitiesOnly=yes'
-                                         + ' -o PasswordAuthentication=no'
-                                         + ' -p ' + str(sshinfo['port'])
-                                         + ' -i ' + sshinfo['idfile'],
-                                         path,
-                                         sshinfo['user'] + "@" + sshinfo['hostname'] + ":" + ftp.getcwd()],
-                                        stderr=subprocess.STDOUT)
-            except subprocess.CalledProcessError as e:
-                raise FDroidException(str(e), e.output.decode()) from e
-
         logging.info("Preparing server for build...")
+        homedir = posixpath.join('/home', sshinfo['user'])
         serverpath = os.path.abspath(os.path.dirname(__file__))
+
+        ftp.chdir(homedir)
         ftp.mkdir('fdroidserver')
         ftp.chdir('fdroidserver')
-        ftp.put(os.path.join(serverpath, '..', 'fdroid'), 'fdroid')
-        ftp.put(os.path.join(serverpath, '..', 'gradlew-fdroid'), 'gradlew-fdroid')
-        ftp.chmod('fdroid', 0o755)  # nosec B103 permissions are appropriate
-        ftp.chmod('gradlew-fdroid', 0o755)  # nosec B103 permissions are appropriate
-        send_dir(os.path.join(serverpath))
-        ftp.chdir(homedir)
 
+        send_dir(os.path.join(serverpath, '..', 'fdroid'))
+        ftp.chmod('fdroid', 0o755)  # nosec B103 permissions are appropriate
+
+        send_dir(os.path.join(serverpath, '..', 'gradlew-fdroid'))
+        ftp.chmod('gradlew-fdroid', 0o755)  # nosec B103 permissions are appropriate
+
+        send_dir(os.path.join(serverpath))
+
+        ftp.chdir(homedir)
+        logging.debug(f"Uploading config.buildserver.yml to VM: {homedir}/config.yml")
         ftp.put(os.path.join(serverpath, '..', 'buildserver',
                              'config.buildserver.yml'), 'config.yml')
         ftp.chmod('config.yml', 0o600)
@@ -170,20 +174,21 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
         with open(os.path.join(os.getcwd(), 'tmp', 'fdroidserverid'), 'wb') as fp:
             fp.write(subprocess.check_output(['git', 'rev-parse', 'HEAD'],
                                              cwd=serverpath))
-        ftp.put('tmp/fdroidserverid', 'fdroidserverid')
+        send_dir('tmp/fdroidserverid')
 
         # Copy the metadata - just the file for this app...
-        ftp.mkdir('metadata')
         ftp.mkdir('srclibs')
+
+        ftp.mkdir('metadata')
         ftp.chdir('metadata')
-        ftp.put(app.metadatapath, os.path.basename(app.metadatapath))
+        send_dir(app.metadatapath)
 
         # And patches if there are any...
         if os.path.exists(os.path.join('metadata', app.id)):
             send_dir(os.path.join('metadata', app.id))
 
-        ftp.chdir(homedir)
         # Create the build directory...
+        ftp.chdir(homedir)
         ftp.mkdir('build')
         ftp.chdir('build')
         ftp.mkdir('extlib')
