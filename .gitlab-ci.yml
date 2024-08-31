@@ -1,4 +1,6 @@
 ---
+include:
+  - template: Code-Quality.gitlab-ci.yml
 
 variables:
   pip: pip3 --timeout 100 --retries 10
@@ -213,7 +215,7 @@ gradlew-fdroid:
 
 
 # Run all the various linters and static analysis tools.
-lint_format_safety_bandit_checks:
+lint_format_safety_checks:
   image: debian:bookworm-slim
   variables:
     LANG: C.UTF-8
@@ -228,34 +230,52 @@ lint_format_safety_bandit_checks:
           make
           pycodestyle
           pyflakes3
-          pylint
           python3-dev
           python3-git
           python3-nose
           python3-pip
           python3-yaml
-          shellcheck
-    - $pip install --break-system-packages bandit safety
+    - $pip install --break-system-packages safety
     - export EXITVALUE=0
     - function set_error() { export EXITVALUE=1; printf "\x1b[31mERROR `history|tail -2|head -1|cut -b 6-500`\x1b[0m\n"; }
     - ./hooks/pre-commit || set_error
-    - bandit
-        -r
-        -ii
-        --ini .bandit
-        || set_error
     - safety check --full-report || set_error
-    - pylint --output-format=colorized --reports=n
-            fdroid
+    - exit $EXITVALUE
+
+
+code_quality:
+  rules:
+    - if: $CODE_QUALITY_DISABLED
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # Run code quality job in merge request pipelines
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH      # Run code quality job in pipelines on the default branch (but not in other branch pipelines)
+    - if: $CI_COMMIT_TAG                               # Run code quality job in pipelines for tags
+  tags:
+    - saas-linux-medium-amd64
+
+
+pylint:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event" # Run code quality job in merge request pipelines
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH      # Run code quality job in pipelines on the default branch (but not in other branch pipelines)
+    - if: $CI_COMMIT_TAG                               # Run code quality job in pipelines for tags
+  image: debian:bookworm-slim
+  script:
+    - apt-get update
+    - apt-get -y install --no-install-recommends
+          python3-pip
+          pylint
+    - $pip install --break-system-packages pylint-gitlab
+    - pylint --exit-zero --output-format=pylint_gitlab.GitlabCodeClimateReporter 
+              fdroid
             makebuildserver
             setup.py
             fdroidserver/*.py
             tests/*.py
-            tests/*.TestCase
-        || set_error
-    - shellcheck --exclude SC2046,SC2090 --severity=warning --color tests/run-tests
-        || set_error
-    - exit $EXITVALUE
+            tests/*.TestCase > pylint-report.json
+  artifacts:
+    reports:
+      codequality: pylint-report.json
 
 
 # Run all the various linters and static analysis tools.

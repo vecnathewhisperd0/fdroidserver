@@ -1,0 +1,47 @@
+---
+version: "2"
+plugins:
+  shellcheck:
+    enabled: true
+    channel:
+    # Only include tests/run-tests
+    exclude_patterns:
+      - "**/*"
+      - "!tests/run-tests"
+    checks:
+      SC2046:
+        enabled: false
+      SC2090:
+        enabled: false
+      # Disable as the followings are absent in the shellcheck version provided by debian
+      # https://gitlab.com/fdroid/fdroidserver/-/merge_requests/1443#note_1769237096
+      SC2086:
+        enabled: false
+      SC2129:
+        enabled: false
+      SC2006:
+        enabled: false
+      SC2126:
+        enabled: false
+      SC1007:
+        enabled: false
+      SC1001:
+        enabled: false
+      SC2016:
+        enabled: false
+      SC2181:
+        enabled: false
+      SC2103:
+        enabled: false
+      SC2089:
+        enabled: false
+
+  bandit:
+    enabled: true
+
+  # Disable as they are not among the array of linters we used previously
+  duplication:
+    enabled: false
+
+  structure:
+    enabled: false

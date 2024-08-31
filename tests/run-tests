@@ -142,7 +142,7 @@ fi
 
 # allow the location of aapt to be overridden
 if [ -z "$aapt" ]; then
-    aapt=`ls -1 $ANDROID_HOME/build-tools/*/aapt 2> /dev/null | sort | tail -1`
+    aapt=$(find "$ANDROID_HOME/build-tools/*/aapt" 2> /dev/null | sort | tail -1)
 fi
 
 # try to use GNU sed on OSX/BSD cuz BSD sed sucks
@@ -745,7 +745,7 @@ if [ -e .git/config ]; then
 
     REPOROOT=`create_test_dir`
     cd $REPOROOT
-    tar xzf `ls -1 $WORKSPACE/dist/fdroidserver-*.tar.gz | sort -n | tail -1`
+    tar xzf "$(find "$WORKSPACE"/dist/fdroidserver-*.tar.gz | sort -n | tail -1)"
     cd $REPOROOT
     # shellcheck disable=SC2211
     ./fdroidserver-*/fdroid init
@@ -1303,7 +1303,7 @@ if which wget; then
     mv $REPOROOT/index-v1.json repo/index-v1.json
 
     port=321${RANDOM:3}
-    test $(printf $port | wc -m) -le 3 && port=52734 # when $RANDOM doesn't work
+    test "${#port}" -le 3 && port=52734 # when $RANDOM doesn't work
     timeout 5m python3 -m http.server $port --bind 127.0.0.1 > $REPOROOT/http.server.log 2>&1 &
     http_server_pid=$!
 
