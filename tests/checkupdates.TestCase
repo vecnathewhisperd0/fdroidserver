@@ -142,6 +142,54 @@ class CheckupdatesTest(unittest.TestCase):
         self.assertEqual(app.CurrentVersion, '1.1.9')
         self.assertEqual(app.CurrentVersionCode, 101093)
 
+    def test_autoupdate_build_only(self):
+        fdroidserver.checkupdates.config = {}
+
+        app = fdroidserver.metadata.App()
+        app.id = 'loop.starts.shooting'
+        app.metadatapath = 'metadata/' + app.id + '.yml'
+        app.CurrentVersion = '1.1.8'
+        app.CurrentVersionCode = 101083
+        app.UpdateCheckMode = 'Tags'
+        app.AutoUpdateMode = 'BuildOnly'
+        app.VercodeOperation = [
+            "10*%c+1",
+            "10*%c+3",
+        ]
+
+        build = fdroidserver.metadata.Build()
+        build.versionCode = app.CurrentVersionCode - 2
+        build.versionName = app.CurrentVersion
+        build.gradle = ["arm"]
+        app['Builds'].append(build)
+
+        build = fdroidserver.metadata.Build()
+        build.versionCode = app.CurrentVersionCode
+        build.versionName = app.CurrentVersion
+        build.gradle = ["x86"]
+        app['Builds'].append(build)
+
+        with mock.patch(
+            'fdroidserver.checkupdates.check_tags',
+            lambda app, pattern: ('1.1.9', 10109, 'v1.1.9'),
+        ):
+            with mock.patch('fdroidserver.metadata.write_metadata', mock.Mock()):
+                with mock.patch('subprocess.call', lambda cmd: 0):
+                    fdroidserver.checkupdates.checkupdates_app(app, auto=True)
+
+        build = app['Builds'][-2]
+        self.assertEqual(build.versionName, '1.1.9')
+        self.assertEqual(build.versionCode, 101091)
+        self.assertEqual(build.gradle, ["arm"])
+
+        build = app['Builds'][-1]
+        self.assertEqual(build.versionName, '1.1.9')
+        self.assertEqual(build.versionCode, 101093)
+        self.assertEqual(build.gradle, ["x86"])
+
+        self.assertEqual(app.CurrentVersion, '1.1.8')
+        self.assertEqual(app.CurrentVersionCode, 101083)
+
     def test_checkupdates_app_http(self):
         fdroidserver.checkupdates.config = {}
 
