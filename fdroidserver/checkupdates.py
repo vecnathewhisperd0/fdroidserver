@@ -588,7 +588,7 @@ def checkupdates_app(app: metadata.App, auto: bool, commit: bool = False) -> Non
             raise MetaDataException(
                 _("Can't auto-update app with no CurrentVersionCode")
             )
-        elif mode in ('None', 'Static'):
+        elif mode == 'None':
             pass
         elif mode.startswith('Version'):
             pattern = mode[8:]
