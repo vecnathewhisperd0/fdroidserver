@@ -868,6 +868,27 @@ def get_local_metadata_files():
     return glob.glob('.fdroid.[a-jl-z]*[a-rt-z]')
 
 
+def split_pkg_arg(appid_versionCode_pair):
+    """Split 'appid:versionCode' pair into 2 separate values safely.
+
+    :raises ValueError: if argument is not parseable
+    :return: (appid, versionCode) tuple with the 2 parsed values
+    """
+    tokens = appid_versionCode_pair.split(":")
+    if len(tokens) != 2:
+        raise ValueError(
+            _("'{}' is not a valid pair of the form appId:versionCode pair").format(
+                appid_versionCode_pair
+            )
+        )
+    if not is_valid_package_name(tokens[0]):
+        raise ValueError(
+            _("'{}' does not start with a valid appId").format(appid_versionCode_pair)
+        )
+    versionCode = version_code_string_to_int(tokens[1])
+    return tokens[0], versionCode
+
+
 def read_pkg_args(appid_versionCode_pairs, allow_vercodes=False):
     """No summary.
 
@@ -1125,7 +1146,24 @@ def get_head_commit_id(git_repo):
 
 
 def setup_vcs(app):
-    """Checkout code from VCS and return instance of vcs and the build dir."""
+    """Create a VCS instance for given app.
+
+    This is a factory function that creates the correct type of VCS instance.
+    This doesn't checkout or clone any source code, it just creates a VCS
+    instance.
+
+    Parameters
+    ----------
+    app
+        metadata app object
+
+    Returns
+    -------
+    vcs
+        VCS instance corresponding to passed app
+    build_dir
+        source code checkout directory for the supplied app
+    """
     build_dir = get_build_dir(app)
 
     # Set up vcs interface and make sure we have the latest code...
@@ -2156,7 +2194,41 @@ def getsrclib(spec, srclib_dir, basepath=False,
     referencing it, which may be a subdirectory of the actual project. If
     you want the base directory of the project, pass 'basepath=True'.
 
-    spec and srclib_dir are both strings, not pathlib.Path.
+    Parameters
+    ----------
+    spec
+        srclib identifier (e.g. 'reproducible-apk-tools@v0.2.3').
+        must be string.
+    srclib_dir
+        base dir for holding checkouts of srclibs (usually './build/srclib').
+        must be a string.
+    basepath
+        changes the output of libdir to the base path, if set to True (default:
+        False)
+    raw
+        Don't sparese the spec instead use the unparsed spec as name, if set to
+        True (default: False)
+    prepare
+        Don't run `Prepare` commands in metadata, if set to False (default:
+        True)
+    preponly
+        Don't checkout the latest source code, if set to True (default: False)
+    refresh
+        Don't fetch latest source code from git remote, if set to False
+        (default: True)
+    build
+        metadata build object
+
+    Returns
+    -------
+    name
+        name of the srclib (e.g. 'mylib' when the spec is 'mylib@1.2.3')
+    number
+        number prefix from srclib spec (e.g. '7' when spec is '7:mylib@1.2.3')
+        (only used for ant builds)
+    libdir
+        (sub-)directory with the source code of this srclib (if basepath is set
+        this will ignore 'Subdir' from srclib metadata)
     """
     number = None
     subdir = None

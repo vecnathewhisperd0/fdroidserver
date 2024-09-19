@@ -1,0 +1,145 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+import inspect
+import tempfile
+import unittest
+import unittest.mock
+
+localmodule = os.path.realpath(
+    os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())), '..')
+)
+print('localmodule: ' + localmodule)
+if localmodule not in sys.path:
+    sys.path.insert(0, localmodule)
+
+import fdroidserver.schedule_build
+import fdroidserver.metadata
+import testcommon
+
+
+class IsBinaryArtifactPresentTest(unittest.TestCase):
+    def mktestdirs(self):
+        os.mkdir("unsigned")
+        os.mkdir("archive")
+        os.mkdir("repo")
+
+    def test_not_present(self):
+        build = unittest.mock.Mock()
+        build.output = None
+
+        with tempfile.TemporaryDirectory() as tmpdir, testcommon.TmpCwd(tmpdir):
+            result = fdroidserver.schedule_build.is_binary_artifact_present(
+                "fake.app", build
+            )
+        self.assertFalse(result)
+
+    def test_present_in_repo(self):
+        build = fdroidserver.metadata.Build()
+        build["versionCode"] = 123
+        build["output"] = None
+
+        with tempfile.TemporaryDirectory() as tmpdir, testcommon.TmpCwd(tmpdir):
+            self.mktestdirs()
+            with open('./repo/fake.app_123.apk', 'w') as f:
+                f.write('')
+            result = fdroidserver.schedule_build.is_binary_artifact_present(
+                "fake.app", build
+            )
+        self.assertTrue(result)
+
+    def test_present_in_unsigned(self):
+        build = fdroidserver.metadata.Build()
+        build["versionCode"] = 123
+        build["output"] = None
+
+        with tempfile.TemporaryDirectory() as tmpdir, testcommon.TmpCwd(tmpdir):
+            self.mktestdirs()
+            with open('./unsigned/fake.app_123.apk', 'w') as f:
+                f.write('')
+            result = fdroidserver.schedule_build.is_binary_artifact_present(
+                "fake.app", build
+            )
+        self.assertTrue(result)
+
+    def test_present_in_archive(self):
+        build = fdroidserver.metadata.Build()
+        build["versionCode"] = 123
+        build["output"] = None
+
+        with tempfile.TemporaryDirectory() as tmpdir, testcommon.TmpCwd(tmpdir):
+            self.mktestdirs()
+            with open('./archive/fake.app_123.apk', 'w') as f:
+                f.write('')
+            result = fdroidserver.schedule_build.is_binary_artifact_present(
+                "fake.app", build
+            )
+        self.assertTrue(result)
+
+    def test_present_in_repo_with_output(self):
+        build = fdroidserver.metadata.Build()
+        build["versionCode"] = 9000
+        build["versionName"] = "vvv"
+        build["commit"] = "commit1"
+        build["output"] = "blah/blah/build_result.zip"
+
+        with tempfile.TemporaryDirectory() as tmpdir, testcommon.TmpCwd(tmpdir):
+            self.mktestdirs()
+            with open('./repo/fake.app_9000.zip', 'w') as f:
+                f.write('')
+            result = fdroidserver.schedule_build.is_binary_artifact_present(
+                "fake.app", build
+            )
+        self.assertTrue(result)
+
+
+class CollectScheduleEntriesTest(unittest.TestCase):
+    def setUp(self):
+        self.apps = {
+            "chat.hal": fdroidserver.metadata.App(),
+            "chat.gpt": fdroidserver.metadata.App(),
+            "microsoft.copilot": fdroidserver.metadata.App(),
+        }
+
+        self.apps['chat.hal']["Builds"].append(fdroidserver.metadata.Build())
+        self.apps['chat.hal']["Builds"][0]["versionCode"] = 9000
+
+        self.apps['chat.gpt']["Disabled"] = "this is jank!"
+        self.apps['chat.gpt']["Builds"].append(fdroidserver.metadata.Build())
+        self.apps['chat.gpt']["Builds"][0]["versionCode"] = 4
+
+        self.apps['microsoft.copilot']["Builds"].append(fdroidserver.metadata.Build())
+        self.apps['microsoft.copilot']["Builds"][0]["versionCode"] = 3
+        self.apps['microsoft.copilot']["Builds"][0]["disable"] = "also jank!"
+
+    def test_asdf(self):
+        with unittest.mock.patch(
+            "fdroidserver.schedule_build.is_binary_artifact_present", return_value=False
+        ):
+            result = fdroidserver.schedule_build.collect_schedule_entries(self.apps)
+        self.maxDiff = None
+        self.assertListEqual(
+            result,
+            [{"applicationId": "chat.hal", "versionCode": 9000, "timeout": None}],
+        )
+
+
+if __name__ == "__main__":
+    os.chdir(os.path.dirname(__file__))
+
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        default=False,
+        help="Spew out even more information than normal",
+    )
+    fdroidserver.common.options = fdroidserver.common.parse_args(parser)
+
+    newSuite = unittest.TestSuite()
+    newSuite.addTest(unittest.makeSuite(IsBinaryArtifactPresentTest))
+    unittest.main(failfast=False)
