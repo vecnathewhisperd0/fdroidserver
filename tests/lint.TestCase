@@ -553,5 +553,6 @@ if __name__ == "__main__":
     fdroidserver.lint.options = parse_args_for_test(parser, sys.argv)
 
     newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(LintTest))
+    loader = unittest.TestLoader()
+    newSuite.addTest(loader.loadTestsFromTestCase(LintTest))
     unittest.main(failfast=False)

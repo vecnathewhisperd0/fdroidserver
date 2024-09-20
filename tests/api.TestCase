@@ -88,5 +88,6 @@ class ApiTest(unittest.TestCase):
 
 if __name__ == "__main__":
     newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(ApiTest))
+    loader = unittest.TestLoader()
+    newSuite.addTest(loader.loadTestsFromTestCase(ApiTest))
     unittest.main(failfast=False)

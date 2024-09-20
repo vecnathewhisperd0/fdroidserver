@@ -895,12 +895,13 @@ if __name__ == "__main__":
     parse_args_for_test(parser, sys.argv)
 
     newSuite = unittest.TestSuite()
+    loader = unittest.TestLoader()
     newSuite.addTests(
         [
-            unittest.makeSuite(ScannerTest),
-            unittest.makeSuite(Test_scan_binary),
-            unittest.makeSuite(Test_SignatureDataController),
-            unittest.makeSuite(Test_main),
+            loader.loadTestsFromTestCase(ScannerTest),
+            loader.loadTestsFromTestCase(Test_scan_binary),
+            loader.loadTestsFromTestCase(Test_SignatureDataController),
+            loader.loadTestsFromTestCase(Test_main),
         ]
     )
     unittest.main(failfast=False)

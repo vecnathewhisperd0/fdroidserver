@@ -160,5 +160,6 @@ if __name__ == "__main__":
     (fdroidserver.common.options, args) = parser.parse_args(["--verbose"])
 
     newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(GithubApiTest))
+    loader = unittest.TestLoader()
+    newSuite.addTest(loader.loadTestsFromTestCase(GithubApiTest))
     unittest.main(failfast=False)

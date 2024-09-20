@@ -954,6 +954,7 @@ if __name__ == "__main__":
     parse_args_for_test(parser, sys.argv)
 
     newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(IndexTest))
-    newSuite.addTest(unittest.makeSuite(AltstoreIndexTest))
+    loader = unittest.TestLoader()
+    newSuite.addTest(loader.loadTestsFromTestCase(IndexTest))
+    newSuite.addTest(loader.loadTestsFromTestCase(AltstoreIndexTest))
     unittest.main(failfast=False)

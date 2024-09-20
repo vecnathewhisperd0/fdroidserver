@@ -51,5 +51,6 @@ if __name__ == "__main__":
     fdroidserver.install.options = parse_args_for_test(parser, sys.argv)
 
     newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(InstallTest))
+    loader = unittest.TestLoader()
+    newSuite.addTest(loader.loadTestsFromTestCase(InstallTest))
     unittest.main(failfast=False)

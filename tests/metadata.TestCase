@@ -2458,5 +2458,6 @@ if __name__ == "__main__":
     parse_args_for_test(parser, sys.argv)
 
     newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(MetadataTest))
+    loader = unittest.TestLoader()
+    newSuite.addTest(loader.loadTestsFromTestCase(MetadataTest))
     unittest.main(failfast=False)

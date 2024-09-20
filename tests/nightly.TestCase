@@ -376,5 +376,6 @@ if __name__ == "__main__":
     common.options = common.parse_args(parser)
 
     newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(NightlyTest))
+    loader = unittest.TestLoader()
+    newSuite.addTest(loader.loadTestsFromTestCase(NightlyTest))
     unittest.main(failfast=False)

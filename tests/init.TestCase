@@ -87,5 +87,6 @@ if __name__ == "__main__":
     fdroidserver.init.options = parse_args_for_test(parser, sys.argv)
 
     newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(InitTest))
+    loader = unittest.TestLoader()
+    newSuite.addTest(loader.loadTestsFromTestCase(InitTest))
     unittest.main(failfast=False)
