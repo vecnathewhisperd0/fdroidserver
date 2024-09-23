@@ -50,7 +50,7 @@ def extract(options):
     if not os.path.exists(tmp_dir):
         os.mkdir(tmp_dir)
 
-    if not options.APK or len(options.APK) <= 0:
+    if not options.APK:
         logging.critical(_('no APK supplied'))
         sys.exit(1)
 

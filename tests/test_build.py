@@ -1,12 +1,7 @@
 #!/usr/bin/env python3
 
-# http://www.drdobbs.com/testing/unit-testing-with-python/240165163
-
-import inspect
-import logging
 import os
 import shutil
-import sys
 import tempfile
 import textwrap
 import unittest
@@ -14,21 +9,12 @@ import yaml
 from pathlib import Path
 from unittest import mock
 
-localmodule = os.path.realpath(
-    os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())), '..')
-)
-print('localmodule: ' + localmodule)
-if localmodule not in sys.path:
-    sys.path.insert(0, localmodule)
-
-from testcommon import TmpCwd
+from .testcommon import TmpCwd, mkdtemp
 
 import fdroidserver.build
 import fdroidserver.common
-import fdroidserver.metadata
-import fdroidserver.scanner
-import fdroidserver.vmtools
-from testcommon import mkdtemp, parse_args_for_test
+
+basedir = Path(__file__).parent
 
 
 class FakeProcess:
@@ -47,9 +33,7 @@ class BuildTest(unittest.TestCase):
     '''fdroidserver/build.py'''
 
     def setUp(self):
-        logging.basicConfig(level=logging.DEBUG)
-        self.basedir = os.path.join(localmodule, 'tests')
-        os.chdir(self.basedir)
+        os.chdir(basedir)
         fdroidserver.common.config = None
         fdroidserver.build.config = None
         fdroidserver.build.options = None
@@ -57,7 +41,7 @@ class BuildTest(unittest.TestCase):
         self.testdir = self._td.name
 
     def tearDown(self):
-        os.chdir(self.basedir)
+        os.chdir(basedir)
         self._td.cleanup()
 
     def create_fake_android_home(self, d):
@@ -618,7 +602,7 @@ class BuildTest(unittest.TestCase):
         os.mkdir('metadata')
         appid = 'info.guardianproject.checkey'
         metadata_file = os.path.join('metadata', appid + '.yml')
-        shutil.copy(os.path.join(self.basedir, metadata_file), 'metadata')
+        shutil.copy(basedir / metadata_file, 'metadata')
         with open(metadata_file) as fp:
             app = fdroidserver.metadata.App(yaml.safe_load(fp))
         app['RepoType'] = 'git'
@@ -708,7 +692,7 @@ class BuildTest(unittest.TestCase):
         os.mkdir('metadata')
         appid = 'info.guardianproject.checkey'
         metadata_file = os.path.join('metadata', appid + '.yml')
-        shutil.copy(os.path.join(self.basedir, metadata_file), 'metadata')
+        shutil.copy(basedir / metadata_file, 'metadata')
         with open(metadata_file) as fp:
             app = fdroidserver.metadata.App(yaml.safe_load(fp))
         app['RepoType'] = 'git'
@@ -937,7 +921,7 @@ class BuildTest(unittest.TestCase):
         subprocess_check_output,
         paramiko_SSHClient,
         fdroidserver_vmtools_get_clean_builder,
-        fdroidserver_vmtools_get_build_vm,
+        fdroidserver_vmtools_get_build_vm,  # pylint: disable=unused-argument
     ):
         """srclibs Prepare: should only be executed in the buildserver"""
 
@@ -954,6 +938,7 @@ class BuildTest(unittest.TestCase):
             refresh=True,
             build=None,
         ):
+            # pylint: disable=unused-argument
             name, ref = spec.split('@')
             libdir = os.path.join(srclib_dir, name)
             os.mkdir(libdir)
@@ -1098,23 +1083,3 @@ class BuildTest(unittest.TestCase):
         fdroidserver.build.options.keep_when_not_allowed = False
         fdroidserver.build.config = {'keep_when_not_allowed': False}
         self.assertFalse(fdroidserver.build.keep_when_not_allowed())
-
-
-if __name__ == "__main__":
-    os.chdir(os.path.dirname(__file__))
-
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        default=False,
-        help="Spew out even more information than normal",
-    )
-    parse_args_for_test(parser, sys.argv)
-
-    newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(BuildTest))
-    unittest.main(failfast=False)
