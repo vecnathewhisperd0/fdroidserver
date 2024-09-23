@@ -209,8 +209,7 @@ gradlew-fdroid:
       - gradlew-fdroid
       - tests/test-gradlew-fdroid
   script:
-    - apt-get install ca-certificates curl default-jdk-headless shellcheck unzip
-    - shellcheck --severity=error --color gradlew-fdroid tests/test-gradlew-fdroid
+    - apt-get install ca-certificates default-jdk-headless python3 python3-requests
     - ./tests/test-gradlew-fdroid
 
 
@@ -249,6 +248,7 @@ lint_format_bandit_checks:
     - pylint --output-format=colorized --reports=n
             fdroid
             makebuildserver
+            gradlew-fdroid
             setup.py
             fdroidserver/*.py
             tests/*.py
