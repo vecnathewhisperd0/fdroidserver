@@ -16,7 +16,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import imghdr
 import itertools
 import json
 import logging
@@ -867,10 +866,6 @@ def scan_source(build_dir, build=metadata.Build(), json_per_build=None):
         ]
     ]
 
-    def is_image_file(path):
-        if imghdr.what(path) is not None:
-            return True
-
     def safe_path(path_in_build_dir):
         for sp in safe_paths:
             if sp.match(path_in_build_dir):
@@ -1050,9 +1045,7 @@ def scan_source(build_dir, build=metadata.Build(), json_per_build=None):
                     )
 
             elif is_executable(filepath):
-                if is_binary(filepath) and not (
-                    safe_path(path_in_build_dir) or is_image_file(filepath)
-                ):
+                if is_binary(filepath) and not (safe_path(path_in_build_dir)):
                     warnproblem(
                         _('executable binary, possibly code'),
                         path_in_build_dir,
@@ -1144,7 +1137,10 @@ def main():
             _get_tool()
         return
 
-    apps = common.read_app_args(appids, allow_version_codes=True)
+    # Read all app and srclib metadata
+
+    allapps = metadata.read_metadata()
+    apps = common.read_app_args(appids, allapps, True)
 
     build_dir = 'build'
     if not os.path.isdir(build_dir):
