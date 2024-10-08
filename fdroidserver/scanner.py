@@ -1045,7 +1045,7 @@ def scan_source(build_dir, build=metadata.Build(), json_per_build=None):
                     )
 
             elif is_executable(filepath):
-                if is_binary(filepath) and not (safe_path(path_in_build_dir)):
+                if is_binary(filepath) and not safe_path(path_in_build_dir):
                     warnproblem(
                         _('executable binary, possibly code'),
                         path_in_build_dir,
