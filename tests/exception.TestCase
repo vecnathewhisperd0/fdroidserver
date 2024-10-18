@@ -70,5 +70,6 @@ if __name__ == "__main__":
     parse_args_for_test(parser, sys.argv)
 
     newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(ExceptionTest))
+    loader = unittest.TestLoader()
+    newSuite.addTest(loader.loadTestsFromTestCase(ExceptionTest))
     unittest.main(failfast=False)

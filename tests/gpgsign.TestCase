@@ -87,5 +87,6 @@ if __name__ == "__main__":
     common.parse_args(parser)
 
     newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(GpgsignTest))
+    loader = unittest.TestLoader()
+    newSuite.addTest(loader.loadTestsFromTestCase(GpgsignTest))
     unittest.main(failfast=False)

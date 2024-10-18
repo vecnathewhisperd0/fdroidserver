@@ -205,5 +205,6 @@ if __name__ == "__main__":
     common.options = common.parse_args(parser)
 
     newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(SignindexTest))
+    loader = unittest.TestLoader()
+    newSuite.addTest(loader.loadTestsFromTestCase(SignindexTest))
     unittest.main(failfast=False)

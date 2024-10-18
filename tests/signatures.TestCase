@@ -71,5 +71,6 @@ if __name__ == "__main__":
     common.options = common.parse_args(parser)
 
     newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(SignaturesTest))
+    loader = unittest.TestLoader()
+    newSuite.addTest(loader.loadTestsFromTestCase(SignaturesTest))
     unittest.main(failfast=False)

@@ -1506,7 +1506,8 @@ if __name__ == "__main__":
     parse_args_for_test(parser, sys.argv)
 
     newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(DeployTest))
-    newSuite.addTest(unittest.makeSuite(GitHubReleasesTest))
-    newSuite.addTest(unittest.makeSuite(Test_UploadToGithubReleasesRepo))
+    loader = unittest.TestLoader()
+    newSuite.addTest(loader.loadTestsFromTestCase(DeployTest))
+    newSuite.addTest(loader.loadTestsFromTestCase(GitHubReleasesTest))
+    newSuite.addTest(loader.loadTestsFromTestCase(Test_UploadToGithubReleasesRepo))
     unittest.main(failfast=False)
