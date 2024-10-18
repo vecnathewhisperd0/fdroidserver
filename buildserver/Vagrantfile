@@ -22,12 +22,11 @@ if File.exists? configpath
     end
   end
 else
-  puts "Copying example file to #{configpath}"
+  puts "[Vagrantfile] Copying template example file to: #{configpath}"
   FileUtils.cp('../examples/Vagrantfile.yaml', configpath)
 end
 
 Vagrant.configure("2") do |config|
-
   if Vagrant.has_plugin?("vagrant-cachier")
     config.cache.scope = :box
     config.cache.auto_detect = false
@@ -35,6 +34,7 @@ Vagrant.configure("2") do |config|
     config.cache.enable :chef
   end
 
+  # https://app.vagrantup.com/debian/boxes/bookworm64
   config.vm.box = "debian/bookworm64"
 
   if not configfile.has_key? "vm_provider" or configfile["vm_provider"] == "virtualbox"
@@ -90,10 +90,12 @@ Vagrant.configure("2") do |config|
 
   # Root partition needs to be resized to the new allocated space
   config.vm.provision "shell", inline: <<-SHELL
+    echo "[Vagrant Guest] Resizing root partition"
     growpart -v -u auto /dev/vda 1
     resize2fs /dev/vda1
   SHELL
 
+  # Run scripts from: ./buildserver/*
   config.vm.provision "shell", name: "setup-env-vars", path: "setup-env-vars",
     args: ["/opt/android-sdk"]
   config.vm.provision "shell", name: "apt-get-install", path: "provision-apt-get-install",
@@ -105,5 +107,4 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", name: "disable-analytics", path: "provision-disable-analytics"
   config.vm.provision "shell", name: "buildserverid", path: "provision-buildserverid",
     args: [`git rev-parse HEAD`]
-
 end
