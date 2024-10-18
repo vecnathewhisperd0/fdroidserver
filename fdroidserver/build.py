@@ -32,6 +32,7 @@ import requests
 import tempfile
 import argparse
 import logging
+import platform
 from gettext import ngettext
 from pathlib import Path
 
@@ -87,6 +88,25 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
     """
     global buildserverid, ssh_channel
 
+    def send_dir(path):
+        """Copy the contents of a directory to the server."""
+        logging.debug("rsyncing %s to %s" % (os.path.realpath(path), ftp.getcwd()))
+        # TODO this should move to `vagrant rsync` from >= v1.5
+        try:
+            subprocess.check_output(['rsync', '--recursive', '--perms', '--links', '--quiet', '--rsh='
+                                     + 'ssh -o StrictHostKeyChecking=no'
+                                     + ' -o UserKnownHostsFile=/dev/null'
+                                     + ' -o LogLevel=FATAL'
+                                     + ' -o IdentitiesOnly=yes'
+                                     + ' -o PasswordAuthentication=no'
+                                     + ' -p ' + str(sshinfo['port'])
+                                     + ' -i ' + sshinfo['idfile'],
+                                     path,
+                                     sshinfo['user'] + "@" + sshinfo['hostname'] + ":" + ftp.getcwd()],
+                                    stderr=subprocess.STDOUT)
+        except subprocess.CalledProcessError as e:
+            raise FDroidException(str(e), e.output.decode()) from e
+
     try:
         paramiko
     except NameError as e:
@@ -101,6 +121,7 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
     output = None
     try:
         if not buildserverid:
+            logging.debug("Missing buildserverid from VM. Fetching")
             try:
                 buildserverid = subprocess.check_output(['vagrant', 'ssh', '-c',
                                                          'cat /home/vagrant/buildserverid'],
@@ -122,45 +143,29 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
                      port=sshinfo['port'], timeout=300,
                      look_for_keys=False, key_filename=sshinfo['idfile'])
 
-        homedir = posixpath.join('/home', sshinfo['user'])
-
         # Get an SFTP connection...
         ftp = sshs.open_sftp()
         ftp.get_channel().settimeout(60)
 
         # Put all the necessary files in place...
-        ftp.chdir(homedir)
-
-        def send_dir(path):
-            """Copy the contents of a directory to the server."""
-            logging.debug("rsyncing %s to %s" % (path, ftp.getcwd()))
-            # TODO this should move to `vagrant rsync` from >= v1.5
-            try:
-                subprocess.check_output(['rsync', '--recursive', '--perms', '--links', '--quiet', '--rsh='
-                                         + 'ssh -o StrictHostKeyChecking=no'
-                                         + ' -o UserKnownHostsFile=/dev/null'
-                                         + ' -o LogLevel=FATAL'
-                                         + ' -o IdentitiesOnly=yes'
-                                         + ' -o PasswordAuthentication=no'
-                                         + ' -p ' + str(sshinfo['port'])
-                                         + ' -i ' + sshinfo['idfile'],
-                                         path,
-                                         sshinfo['user'] + "@" + sshinfo['hostname'] + ":" + ftp.getcwd()],
-                                        stderr=subprocess.STDOUT)
-            except subprocess.CalledProcessError as e:
-                raise FDroidException(str(e), e.output.decode()) from e
-
         logging.info("Preparing server for build...")
+        homedir = posixpath.join('/home', sshinfo['user'])
         serverpath = os.path.abspath(os.path.dirname(__file__))
+
+        ftp.chdir(homedir)
         ftp.mkdir('fdroidserver')
         ftp.chdir('fdroidserver')
-        ftp.put(os.path.join(serverpath, '..', 'fdroid'), 'fdroid')
-        ftp.put(os.path.join(serverpath, '..', 'gradlew-fdroid'), 'gradlew-fdroid')
-        ftp.chmod('fdroid', 0o755)  # nosec B103 permissions are appropriate
-        ftp.chmod('gradlew-fdroid', 0o755)  # nosec B103 permissions are appropriate
-        send_dir(os.path.join(serverpath))
-        ftp.chdir(homedir)
 
+        send_dir(os.path.join(serverpath, '..', 'fdroid'))
+        ftp.chmod('fdroid', 0o755)  # nosec B103 permissions are appropriate
+
+        send_dir(os.path.join(serverpath, '..', 'gradlew-fdroid'))
+        ftp.chmod('gradlew-fdroid', 0o755)  # nosec B103 permissions are appropriate
+
+        send_dir(os.path.join(serverpath))
+
+        ftp.chdir(homedir)
+        logging.debug(f"Uploading config.buildserver.yml to VM: {homedir}/config.yml")
         ftp.put(os.path.join(serverpath, '..', 'buildserver',
                              'config.buildserver.yml'), 'config.yml')
         ftp.chmod('config.yml', 0o600)
@@ -169,26 +174,28 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
         with open(os.path.join(os.getcwd(), 'tmp', 'fdroidserverid'), 'wb') as fp:
             fp.write(subprocess.check_output(['git', 'rev-parse', 'HEAD'],
                                              cwd=serverpath))
-        ftp.put('tmp/fdroidserverid', 'fdroidserverid')
+        send_dir('tmp/fdroidserverid')
 
         # Copy the metadata - just the file for this app...
-        ftp.mkdir('metadata')
         ftp.mkdir('srclibs')
+
+        ftp.mkdir('metadata')
         ftp.chdir('metadata')
-        ftp.put(app.metadatapath, os.path.basename(app.metadatapath))
+        send_dir(app.metadatapath)
 
         # And patches if there are any...
         if os.path.exists(os.path.join('metadata', app.id)):
             send_dir(os.path.join('metadata', app.id))
 
-        ftp.chdir(homedir)
         # Create the build directory...
+        ftp.chdir(homedir)
         ftp.mkdir('build')
         ftp.chdir('build')
         ftp.mkdir('extlib')
         ftp.mkdir('srclib')
         # Copy any extlibs that are required...
         if build.extlibs:
+            logging.debug("Found extlibs")
             ftp.chdir(posixpath.join(homedir, 'build', 'extlib'))
             for lib in build.extlibs:
                 lib = lib.strip()
@@ -206,6 +213,7 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
         # Copy any srclibs that are required...
         srclibpaths = []
         if build.srclibs:
+            logging.debug("Found srclibs")
             for lib in build.srclibs:
                 srclibpaths.append(
                     common.getsrclib(lib, 'build/srclib', basepath=True, prepare=False))
@@ -257,6 +265,7 @@ def build_server(app, build, vcs, build_dir, output_dir, log_dir, force):
         if (options.scan_binary or config.get('scan_binary')) and not options.skipscan:
             cmdline += ' --scan-binary'
         cmdline += " %s:%s" % (app.id, build.versionCode)
+        logging.debug("Build command: " + cmdline)
         ssh_channel.exec_command('bash --login -c "' + cmdline + '"')  # nosec B601 inputs are sanitized
 
         # Fetch build process output ...
@@ -493,11 +502,13 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
                 raise BuildException("Error running sudo command for %s:%s" %
                                      (app.id, build.versionName), p.output)
 
+        logging.debug("Locking root account")
         p = FDroidPopen(['sudo', 'passwd', '--lock', 'root'])
         if p.returncode != 0:
             raise BuildException("Error locking root account for %s:%s" %
                                  (app.id, build.versionName), p.output)
 
+        logging.debug("Removing sudo program")
         p = FDroidPopen(['sudo', 'SUDO_FORCE_REMOVE=yes', 'dpkg', '--purge', 'sudo'])
         if p.returncode != 0:
             raise BuildException("Error removing sudo for %s:%s" %
@@ -505,6 +516,7 @@ def build_local(app, build, vcs, build_dir, output_dir, log_dir, srclib_dir, ext
 
         log_path = os.path.join(log_dir,
                                 common.get_toolsversion_logname(app, build))
+        logging.debug("Writing log: %s" % log_path)
         with open(log_path, 'w') as f:
             f.write(common.get_android_tools_version_log())
     else:
@@ -925,8 +937,15 @@ def trybuild(app, build, build_dir, output_dir, log_dir, also_check_dir,
     if build.disable and not options.force:
         return False
 
-    logging.info("Building version %s (%s) of %s" % (
-        build.versionName, build.versionCode, app.id))
+    # If not using builder/buildserver VM (--server) - otherwise this gets shown twice
+    if not options.onserver:
+        logging.info("Building version %s (%s) of %s" % (
+            build.versionName, build.versionCode, app.id))
+
+    # If using buildserver VM (--server), the code is being executed there, otherwise if on localhost
+    if (server and options.onserver) or not server:
+        logging.debug("Platform: %s" % platform.platform())
+        logging.debug("Node    : %s" % platform.node())
 
     if server:
         # When using server mode, still keep a local cache of the repo, by
@@ -986,7 +1005,7 @@ def parse_commandline():
     parser.add_argument("-s", "--stop", action="store_true", default=False,
                         help=_("Make the build stop on exceptions"))
     parser.add_argument("-t", "--test", action="store_true", default=False,
-                        help=_("Test mode - put output in the tmp directory only, and always build, even if the output already exists."))
+                        help=_("Test mode - put output in the tmp directory only, and always build, even if the output already exists"))
     parser.add_argument("--server", action="store_true", default=False,
                         help=_("Use build server"))
     # this option is internal API for telling fdroid that
@@ -996,7 +1015,7 @@ def parse_commandline():
     parser.add_argument("--skip-scan", dest="skipscan", action="store_true", default=False,
                         help=_("Skip scanning the source code for binaries and other problems"))
     parser.add_argument("--scan-binary", action="store_true", default=False,
-                        help=_("Scan the resulting APK(s) for known non-free classes."))
+                        help=_("Scan the resulting APK(s) for known non-free classes"))
     parser.add_argument("--no-tarball", dest="notarball", action="store_true", default=False,
                         help=_("Don't create a source tarball, useful when testing a build"))
     parser.add_argument("--no-refresh", dest="refresh", action="store_false", default=True,
@@ -1004,7 +1023,7 @@ def parse_commandline():
     parser.add_argument("-r", "--refresh-scanner", dest="refresh_scanner", action="store_true", default=False,
                         help=_("Refresh and cache scanner rules and signatures from the network"))
     parser.add_argument("-f", "--force", action="store_true", default=False,
-                        help=_("Force build of disabled apps, and carries on regardless of scan problems. Only allowed in test mode."))
+                        help=_("Force build of disabled apps, and carries on regardless of scan problems. Only allowed in test mode"))
     parser.add_argument("-a", "--all", action="store_true", default=False,
                         help=_("Build all applications available"))
     parser.add_argument("--keep-when-not-allowed", default=False, action="store_true",
@@ -1081,12 +1100,12 @@ def main():
 
     log_dir = 'logs'
     if not os.path.isdir(log_dir):
-        logging.info("Creating log directory")
+        logging.info("Creating log directory: ./%s" % log_dir)
         os.makedirs(log_dir)
 
     tmp_dir = 'tmp'
     if not os.path.isdir(tmp_dir):
-        logging.info("Creating temporary directory")
+        logging.info("Creating temporary directory: ./%s" % tmp_dir)
         os.makedirs(tmp_dir)
 
     if options.test:
@@ -1094,7 +1113,7 @@ def main():
     else:
         output_dir = 'unsigned'
         if not os.path.isdir(output_dir):
-            logging.info("Creating output directory")
+            logging.info("Creating output directory: ./%s" % output_dir)
             os.makedirs(output_dir)
     binaries_dir = os.path.join(output_dir, 'binaries')
 
@@ -1112,7 +1131,7 @@ def main():
 
     build_dir = 'build'
     if not os.path.isdir(build_dir):
-        logging.info("Creating build directory")
+        logging.info("Creating build directory: ./%s" % build_dir)
         os.makedirs(build_dir)
     srclib_dir = os.path.join(build_dir, 'srclib')
     extlib_dir = os.path.join(build_dir, 'extlib')
@@ -1121,6 +1140,13 @@ def main():
 
     for appid, app in list(apps.items()):
         if (app.get('Disabled') and not options.force) or not app.get('RepoType') or not app.get('Builds', []):
+            if (app.get('Disabled') and not options.force):
+                logging.debug("disabled & not forced: %s" % appid)
+            if (not app.get('RepoType')):
+                logging.debug("missing RepoType: %s" % appid)
+            if (not app.get('Builds', [])):
+                logging.debug("missing Builds: %s" % appid)
+            logging.debug("deleting appid from apps: %s" % appid)
             del apps[appid]
 
     if not apps:
@@ -1145,9 +1171,11 @@ def main():
         pass
 
     if options.latest:
+        logging.debug("Only building latest version (--latest)")
         for app in apps.values():
             for build in reversed(app.get('Builds', [])):
                 if build.disable and not options.force:
+                    logging.debug("Skipping disabled build (missing --force)")
                     continue
                 app['Builds'] = [build]
                 break
@@ -1192,6 +1220,7 @@ def main():
                 # the source repo. We can reuse it on subsequent builds, if
                 # there are any.
                 if first:
+                    logging.debug("First build")
                     vcs, build_dir = common.setup_vcs(app)
                     first = False
 
