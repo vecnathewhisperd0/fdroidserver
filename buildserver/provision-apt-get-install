@@ -7,6 +7,8 @@ set -x
 debian_mirror=$1
 export DEBIAN_FRONTEND=noninteractive
 
+VERSION_CODENAME=$( awk -F '=' '/^VERSION_CODENAME/ {print $2}' /etc/os-release )
+
 printf 'APT::Install-Recommends "0";\nAPT::Install-Suggests "0";\n' \
        > /etc/apt/apt.conf.d/99no-install-recommends
 
@@ -34,18 +36,18 @@ EOF
 echo "man-db man-db/auto-update boolean false" | debconf-set-selections
 
 if echo $debian_mirror | grep '^https' 2>&1 > /dev/null; then
-    apt-get update || apt-get update
-    apt-get install ca-certificates
+       apt-get update
+       apt-get install ca-certificates
 fi
 
 cat << EOF > /etc/apt/sources.list
-deb ${debian_mirror} bookworm main
-deb https://security.debian.org/debian-security bookworm-security main
-deb ${debian_mirror} bookworm-updates main
+deb ${debian_mirror} ${VERSION_CODENAME} main
+deb https://security.debian.org/debian-security ${VERSION_CODENAME}-security main
+deb ${debian_mirror} ${VERSION_CODENAME}-updates main
 EOF
-echo "deb ${debian_mirror} bookworm-backports main" > /etc/apt/sources.list.d/backports.list
+echo "deb ${debian_mirror} ${VERSION_CODENAME}-backports main" > /etc/apt/sources.list.d/backports.list
 
-apt-get update || apt-get update
+apt-get update
 
 # purge things that might come from the base box, but we don't want
 # https://salsa.debian.org/cloud-team/debian-vagrant-images/-/tree/master/config_space/package_config
@@ -101,7 +103,7 @@ apt-get upgrade --download-only
 apt-get upgrade
 
 # again after upgrade in case of keyring changes
-apt-get update || apt-get update
+apt-get update
 
 packages="
  apksigner
@@ -116,7 +118,7 @@ packages="
  patch
  python3-packaging
  rsync
- sdkmanager/bookworm-backports
+ sdkmanager/${VERSION_CODENAME}-backports
  sudo
  unzip
 "
@@ -127,11 +129,6 @@ apt-get install $packages
 # fdroidserver comes from git, it was installed just for dependencies
 apt-mark manual `apt-cache depends fdroidserver | sed -nE 's,^[| ]*Depends: ([a-z0-9 -]+),\1,p'`
 apt-get purge fdroidserver
-
-# clean up things that will become outdated anyway
-apt-get autoremove --purge
-apt-get clean
-rm -rf /var/lib/apt/lists/*
 
 highestjava=`update-java-alternatives --list | sort -n | tail -1 | cut -d ' ' -f 1`
 update-java-alternatives --set $highestjava
