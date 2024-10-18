@@ -1193,7 +1193,6 @@ class vcs:
         self.local = local
         self.clone_failed = False
         self.refreshed = False
-        self.srclib = None
 
     def _gettags(self):
         raise NotImplementedError
@@ -1301,10 +1300,6 @@ class vcs:
     def getref(self, revname=None):
         """Get current commit reference (hash, revision, etc)."""
         raise VCSException('getref not supported for this vcs type')
-
-    def getsrclib(self):
-        """Return the srclib (name, path) used in setting up the current revision, or None."""
-        return self.srclib
 
 
 class vcs_git(vcs):
@@ -2305,11 +2300,6 @@ def prepare_source(vcs, app, build, build_dir, srclib_dir, extlib_dir, onserver=
 
     for name, number, libpath in srclibpaths:
         place_srclib(root_dir, int(number) if number else None, libpath)
-
-    basesrclib = vcs.getsrclib()
-    # If one was used for the main source, add that too.
-    if basesrclib:
-        srclibpaths.append(basesrclib)
 
     # Update the local.properties file
     localprops = [os.path.join(build_dir, 'local.properties')]

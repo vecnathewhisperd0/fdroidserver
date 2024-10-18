@@ -220,6 +220,7 @@ class BuildTest(unittest.TestCase):
     @mock.patch('fdroidserver.build.FDroidPopen')
     @mock.patch('fdroidserver.common.is_debuggable_or_testOnly', lambda f: False)
     @mock.patch('fdroidserver.common.get_native_code', lambda f: 'x86')
+    @mock.patch('fdroidserver.common.setup_vcs', lambda f: (mock.Mock(), "."))
     def test_build_local_maven(self, fake_FDroidPopen, fake_get_apk_id):
         """Test build_local() with a maven project"""
 
@@ -255,14 +256,11 @@ class BuildTest(unittest.TestCase):
             build.versionCode,
             build.versionName,
         )
-        vcs = mock.Mock()
 
         build.maven = 'yes@..'
         fdroidserver.build.build_local(
             app,
             build,
-            vcs,
-            build_dir=self.testdir,
             output_dir=self.testdir,
             log_dir=os.getcwd(),
             srclib_dir=None,
@@ -277,8 +275,6 @@ class BuildTest(unittest.TestCase):
         fdroidserver.build.build_local(
             app,
             build,
-            vcs,
-            build_dir=self.testdir,
             output_dir=self.testdir,
             log_dir=os.getcwd(),
             srclib_dir=None,
@@ -313,7 +309,6 @@ class BuildTest(unittest.TestCase):
             build.ndk = 'r21e'  # aka 21.4.7075529
             ndk_version = '21.4.7075529'
             ndk_dir = Path(config['sdk_path']) / 'ndk' / ndk_version
-            vcs = mock.Mock()
 
             def make_fake_apk(output, build):
                 with open(build.output, 'w') as fp:
@@ -345,6 +340,8 @@ class BuildTest(unittest.TestCase):
                 'fdroidserver.build.FDroidPopen', FakeProcess
             ) as _ignored, mock.patch(
                 'sdkmanager.install', wraps=fake_sdkmanager_install
+            ) as _ignored, mock.patch(
+                'fdroidserver.common.setup_vcs', return_value=(mock.Mock(), testdir)
             ) as _ignored:
                 _ignored  # silence the linters
                 with self.assertRaises(
@@ -354,8 +351,6 @@ class BuildTest(unittest.TestCase):
                     fdroidserver.build.build_local(
                         app,
                         build,
-                        vcs,
-                        build_dir=testdir,
                         output_dir=testdir,
                         log_dir=None,
                         srclib_dir=None,
@@ -373,8 +368,6 @@ class BuildTest(unittest.TestCase):
                 fdroidserver.build.build_local(
                     app,
                     build,
-                    vcs,
-                    build_dir=testdir,
                     output_dir=testdir,
                     log_dir=os.getcwd(),
                     srclib_dir=None,
@@ -397,6 +390,7 @@ class BuildTest(unittest.TestCase):
         'fdroidserver.common.sha256sum',
         lambda f: 'ad7ce5467e18d40050dc51b8e7affc3e635c85bd8c59be62de32352328ed467e',
     )
+    @mock.patch('fdroidserver.common.setup_vcs', lambda f: (mock.Mock(), "."))
     def test_build_local_ndk_some_installed(self):
         """Test if `fdroid build` detects installed NDKs and auto-installs when missing"""
         with tempfile.TemporaryDirectory() as testdir, TmpCwd(
@@ -424,7 +418,6 @@ class BuildTest(unittest.TestCase):
             build.ndk = 'r21e'  # aka 21.4.7075529
             ndk_version = '21.4.7075529'
             ndk_dir = Path(config['sdk_path']) / 'ndk' / ndk_version
-            vcs = mock.Mock()
 
             def make_fake_apk(output, build):
                 with open(build.output, 'w') as fp:
@@ -454,8 +447,6 @@ class BuildTest(unittest.TestCase):
                 fdroidserver.build.build_local(
                     app,
                     build,
-                    vcs,
-                    build_dir=testdir,
                     output_dir=testdir,
                     log_dir=os.getcwd(),
                     srclib_dir=None,
@@ -489,7 +480,6 @@ class BuildTest(unittest.TestCase):
         build.scanignore = ['foo.aar']
         build.versionCode = 1
         build.versionName = '1.0'
-        vcs = mock.Mock()
 
         os.mkdir('reports')
         os.mkdir('target')
@@ -522,30 +512,31 @@ class BuildTest(unittest.TestCase):
                 fp.write('APK PLACEHOLDER')
             return output
 
-        with mock.patch('fdroidserver.common.replace_build_vars', wraps=make_fake_apk):
-            with mock.patch('fdroidserver.common.get_native_code', return_value='x86'):
-                with mock.patch(
-                    'fdroidserver.common.get_apk_id',
-                    return_value=(app.id, build.versionCode, build.versionName),
-                ):
-                    with mock.patch(
-                        'fdroidserver.common.is_debuggable_or_testOnly',
-                        return_value=False,
-                    ):
-                        fdroidserver.build.build_local(
-                            app,
-                            build,
-                            vcs,
-                            build_dir=self.testdir,
-                            output_dir=self.testdir,
-                            log_dir=None,
-                            srclib_dir=None,
-                            extlib_dir=None,
-                            tmp_dir=None,
-                            force=False,
-                            onserver=False,
-                            refresh=False,
-                        )
+        with mock.patch(
+            'fdroidserver.common.replace_build_vars', wraps=make_fake_apk
+        ) as _ignored, mock.patch(
+            'fdroidserver.common.get_native_code', return_value='x86'
+        ) as _ignored, mock.patch(
+            'fdroidserver.common.get_apk_id',
+            return_value=(app.id, build.versionCode, build.versionName),
+        ) as _ignored, mock.patch(
+            'fdroidserver.common.is_debuggable_or_testOnly', return_value=False
+        ) as _ignored, mock.patch(
+            'fdroidserver.common.setup_vcs', return_value=(mock.Mock(), self.testdir)
+        ) as _ignored:
+            _ignored  # silence the linters
+            fdroidserver.build.build_local(
+                app,
+                build,
+                output_dir=self.testdir,
+                log_dir=None,
+                srclib_dir=None,
+                extlib_dir=None,
+                tmp_dir=None,
+                force=False,
+                onserver=False,
+                refresh=False,
+            )
 
         self.assertTrue(os.path.exists('foo.aar'))
         self.assertTrue(os.path.isdir('build'))
@@ -880,8 +871,6 @@ class BuildTest(unittest.TestCase):
         }
         fdroidserver.common.config = {'sdk_path': '/fake/android/sdk/path'}
         fdroidserver.build.options = mock.MagicMock()
-        vcs = mock.Mock()
-        vcs.getsrclib = mock.Mock(return_value=None)
         app = fdroidserver.metadata.App()
         app['metadatapath'] = 'metadata/fake.id.yml'
         app['id'] = 'fake.id'
@@ -896,29 +885,33 @@ class BuildTest(unittest.TestCase):
         )
         app['Builds'] = [build]
 
-        test_flag = ('--on-server', True)
-        fdroidserver.build.build_server(app, build, vcs, '', '', '', False)
-        self.assertTrue(fdroidserver_vmtools_get_build_vm.called)
+        with mock.patch(
+            'fdroidserver.common.setup_vcs', return_value=(mock.Mock(), "")
+        ) as _ignored:
+            _ignored  # silence the linters
+            test_flag = ('--on-server', True)
+            fdroidserver.build.build_server(app, build, '', '', False, False)
+            self.assertTrue(fdroidserver_vmtools_get_build_vm.called)
 
-        for force in (True, False):
-            test_flag = ('--force', force)
-            fdroidserver.build.build_server(app, build, vcs, '', '', '', force)
+            for force in (True, False):
+                test_flag = ('--force', force)
+                fdroidserver.build.build_server(app, build, '', '', force, False)
 
-        fdroidserver.build.options.notarball = True
-        test_flag = ('--no-tarball', True)
-        fdroidserver.build.build_server(app, build, vcs, '', '', '', False)
-        fdroidserver.build.options.notarball = False
-        test_flag = ('--no-tarball', False)
-        fdroidserver.build.build_server(app, build, vcs, '', '', '', False)
+            fdroidserver.build.options.notarball = True
+            test_flag = ('--no-tarball', True)
+            fdroidserver.build.build_server(app, build, '', '', False, False)
+            fdroidserver.build.options.notarball = False
+            test_flag = ('--no-tarball', False)
+            fdroidserver.build.build_server(app, build, '', '', False, False)
 
-        fdroidserver.build.options.skipscan = False
-        test_flag = ('--scan-binary', True)
-        fdroidserver.build.build_server(app, build, vcs, '', '', '', False)
-        fdroidserver.build.options.skipscan = True
-        test_flag = ('--scan-binary', False)
-        fdroidserver.build.build_server(app, build, vcs, '', '', '', False)
-        test_flag = ('--skip-scan', True)
-        fdroidserver.build.build_server(app, build, vcs, '', '', '', False)
+            fdroidserver.build.options.skipscan = False
+            test_flag = ('--scan-binary', True)
+            fdroidserver.build.build_server(app, build, '', '', False, False)
+            fdroidserver.build.options.skipscan = True
+            test_flag = ('--scan-binary', False)
+            fdroidserver.build.build_server(app, build, '', '', False, False)
+            test_flag = ('--skip-scan', True)
+            fdroidserver.build.build_server(app, build, '', '', False, False)
 
     @mock.patch('fdroidserver.vmtools.get_build_vm')
     @mock.patch('fdroidserver.vmtools.get_clean_builder')
@@ -929,6 +922,7 @@ class BuildTest(unittest.TestCase):
     @mock.patch('fdroidserver.build.build_local')
     @mock.patch('fdroidserver.common.get_android_tools_version_log', lambda: 'versions')
     @mock.patch('fdroidserver.common.deploy_build_log_with_rsync', lambda a, b, c: None)
+    @mock.patch('fdroidserver.common.setup_vcs', lambda f: (mock.Mock(), "."))
     def test_build_server_no_local_prepare(
         self,
         build_build_local,
@@ -1004,8 +998,6 @@ class BuildTest(unittest.TestCase):
         fdroidserver.build.options = options
         fdroidserver.build.config = {'sdk_path': '/fake/android/sdk/path'}
 
-        vcs = mock.Mock()
-        vcs.getsrclib = mock.Mock(return_value=None)
         app = fdroidserver.metadata.App()
         app['metadatapath'] = 'metadata/fake.id.yml'
         app['id'] = 'fake.id'
@@ -1032,7 +1024,6 @@ class BuildTest(unittest.TestCase):
         fdroidserver.build.trybuild(
             app,
             build,
-            build_dir,
             'unsigned',
             'logs',
             None,
@@ -1040,7 +1031,6 @@ class BuildTest(unittest.TestCase):
             extlib_dir,
             'tmp',
             'repo',
-            vcs,
             options.test,
             options.server,
             options.force,

@@ -312,7 +312,6 @@ class ScannerTest(unittest.TestCase):
         build.scanignore = ['baz.so', 'foo.aar']
         build.versionCode = 1
         build.versionName = '1.0'
-        vcs = mock.Mock()
 
         for f in ('baz.so', 'foo.aar', 'gradle-wrapper.jar'):
             with open(f, 'w') as fp:
@@ -335,30 +334,31 @@ class ScannerTest(unittest.TestCase):
                 fp.write('APK PLACEHOLDER')
             return output
 
-        with mock.patch('fdroidserver.common.replace_build_vars', wraps=make_fake_apk):
-            with mock.patch('fdroidserver.common.get_native_code', return_value='x86'):
-                with mock.patch(
-                    'fdroidserver.common.get_apk_id',
-                    return_value=(app.id, build.versionCode, build.versionName),
-                ):
-                    with mock.patch(
-                        'fdroidserver.common.is_debuggable_or_testOnly',
-                        return_value=False,
-                    ):
-                        fdroidserver.build.build_local(
-                            app,
-                            build,
-                            vcs,
-                            build_dir=self.testdir,
-                            output_dir=self.testdir,
-                            log_dir=None,
-                            srclib_dir=None,
-                            extlib_dir=None,
-                            tmp_dir=None,
-                            force=False,
-                            onserver=False,
-                            refresh=False,
-                        )
+        with mock.patch(
+            'fdroidserver.common.replace_build_vars', wraps=make_fake_apk
+        ) as _ignored, mock.patch(
+            'fdroidserver.common.get_native_code', return_value='x86'
+        ) as _ignored, mock.patch(
+            'fdroidserver.common.get_apk_id',
+            return_value=(app.id, build.versionCode, build.versionName),
+        ) as _ignored, mock.patch(
+            'fdroidserver.common.is_debuggable_or_testOnly', return_value=False
+        ) as _ignored, mock.patch(
+            'fdroidserver.common.setup_vcs', return_value=(mock.Mock(), self.testdir)
+        ) as _ignored:
+            _ignored  # silence the linters
+            fdroidserver.build.build_local(
+                app,
+                build,
+                output_dir=self.testdir,
+                log_dir=None,
+                srclib_dir=None,
+                extlib_dir=None,
+                tmp_dir=None,
+                force=False,
+                onserver=False,
+                refresh=False,
+            )
         self.assertTrue(os.path.exists('baz.so'))
         self.assertTrue(os.path.exists('foo.aar'))
         self.assertFalse(os.path.exists('gradle-wrapper.jar'))
