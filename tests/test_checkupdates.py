@@ -1,32 +1,15 @@
 #!/usr/bin/env python3
 
-# http://www.drdobbs.com/testing/unit-testing-with-python/240165163
-
-import logging
-import os
-import sys
 import unittest
 from unittest import mock
 from pathlib import Path
 
-
-localmodule = Path(__file__).resolve().parent.parent
-print('localmodule: ' + str(localmodule))
-if localmodule not in sys.path:
-    sys.path.insert(0, str(localmodule))
-
+import fdroidserver
 import fdroidserver.checkupdates
-import fdroidserver.metadata
-from fdroidserver.exception import FDroidException
 
 
 class CheckupdatesTest(unittest.TestCase):
     '''fdroidserver/checkupdates.py'''
-
-    def setUp(self):
-        logging.basicConfig(level=logging.DEBUG)
-        self.basedir = localmodule / 'tests'
-        os.chdir(self.basedir)
 
     def test_autoupdatemode_no_suffix(self):
         fdroidserver.checkupdates.config = {}
@@ -60,7 +43,7 @@ class CheckupdatesTest(unittest.TestCase):
         ):
             with mock.patch('fdroidserver.metadata.write_metadata', mock.Mock()):
                 with mock.patch('subprocess.call', lambda cmd: 0):
-                    with self.assertRaises(FDroidException):
+                    with self.assertRaises(fdroidserver.exception.FDroidException):
                         fdroidserver.checkupdates.checkupdates_app(app, auto=True)
 
         build = app['Builds'][-1]
@@ -155,7 +138,7 @@ class CheckupdatesTest(unittest.TestCase):
         with mock.patch(
             'fdroidserver.checkupdates.check_http', lambda app: (None, 'bla')
         ):
-            with self.assertRaises(FDroidException):
+            with self.assertRaises(fdroidserver.exception.FDroidException):
                 fdroidserver.checkupdates.checkupdates_app(app, auto=True)
 
         with mock.patch(
@@ -188,7 +171,7 @@ class CheckupdatesTest(unittest.TestCase):
             'fdroidserver.checkupdates.check_tags',
             lambda app, pattern: (None, 'bla', None),
         ):
-            with self.assertRaises(FDroidException):
+            with self.assertRaises(fdroidserver.exception.FDroidException):
                 fdroidserver.checkupdates.checkupdates_app(app, auto=True)
 
         with mock.patch(
@@ -226,7 +209,7 @@ class CheckupdatesTest(unittest.TestCase):
             faked = scheme + '://fake.url/for/testing/scheme'
             app.UpdateCheckData = faked + '|ignored|' + faked + '|ignored'
             app.metadatapath = 'metadata/' + app.id + '.yml'
-            with self.assertRaises(FDroidException):
+            with self.assertRaises(fdroidserver.exception.FDroidException):
                 fdroidserver.checkupdates.check_http(app)
 
     def test_check_http_ignore(self):
@@ -316,22 +299,3 @@ class CheckupdatesTest(unittest.TestCase):
             vername, vercode, _tag = fdroidserver.checkupdates.check_tags(app, None)
         self.assertEqual(vername, '2')
         self.assertEqual(vercode, 2)
-
-
-if __name__ == "__main__":
-    import argparse
-    from testcommon import parse_args_for_test
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        default=False,
-        help="Spew out even more information than normal",
-    )
-    parse_args_for_test(parser, sys.argv)
-
-    newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(CheckupdatesTest))
-    unittest.main(failfast=False)

@@ -7,7 +7,6 @@ import os
 import random
 import ruamel.yaml
 import shutil
-import sys
 import unittest
 import tempfile
 import textwrap
@@ -15,16 +14,14 @@ from collections import OrderedDict
 from pathlib import Path
 from unittest import mock
 
-localmodule = Path(__file__).resolve().parent.parent
-print('localmodule: ' + str(localmodule))
-if localmodule not in sys.path:
-    sys.path.insert(0, str(localmodule))
-
 import fdroidserver
 from fdroidserver import metadata
 from fdroidserver.exception import MetaDataException
 from fdroidserver.common import DEFAULT_LOCALE
-from testcommon import TmpCwd, mkdtemp, parse_args_for_test
+from .testcommon import TmpCwd, mkdtemp
+
+logging.basicConfig(level=logging.DEBUG)
+basedir = Path(__file__).parent
 
 
 def _get_mock_mf(s):
@@ -37,9 +34,7 @@ class MetadataTest(unittest.TestCase):
     '''fdroidserver/metadata.py'''
 
     def setUp(self):
-        logging.basicConfig(level=logging.DEBUG)
-        self.basedir = localmodule / 'tests'
-        os.chdir(self.basedir)
+        os.chdir(basedir)
         self._td = mkdtemp()
         self.testdir = self._td.name
         fdroidserver.metadata.warnings_action = 'error'
@@ -57,12 +52,12 @@ class MetadataTest(unittest.TestCase):
             pass
 
     def test_fieldtypes_key_exist(self):
-        for k in fdroidserver.metadata.fieldtypes.keys():
-            self.assertTrue(k in fdroidserver.metadata.yaml_app_fields)
+        for k in fdroidserver.metadata.fieldtypes:
+            self.assertIn(k, fdroidserver.metadata.yaml_app_fields)
 
     def test_build_flagtypes_key_exist(self):
-        for k in fdroidserver.metadata.flagtypes.keys():
-            self.assertTrue(k in fdroidserver.metadata.build_flags)
+        for k in fdroidserver.metadata.flagtypes:
+            self.assertIn(k, fdroidserver.metadata.build_flags)
 
     def test_FieldValidator_BitcoinAddress(self):
         validator = None
@@ -183,7 +178,7 @@ class MetadataTest(unittest.TestCase):
 
     def test_valid_funding_yml_regex(self):
         """Check the regex can find all the cases"""
-        with (self.basedir / 'funding-usernames.yaml').open() as fp:
+        with (basedir / 'funding-usernames.yaml').open() as fp:
             yaml = ruamel.yaml.YAML(typ='safe')
             data = yaml.load(fp)
 
@@ -203,7 +198,9 @@ class MetadataTest(unittest.TestCase):
 
     @mock.patch('git.Repo')
     @mock.patch('logging.error')
-    def test_read_metadata(self, logging_error, git_repo):
+    def test_read_metadata(
+        self, logging_error, git_repo
+    ):  # pylint: disable=unused-argument
         """Read specified metadata files included in tests/, compare to stored output"""
 
         self.maxDiff = None
@@ -240,7 +237,9 @@ class MetadataTest(unittest.TestCase):
         self.assertEqual(3, len(logging_error.call_args_list))
 
     @mock.patch('git.Repo')
-    def test_metadata_overrides_dot_fdroid_yml(self, git_Repo):
+    def test_metadata_overrides_dot_fdroid_yml(
+        self, git_Repo
+    ):  # pylint: disable=unused-argument
         """Fields in metadata files should override anything in .fdroid.yml."""
         app = metadata.parse_metadata('metadata/info.guardianproject.urzip.yml')
         self.assertEqual(app['Summary'], '一个实用工具，获取已安装在您的设备上的应用的有关信息')
@@ -260,7 +259,9 @@ class MetadataTest(unittest.TestCase):
 
     @mock.patch('git.Repo')
     @mock.patch('logging.error')
-    def test_rewrite_yaml_fakeotaupdate(self, logging_error, git_Repo):
+    def test_rewrite_yaml_fakeotaupdate(
+        self, logging_error, git_Repo
+    ):  # pylint: disable=unused-argument
         with tempfile.TemporaryDirectory() as testdir:
             testdir = Path(testdir)
             fdroidserver.common.config = {'accepted_formats': ['yml']}
@@ -287,7 +288,9 @@ class MetadataTest(unittest.TestCase):
         self.assertEqual(3, len(logging_error.call_args_list))
 
     @mock.patch('git.Repo')
-    def test_rewrite_yaml_fdroidclient(self, git_Repo):
+    def test_rewrite_yaml_fdroidclient(
+        self, git_Repo
+    ):  # pylint: disable=unused-argument
         with tempfile.TemporaryDirectory() as testdir:
             testdir = Path(testdir)
             fdroidserver.common.config = {'accepted_formats': ['yml']}
@@ -309,13 +312,15 @@ class MetadataTest(unittest.TestCase):
             )
 
     @mock.patch('git.Repo')
-    def test_rewrite_yaml_special_build_params(self, git_Repo):
+    def test_rewrite_yaml_special_build_params(
+        self, git_Repo
+    ):  # pylint: disable=unused-argument
         """Test rewriting a plain YAML metadata file without localized files."""
         os.chdir(self.testdir)
         os.mkdir('metadata')
         appid = 'app.with.special.build.params'
         file_name = Path('metadata/%s.yml' % appid)
-        shutil.copy(self.basedir / file_name, file_name)
+        shutil.copy(basedir / file_name, file_name)
 
         # rewrite metadata
         allapps = fdroidserver.metadata.read_metadata({appid: -1})
@@ -326,7 +331,7 @@ class MetadataTest(unittest.TestCase):
         self.maxDiff = None
         self.assertEqual(
             file_name.read_text(),
-            (self.basedir / 'metadata-rewrite-yml' / file_name.name).read_text(),
+            (basedir / 'metadata-rewrite-yml' / file_name.name).read_text(),
         )
 
     def test_normalize_type_string(self):
@@ -508,7 +513,7 @@ class MetadataTest(unittest.TestCase):
             metadatadir.mkdir()
 
             randomlist = []
-            randomapps = list((self.basedir / 'metadata').glob('*.yml'))
+            randomapps = list((basedir / 'metadata').glob('*.yml'))
             random.shuffle(randomapps)
             i = 1
             for f in randomapps:
@@ -911,7 +916,7 @@ class MetadataTest(unittest.TestCase):
                     {
                         'versionCode': 1,
                         'versionName': 'v0.1.0',
-                        'prebuild': ["a && b && " "sed -i 's,a,b,'"],
+                        'prebuild': ["a && b && sed -i 's,a,b,'"],
                     }
                 ],
             },
@@ -1553,7 +1558,7 @@ class MetadataTest(unittest.TestCase):
                 )
             with self.assertRaisesRegex(
                 MetaDataException,
-                "Invalid srclib metadata: " "unknown key 'Evil' in " "'test.yml'",
+                "Invalid srclib metadata: unknown key 'Evil' in 'test.yml'",
             ):
                 fdroidserver.metadata.parse_yaml_srclib(Path('test.yml'))
 
@@ -1788,7 +1793,6 @@ class MetadataTest(unittest.TestCase):
         )
 
     def test_build_ndk_path(self):
-        """"""
         with tempfile.TemporaryDirectory(prefix='android-sdk-') as sdk_path:
             config = {'ndk_paths': {}, 'sdk_path': sdk_path}
             fdroidserver.common.config = config
@@ -2442,21 +2446,3 @@ class PostMetadataParseTest(unittest.TestCase):
         self.assertEqual(*self._post_metadata_parse_build_list(True, ['true']))
         self.assertEqual(*self._post_metadata_parse_build_script(True, ['true']))
         self.assertEqual(*self._post_metadata_parse_build_string(True, 'true'))
-
-
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "-v",
-        "--verbose",
-        action="store_true",
-        default=False,
-        help="Spew out even more information than normal",
-    )
-    parse_args_for_test(parser, sys.argv)
-
-    newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(MetadataTest))
-    unittest.main(failfast=False)

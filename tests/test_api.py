@@ -1,17 +1,7 @@
 #!/usr/bin/env python3
 
-import inspect
-import os
-import sys
 import unittest
-from unittest import mock
-
-localmodule = os.path.realpath(
-    os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())), '..')
-)
-print('localmodule: ' + localmodule)
-if localmodule not in sys.path:
-    sys.path.insert(0, localmodule)
+from unittest.mock import patch
 
 import fdroidserver
 
@@ -25,15 +15,11 @@ class ApiTest(unittest.TestCase):
 
     """
 
-    def setUp(self):
-        self.basedir = os.path.join(localmodule, 'tests')
-        os.chdir(self.basedir)
-
     def test_download_repo_index_no_fingerprint(self):
         with self.assertRaises(fdroidserver.VerificationException):
             fdroidserver.download_repo_index("http://example.org")
 
-    @mock.patch('fdroidserver.net.http_get')
+    @patch('fdroidserver.net.http_get')
     def test_download_repo_index_url_parsing(self, mock_http_get):
         """Test whether it is trying to download the right file
 
@@ -50,7 +36,7 @@ class ApiTest(unittest.TestCase):
             )
             self.assertEqual(index_url, etag_set_to_url)
 
-    @mock.patch('fdroidserver.net.http_get')
+    @patch('fdroidserver.net.http_get')
     def test_download_repo_index_v1_url_parsing(self, mock_http_get):
         """Test whether it is trying to download the right file
 
@@ -67,7 +53,7 @@ class ApiTest(unittest.TestCase):
             )
             self.assertEqual(index_url, etag_set_to_url)
 
-    @mock.patch('fdroidserver.net.http_get')
+    @patch('fdroidserver.net.http_get')
     def test_download_repo_index_v2_url_parsing(self, mock_http_get):
         """Test whether it is trying to download the right file
 
@@ -84,9 +70,3 @@ class ApiTest(unittest.TestCase):
                 url, verify_fingerprint=False
             )
             self.assertEqual(entry_url, etag_set_to_url)
-
-
-if __name__ == "__main__":
-    newSuite = unittest.TestSuite()
-    newSuite.addTest(unittest.makeSuite(ApiTest))
-    unittest.main(failfast=False)
