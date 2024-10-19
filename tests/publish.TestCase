@@ -260,6 +260,7 @@ class PublishTest(unittest.TestCase):
                 self.assertEqual(publish.config['jarsigner'], data['jarsigner'])
                 self.assertEqual(publish.config['keytool'], data['keytool'])
 
+    @unittest.skipIf(sys.byteorder == 'big', 'androguard is not ported to big-endian')
     def test_sign_then_implant_signature(self):
         class Options:
             verbose = False
