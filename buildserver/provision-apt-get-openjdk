@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+
+echo $0
+set -e
+set -x
+
+VERSION_CODENAME=$( awk -F '=' '/^VERSION_CODENAME/ {print $2}' /etc/os-release )
+
+adoptium_file=/etc/apt/keyrings/adoptium.asc
+
+curl --silent --fail https://packages.adoptium.net/artifactory/api/gpg/key/public \
+  | tee ${adoptium_file}
+
+echo "deb [signed-by=${adoptium_file}] https://packages.adoptium.net/artifactory/deb ${VERSION_CODENAME} main" \
+  | tee /etc/apt/sources.list.d/adoptium.list
+
+apt-get update
+
+## LTS: https://adoptium.net/en-GB/support/
+apt-get install --yes \
+  default-jdk-headless \
+  temurin-8-jdk \
+  temurin-11-jdk \
+  temurin-17-jdk \
+  temurin-21-jdk
+
+highestjava=`update-java-alternatives --list | sort -n | tail -1 | cut -d ' ' -f 1`
+update-java-alternatives --set $highestjava
