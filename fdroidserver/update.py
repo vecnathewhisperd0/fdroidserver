@@ -1160,7 +1160,7 @@ def insert_localized_app_metadata(apps):
     for srcd in sorted(sourcedirs):
         if not os.path.isdir(srcd):
             continue
-        for root, dirs, files in os.walk(srcd):
+        for root, dirs, files in os.walk(srcd, followlinks=True):
             segments = root.split('/')
             packageName = segments[1]
             if packageName not in apps:
