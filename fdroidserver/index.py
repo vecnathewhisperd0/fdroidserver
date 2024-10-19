@@ -117,14 +117,16 @@ def make(apps, apks, repodir, archive):
         requestsdict[command] = packageNames
 
     fdroid_signing_key_fingerprints = load_stats_fdroid_signing_key_fingerprints()
+    _ignored, repo_pubkey_fingerprint = extract_pubkey()
+    repo_pubkey_fingerprint = repo_pubkey_fingerprint.replace(" ", "")
 
     make_v0(sortedapps, apks, repodir, repodict, requestsdict,
             fdroid_signing_key_fingerprints)
     make_v1(sortedapps, apks, repodir, repodict, requestsdict,
             fdroid_signing_key_fingerprints)
     make_v2(sortedapps, apks, repodir, repodict, requestsdict,
-            fdroid_signing_key_fingerprints, archive)
-    make_website(sortedapps, repodir, repodict)
+            fdroid_signing_key_fingerprints, repo_pubkey_fingerprint, archive)
+    make_website(sortedapps, repodir, repodict, repo_pubkey_fingerprint)
     make_altstore(
         sortedapps,
         apks,
@@ -143,12 +145,10 @@ def _should_file_be_generated(path, magic_string):
     return True
 
 
-def make_website(apps, repodir, repodict):
-    _ignored, repo_pubkey_fingerprint = extract_pubkey()
-    repo_pubkey_fingerprint_stripped = repo_pubkey_fingerprint.replace(" ", "")
+def make_website(apps, repodir, repodict, repo_pubkey_fingerprint):
     link = repodict["address"]
     link_fingerprinted = ('{link}?fingerprint={fingerprint}'
-                          .format(link=link, fingerprint=repo_pubkey_fingerprint_stripped))
+                          .format(link=link, fingerprint=repo_pubkey_fingerprint))
     # do not change this string, as it will break updates for files with older versions of this string
     autogenerate_comment = "auto-generated - fdroid index updates will overwrite this file"
 
@@ -662,7 +662,7 @@ def convert_version(version, app, repodir):
     return ver
 
 
-def v2_repo(repodict, repodir, archive):
+def v2_repo(repodict, repodir, archive, repo_pubkey_fingerprint):
     repo = {}
 
     repo["name"] = {DEFAULT_LOCALE: repodict["name"]}
@@ -682,6 +682,7 @@ def v2_repo(repodict, repodir, archive):
         repo["mirrors"] = repodict["mirrors"]
     if "webBaseUrl" in repodict:
         repo["webBaseUrl"] = repodict["webBaseUrl"]
+    repo["fingerprint"] = repo_pubkey_fingerprint
 
     repo["timestamp"] = repodict["timestamp"]
 
@@ -700,7 +701,7 @@ def v2_repo(repodict, repodir, archive):
     return repo
 
 
-def make_v2(apps, packages, repodir, repodict, requestsdict, fdroid_signing_key_fingerprints, archive):
+def make_v2(apps, packages, repodir, repodict, requestsdict, fdroid_signing_key_fingerprints, repo_pubkey_fingerprint, archive):
 
     def _index_encoder_default(obj):
         if isinstance(obj, set):
@@ -717,7 +718,7 @@ def make_v2(apps, packages, repodir, repodict, requestsdict, fdroid_signing_key_
         raise TypeError(repr(obj) + " is not JSON serializable")
 
     output = collections.OrderedDict()
-    output["repo"] = v2_repo(repodict, repodir, archive)
+    output["repo"] = v2_repo(repodict, repodir, archive, repo_pubkey_fingerprint)
     if requestsdict and (requestsdict["install"] or requestsdict["uninstall"]):
         output["repo"]["requests"] = requestsdict
 

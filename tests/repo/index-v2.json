@@ -26,6 +26,7 @@
         "url": "https://foo.bar/fdroid/repo"
       }
     ],
+    "fingerprint": "F49AF3F11EFDDF20DFFD70F5E3117B9976674167ADCA280E6B1932A0601B26F6",
     "timestamp": 1676634233000,
     "antiFeatures": {
       "Ads": {
