@@ -19,6 +19,7 @@ COPY 	provision-android-ndk \
 	provision-apt-get-install \
 	provision-buildserverid \
 	provision-gradle \
+	setup-ci \
 	setup-env-vars \
 	/opt/buildserver/
 

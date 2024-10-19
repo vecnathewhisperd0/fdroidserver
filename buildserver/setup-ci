@@ -1,0 +1,71 @@
+#!/bin/bash
+#
+# Prepares a CI environment for apps.
+#
+# Notes:
+#
+# - This script needs to determine the path where the app code resides. This is done by examining certain
+#   CI-specific environment variables, falling back to $PWD if no recognized variables are set. This check
+#   can be overridden by setting FDROID_PROJECT_DIR prior to running this script.
+# - This script does not set up a keystore, therefore `fdroid publish` will not work. If this is required, a
+#   keystore must be set up separately.
+
+# if FDROID_PROJECT_DIR is not set, determine where the app code resides. This depends on the CI environment:
+# - On CircleCI, the path is stored in CIRCLE_WORKING_DIRECTORY and defaults to ~/project.
+# - On GitLab CI, the path is stored in CI_PROJECT_DIR and defaults to /builds/$CI_PROJECT_PATH.
+# - TODO add support for other CI environments
+# - As a fallback, we will use $PWD.
+test "$CIRCLECI" = true && test -z "$FDROID_PROJECT_DIR" && export FDROID_PROJECT_DIR=$CIRCLE_WORKING_DIRECTORY
+test "$GITLAB_CI" = true && test -z "$FDROID_PROJECT_DIR" && export FDROID_PROJECT_DIR=$CI_PROJECT_DIR
+test -z "$FDROID_PROJECT_DIR" && export FDROID_PROJECT_DIR=$PWD
+echo "FDROID_PROJECT_DIR: $FDROID_PROJECT_DIR"
+pushd $FDROID_PROJECT_DIR
+
+test -d build || mkdir build
+
+apt-get update
+apt-get dist-upgrade
+apt-get clean
+
+test -n "$fdroidserver" || source /etc/profile.d/bsenv.sh
+
+rm -rf "$ANDROID_HOME/tools" # TODO remove once sdkmanager can upgrade installed packages
+# These packages are needed to make this env like the production buildserver.
+sdkmanager "tools" "platform-tools" "build-tools;31.0.0"
+
+# Install fdroidserver from source
+rm -rf $fdroidserver
+mkdir $fdroidserver
+git ls-remote https://gitlab.com/fdroid/fdroidserver.git master
+curl --silent https://gitlab.com/fdroid/fdroidserver/-/archive/master/fdroidserver-master.tar.gz | tar -xz --directory=$fdroidserver --strip-components=1
+export PATH="$fdroidserver:$PATH"
+export PYTHONPATH="$fdroidserver:$fdroidserver/examples"
+export PYTHONUNBUFFERED=true
+
+ln -s $home_vagrant/build $FDROID_PROJECT_DIR/build
+
+# Make sure .gradle stores inside $FDROID_PROJECT_DIR (needed to make it cacheable on some CI environments)
+# (force link creation to ensure this operation completes even if there is cached data left behind by
+# previous CI setups)
+ln -fsv $home_vagrant/.gradle $FDROID_PROJECT_DIR/.gradle
+
+for d in logs tmp unsigned $home_vagrant/build $home_vagrant/.android $home_vagrant/.gradle $ANDROID_HOME; do
+    test -d $d || mkdir $d;
+    chown -R vagrant $d;
+done
+
+export GRADLE_USER_HOME=$home_vagrant/.gradle
+export fdroid="sudo --preserve-env --user vagrant
+  env PATH=$fdroidserver:$PATH
+  env PYTHONPATH=$fdroidserver:$fdroidserver/examples
+  env PYTHONUNBUFFERED=true
+  env TERM=$TERM
+  env HOME=$home_vagrant
+  fdroid"
+
+# Modify permissions so `fdroid build` (running as user vagrant) has access to everything it needs.
+chown -R vagrant $FDROID_PROJECT_DIR
+
+chown -R vagrant $home_vagrant
+
+popd
