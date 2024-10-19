@@ -2588,6 +2588,8 @@ def main():
                         help=_("Rename APK files that do not match package.name_123.apk"))
     parser.add_argument("--allow-disabled-algorithms", action="store_true", default=False,
                         help=_("Include APKs that are signed with disabled algorithms like MD5"))
+    parser.add_argument("--skip-btlog", action="store_true", default=False,
+                        help=_("Skip updating binary transparency log"))
     metadata.add_metadata_arguments(parser)
     options = common.parse_args(parser)
     metadata.warnings_action = options.W
@@ -2767,10 +2769,13 @@ def main():
     # Make the index for the main repo...
     fdroidserver.index.make(repoapps, apks, repodirs[0], False)
 
-    git_remote = config.get('binary_transparency_remote')
-    if git_remote or os.path.isdir(os.path.join('binary_transparency', '.git')):
-        from . import btlog
-        btlog.make_binary_transparency_log(repodirs)
+    if options.skip_btlog:
+        logging.info(_('Skipping binary transparency log'))
+    else:
+        git_remote = config.get('binary_transparency_remote')
+        if git_remote or os.path.isdir(os.path.join('binary_transparency', '.git')):
+            from . import btlog
+            btlog.make_binary_transparency_log(repodirs)
 
     if config['update_stats']:
         # Update known apks info...
