@@ -470,28 +470,26 @@ def parse_yaml_srclib(metadatapath):
         )
         return thisinfo
 
-    with metadatapath.open("r", encoding="utf-8") as f:
-        try:
-            yaml = ruamel.yaml.YAML(typ='safe')
-            data = yaml.load(f)
-            if type(data) is not dict:
-                if platform.system() == 'Windows':
-                    # Handle symlink on Windows
-                    symlink = metadatapath.parent / metadatapath.read_text(encoding='utf-8')
-                    if symlink.is_file():
-                        with symlink.open("r", encoding="utf-8") as s:
-                            data = yaml.load(s)
-            if type(data) is not dict:
-                raise ruamel.yaml.YAMLError(
-                    _('{file} is blank or corrupt!').format(file=metadatapath)
-                )
-        except ruamel.yaml.YAMLError as e:
-            _warn_or_exception(_("Invalid srclib metadata: could not "
-                                 "parse '{file}'")
-                               .format(file=metadatapath) + '\n'
-                               + common.run_yamllint(metadatapath, indent=4),
-                               cause=e)
-            return thisinfo
+    try:
+        yaml = ruamel.yaml.YAML(typ='safe')
+        data = yaml.load(metadatapath)
+        if type(data) is not dict:
+            if platform.system() == 'Windows':
+                # Handle symlink on Windows
+                symlink = metadatapath.parent / metadatapath.read_text(encoding='utf-8')
+                if symlink.is_file():
+                    data = yaml.load(symlink)
+        if type(data) is not dict:
+            raise ruamel.yaml.YAMLError(
+                _('{file} is blank or corrupt!').format(file=metadatapath)
+            )
+    except ruamel.yaml.YAMLError as e:
+        _warn_or_exception(_("Invalid srclib metadata: could not "
+                             "parse '{file}'")
+                           .format(file=metadatapath) + '\n'
+                           + common.run_yamllint(metadatapath, indent=4),
+                           cause=e)
+        return thisinfo
 
     for key in data:
         if key not in thisinfo:
@@ -572,14 +570,11 @@ def read_metadata(appid_to_vercode={}, sort_by_time=False):
             Path('.').glob('.fdroid.yml')
         )
 
+    # Most things want the index alpha sorted for stability
+    metadatafiles.sort()
     if sort_by_time:
-        entries = ((path.stat().st_mtime, path) for path in metadatafiles)
-        metadatafiles = []
-        for _ignored, path in sorted(entries, reverse=True):
-            metadatafiles.append(path)
-    else:
-        # most things want the index alpha sorted for stability
-        metadatafiles = sorted(metadatafiles)
+        # Sort on mtime as primary, alpha as secondary (sort stability)
+        metadatafiles.sort(key=lambda path: path.stat().st_mtime, reverse=True)
 
     for metadatapath in metadatafiles:
         appid = metadatapath.stem
@@ -643,8 +638,7 @@ def parse_metadata(metadatapath):
     app = App()
     app.metadatapath = metadatapath.as_posix()
     if metadatapath.suffix == '.yml':
-        with metadatapath.open('r', encoding='utf-8') as mf:
-            app.update(parse_yaml_metadata(mf))
+        app.update(parse_yaml_metadata(metadatapath))
     else:
         _warn_or_exception(
             _('Unknown metadata format: {path} (use: *.yml)').format(path=metadatapath)
@@ -1261,16 +1255,15 @@ def write_yaml(mf, app):
     yaml_app = _app_to_yaml(app)
     yaml = ruamel.yaml.YAML()
     yaml.indent(mapping=2, sequence=4, offset=2)
-    yaml.dump(yaml_app, stream=mf)
+    yaml.dump(yaml_app, mf)
 
 
 def write_metadata(metadatapath, app):
     metadatapath = Path(metadatapath)
     if metadatapath.suffix == '.yml':
-        with metadatapath.open('w') as mf:
-            return write_yaml(mf, app)
-
-    _warn_or_exception(_('Unknown metadata format: %s') % metadatapath)
+        write_yaml(metadatapath, app)
+    else:
+        _warn_or_exception(_('Unknown metadata format: %s') % metadatapath)
 
 
 def add_metadata_arguments(parser):
