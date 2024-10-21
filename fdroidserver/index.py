@@ -782,14 +782,14 @@ def make_v2(apps, packages, repodir, repodict, requestsdict, fdroid_signing_key_
         if common.options.pretty:
             json.dump(output, fp, default=_index_encoder_default, indent=2, ensure_ascii=False)
         else:
-            json.dump(output, fp, default=_index_encoder_default, ensure_ascii=False)
+            json.dump(output, fp, default=_index_encoder_default, ensure_ascii=False, separators=(',', ':'))
 
     json_name = "tmp/{}_{}.json".format(repodir, convert_datetime(repodict["timestamp"]))
     with open(json_name, "w", encoding="utf-8") as fp:
         if common.options.pretty:
             json.dump(output, fp, default=_index_encoder_default, indent=2, ensure_ascii=False)
         else:
-            json.dump(output, fp, default=_index_encoder_default, ensure_ascii=False)
+            json.dump(output, fp, default=_index_encoder_default, ensure_ascii=False, separators=(',', ':'))
 
     entry["index"] = common.file_entry(index_file)
     entry["index"]["numPackages"] = len(output.get("packages", []))
@@ -816,7 +816,7 @@ def make_v2(apps, packages, repodir, repodict, requestsdict, fdroid_signing_key_
             if common.options.pretty:
                 json.dump(diff, fp, default=_index_encoder_default, indent=2, ensure_ascii=False)
             else:
-                json.dump(diff, fp, default=_index_encoder_default, ensure_ascii=False)
+                json.dump(diff, fp, default=_index_encoder_default, ensure_ascii=False, separators=(',', ':'))
 
         entry["diffs"][old["repo"]["timestamp"]] = common.file_entry(diff_file)
         entry["diffs"][old["repo"]["timestamp"]]["numPackages"] = len(diff.get("packages", []))
@@ -827,7 +827,7 @@ def make_v2(apps, packages, repodir, repodict, requestsdict, fdroid_signing_key_
         if common.options.pretty:
             json.dump(entry, fp, default=_index_encoder_default, indent=2, ensure_ascii=False)
         else:
-            json.dump(entry, fp, default=_index_encoder_default, ensure_ascii=False)
+            json.dump(entry, fp, default=_index_encoder_default, ensure_ascii=False, separators=(',', ':'))
 
     if common.options.nosign:
         _copy_to_local_copy_dir(repodir, index_file)
@@ -951,9 +951,9 @@ def make_v1(apps, packages, repodir, repodict, requestsdict, fdroid_signing_key_
     index_file = os.path.join(repodir, json_name)
     with open(index_file, 'w') as fp:
         if common.options.pretty:
-            json.dump(output, fp, default=_index_encoder_default, indent=2)
+            json.dump(output, fp, ensure_ascii=False, default=_index_encoder_default, indent=2)
         else:
-            json.dump(output, fp, default=_index_encoder_default)
+            json.dump(output, fp, ensure_ascii=False, default=_index_encoder_default, separators=(',', ':'))
 
     if common.options.nosign:
         _copy_to_local_copy_dir(repodir, index_file)
