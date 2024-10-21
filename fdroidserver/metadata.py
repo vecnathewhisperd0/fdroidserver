@@ -443,7 +443,7 @@ valuetypes = {
                    ["AllowedAPKSigningKeys"]),
 
     FieldValidator("Auto Update Mode",
-                   r"^(Version.*|None)$",
+                   r"^(Version.*|None|BuildOnly)$",
                    ["AutoUpdateMode"]),
 
     FieldValidator("Update Check Mode",

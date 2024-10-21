@@ -564,17 +564,16 @@ def checkupdates_app(app: metadata.App, auto: bool, commit: bool = False) -> Non
     elif vercodes[-1] > app.CurrentVersionCode:
         logging.debug("...updating - old vercode={0}, new vercode={1}".format(
             app.CurrentVersionCode, vercodes[-1]))
-        app.CurrentVersion = version
-        app.CurrentVersionCode = vercodes[-1]
-        updating = True
+        if app.AutoUpdateMode != "BuildOnly":
+            app.CurrentVersion = version
+            app.CurrentVersionCode = vercodes[-1]
+            updating = True
     else:
         raise FDroidException(
             _('current version is newer: old vercode={old}, new vercode={new}').format(
                 old=app.CurrentVersionCode, new=vercodes[-1]
             )
         )
-
-    commitmsg = fetch_autoname(app, tag)
 
     if updating:
         name = _getappname(app)
@@ -583,21 +582,19 @@ def checkupdates_app(app: metadata.App, auto: bool, commit: bool = False) -> Non
         commitmsg = 'Update CurrentVersion of %s to %s' % (name, ver)
 
     if auto:
-        mode = app.AutoUpdateMode
-        if not app.CurrentVersionCode:
-            raise MetaDataException(
-                _("Can't auto-update app with no CurrentVersionCode")
-            )
-        elif mode in ('None', 'Static'):
+        mode = app.AutoUpdateMode.split()[0]
+        if mode == 'None':
             pass
-        elif mode.startswith('Version'):
-            pattern = mode[8:]
+        elif mode in ('Version', 'BuildOnly'):
+            pattern = ""
+            if ' ' in app.AutoUpdateMode:
+                pattern = app.AutoUpdateMode.split(maxsplit=1)[1]
             suffix = ''
             if pattern.startswith('+'):
                 try:
                     suffix, pattern = pattern[1:].split(' ', 1)
                 except ValueError as exc:
-                    raise MetaDataException("Invalid AutoUpdateMode: " + mode) from exc
+                    raise MetaDataException("Invalid AutoUpdateMode: " + app.AutoUpdateMode) from exc
 
             gotcur = False
             latest = None
@@ -605,14 +602,14 @@ def checkupdates_app(app: metadata.App, auto: bool, commit: bool = False) -> Non
 
             if builds:
                 latest = builds[-1]
-                if latest.versionCode == app.CurrentVersionCode:
+                if latest.versionCode == vercodes[-1]:
                     gotcur = True
-                elif latest.versionCode > app.CurrentVersionCode:
+                elif latest.versionCode > vercodes[-1]:
                     raise FDroidException(
                         _(
                             'latest build recipe is newer: '
                             'old vercode={old}, new vercode={new}'
-                        ).format(old=latest.versionCode, new=app.CurrentVersionCode)
+                        ).format(old=latest.versionCode, new=vercodes[-1])
                     )
 
             if not gotcur:
@@ -642,14 +639,14 @@ def checkupdates_app(app: metadata.App, auto: bool, commit: bool = False) -> Non
                 for b, v in zip(newbuilds, vercodes):
                     b.disable = False
                     b.versionCode = v
-                    b.versionName = app.CurrentVersion + suffix.replace(
+                    b.versionName = version + suffix.replace(
                         '%c', str(v)
                     )
                     logging.info("...auto-generating build for " + b.versionName)
                     if tag:
                         b.commit = tag
                     else:
-                        commit = pattern.replace('%v', app.CurrentVersion)
+                        commit = pattern.replace('%v', version)
                         commit = commit.replace('%c', str(v))
                         b.commit = commit
 
@@ -660,7 +657,7 @@ def checkupdates_app(app: metadata.App, auto: bool, commit: bool = False) -> Non
                 commitmsg = "Update %s to %s" % (name, ver)
         else:
             raise MetaDataException(
-                _('Invalid AutoUpdateMode: {mode}').format(mode=mode)
+                _('Invalid AutoUpdateMode: {mode}').format(mode=app.AutoUpdateMode)
             )
 
     if commitmsg:
