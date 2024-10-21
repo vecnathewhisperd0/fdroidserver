@@ -219,6 +219,11 @@ class InstallTest(unittest.TestCase):
         f = install.download_fdroid_apk_from_maven()
         self.assertTrue(Path(f).exists())
 
+    @unittest.skipUnless(os.getenv('test_download_fdroid_apk'), 'requires net access')
+    def test_download_fdroid_apk_from_ipns(self):
+        f = install.download_fdroid_apk_from_ipns()
+        self.assertTrue(Path(f).exists())
+
 
 if __name__ == "__main__":
     os.chdir(os.path.dirname(__file__))
