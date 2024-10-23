@@ -35,6 +35,7 @@ if localmodule not in sys.path:
     sys.path.insert(0, localmodule)
 
 import fdroidserver.index
+import fdroidserver.install
 import fdroidserver.signindex
 import fdroidserver.common
 import fdroidserver.metadata
@@ -2936,6 +2937,38 @@ class CommonTest(unittest.TestCase):
         self.assertEqual(
             [{'url': s}], fdroidserver.common.parse_mirrors_config(mirrors)
         )
+
+    def test_get_mirrors_fdroidorg(self):
+        mirrors = fdroidserver.common.get_mirrors(
+            'https://f-droid.org/repo', 'entry.jar'
+        )
+        self.assertEqual(
+            'https://f-droid.org/repo/entry.jar',
+            mirrors[0]['url'],
+        )
+
+    def test_get_mirrors_other(self):
+        self.assertEqual(
+            [{'url': 'https://example.com/fdroid/repo/index-v2.json'}],
+            fdroidserver.common.get_mirrors(
+                'https://example.com/fdroid/repo', 'index-v2.json'
+            ),
+        )
+
+    def test_append_filename_to_mirrors(self):
+        filename = 'test.apk'
+        url = 'https://example.com/fdroid/repo'
+        mirrors = [{'url': url}]
+        self.assertEqual(
+            [{'url': url + '/' + filename}],
+            fdroidserver.common.append_filename_to_mirrors(filename, mirrors),
+        )
+
+    def test_append_filename_to_mirrors_full(self):
+        filename = 'test.apk'
+        mirrors = fdroidserver.common.FDROIDORG_MIRRORS
+        for mirror in fdroidserver.common.append_filename_to_mirrors(filename, mirrors):
+            self.assertTrue(mirror['url'].endswith('/' + filename))
 
 
 APKS_WITH_JAR_SIGNATURES = (
